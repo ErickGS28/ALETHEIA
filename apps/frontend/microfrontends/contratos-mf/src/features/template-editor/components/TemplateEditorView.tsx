@@ -11,6 +11,7 @@ import {
   useRole,
 } from '@aletheia/frontend-commons';
 import { Power, PowerOff, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Label } from '../../../components/ui/label';
 import { NoAccess } from '../../../components/ui/no-access';
@@ -153,6 +154,7 @@ interface TemplateEditorViewProps {
 export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
   const { can } = useRole();
   const { ready, getById, create, update, toggleActive } = useTemplates();
+  const router = useRouter();
 
   const isEdit = Boolean(templateId);
   const [name, setName] = useState('');
@@ -198,8 +200,7 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
       update(templateId, payload);
     } else {
       const created = create(payload);
-      // Tras crear, redirige a la edición de la nueva plantilla.
-      window.location.href = `/plantillas/${created.id}`;
+      router.push(`/plantillas/${created.id}`);
       return;
     }
     setSavedAt(new Date().toLocaleTimeString('es-MX'));

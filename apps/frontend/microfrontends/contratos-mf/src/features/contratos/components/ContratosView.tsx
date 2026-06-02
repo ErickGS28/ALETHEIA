@@ -12,6 +12,7 @@ import {
   useRole,
 } from '@aletheia/frontend-commons';
 import { FileSignature, FileText, LayoutTemplate } from 'lucide-react';
+import Link from 'next/link';
 
 export function ContratosView() {
   const { role, privileges } = useRole();
@@ -30,7 +31,7 @@ export function ContratosView() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Microfrontend &middot; Contratos (CLM)</CardTitle>
+            <CardTitle>Microfrontend · Contratos (CLM)</CardTitle>
             <CardDescription>Gestión de plantillas y elaboración de documentos.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap items-center gap-2 font-mono text-sm text-foreground/70">
@@ -52,9 +53,9 @@ export function ContratosView() {
                 privilege="TEMPLATES_MANAGE"
                 fallback={<Badge variant="secondary">Sin permiso (TEMPLATES_MANAGE)</Badge>}
               >
-                <a href="/plantillas">
+                <Link href="/plantillas">
                   <Button className="w-full">Gestionar plantillas</Button>
-                </a>
+                </Link>
               </CookiePrivilegeGuard>
             </CardContent>
           </Card>
@@ -70,11 +71,11 @@ export function ContratosView() {
                 privilege="TEMPLATES_MANAGE"
                 fallback={<Badge variant="secondary">Sin permiso (TEMPLATES_MANAGE)</Badge>}
               >
-                <a href="/plantillas/nueva">
+                <Link href="/plantillas/nueva">
                   <Button variant="neutral" className="w-full">
                     Nueva plantilla
                   </Button>
-                </a>
+                </Link>
               </CookiePrivilegeGuard>
             </CardContent>
           </Card>
@@ -86,11 +87,11 @@ export function ContratosView() {
               <CardDescription>Genera el documento de un contrato (HU-19).</CardDescription>
             </CardHeader>
             <CardContent>
-              <a href="/elaborar">
+              <Link href="/elaborar">
                 <Button variant="neutral" className="w-full">
                   Elaborar contrato
                 </Button>
-              </a>
+              </Link>
             </CardContent>
           </Card>
         </div>

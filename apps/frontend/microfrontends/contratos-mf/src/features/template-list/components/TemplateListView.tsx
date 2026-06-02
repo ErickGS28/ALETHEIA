@@ -14,6 +14,7 @@ import {
   useRole,
 } from '@aletheia/frontend-commons';
 import { Pencil, Plus, Power, PowerOff } from 'lucide-react';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { NoAccess } from '../../../components/ui/no-access';
 import { PageHeader } from '../../../components/ui/page-header';
@@ -45,11 +46,11 @@ function TemplateTableRow({
       </TableCell>
       <TableCell>
         <div className="flex items-center justify-end gap-2">
-          <a href={`/plantillas/${id}`}>
+          <Link href={`/plantillas/${id}`}>
             <Button variant="neutral" size="sm" aria-label={`Editar ${name}`}>
               <Pencil className="h-4 w-4" /> Editar
             </Button>
-          </a>
+          </Link>
           <Button
             variant={active ? 'outline' : 'default'}
             size="sm"
@@ -101,26 +102,24 @@ export function TemplateListView() {
         <PageHeader
           title="Plantillas"
           actions={
-            <a href="/plantillas/nueva">
+            <Link href="/plantillas/nueva">
               <Button>
                 <Plus className="h-4 w-4" /> Nueva plantilla
               </Button>
-            </a>
+            </Link>
           }
         />
 
         <Card>
-          <CardContent className="space-y-4 pt-6">
-            {/* Toolbar / filtro */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="font-heading text-xs uppercase tracking-widest text-foreground/60">
+          <CardContent className="p-0">
+            <div className="flex items-center gap-4 border-b-2 border-border px-4 py-3">
+              <span className="font-mono text-xs text-foreground/50 uppercase tracking-widest">
                 Filtrar por sociedad
               </span>
               <Select
-                aria-label="Filtrar por sociedad"
                 value={societyFilter}
                 onChange={(e) => setSocietyFilter(e.target.value)}
-                className="max-w-xs"
+                className="w-56"
               >
                 <option value="ALL">Todas</option>
                 <option value="GENERAL">General</option>
@@ -135,33 +134,33 @@ export function TemplateListView() {
               </span>
             </div>
 
-            {/* Tabla */}
-            <div className="overflow-hidden rounded-base border-2 border-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nombre</TableHead>
-                    <TableHead>Sociedad</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {!ready && <EmptyRow message="Cargando…" />}
-                  {ready && filtered.length === 0 && (
-                    <EmptyRow message="Sin plantillas para este filtro." />
-                  )}
-                  {ready &&
-                    filtered.map((t) => (
-                      <TemplateTableRow key={t.id} template={t} onToggle={toggleActive} />
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Sociedad</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {!ready ? (
+                  <EmptyRow message="Cargando plantillas…" />
+                ) : filtered.length === 0 ? (
+                  <EmptyRow message="No hay plantillas para este filtro." />
+                ) : (
+                  filtered.map((tpl) => (
+                    <TemplateTableRow key={tpl.id} template={tpl} onToggle={toggleActive} />
+                  ))
+                )}
+              </TableBody>
+            </Table>
 
-            <p className="font-mono text-xs text-foreground/40">
-              Las plantillas no se eliminan; solo se activan o desactivan (HU-18).
-            </p>
+            <div className="border-t-2 border-border px-4 py-2">
+              <span className="font-mono text-xs text-foreground/40">
+                Las plantillas no se eliminan; solo se activan o desactivan (HU-18).
+              </span>
+            </div>
           </CardContent>
         </Card>
       </div>
