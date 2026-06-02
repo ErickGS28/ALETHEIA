@@ -2,7 +2,7 @@
 
 import { Badge, cn } from '@aletheia/frontend-commons';
 import { ArrowRightIcon } from '../../../components/ui/icons';
-import type { TransitionAction, WorkflowTransition } from '../../_mock/workflow';
+import type { TransitionAction, WorkflowTransition } from '../../_shared/adapters';
 import { ACTION_LABELS, STATUS_LABELS, formatDateTime } from '../../_shared/workflow-rules';
 
 const ACTION_DOT: Record<TransitionAction, string> = {

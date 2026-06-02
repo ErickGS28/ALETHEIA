@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@aletheia/frontend-commons';
-import { SLA_META, type SlaLevel } from '../../_mock/contracts';
+import { SLA_META, type SlaLevel } from '../domain/contract';
 
 // SLA semaphore (simulated). Inline span + dot, safe inside <p>.
 

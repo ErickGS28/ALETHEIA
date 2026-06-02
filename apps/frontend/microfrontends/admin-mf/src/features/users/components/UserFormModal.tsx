@@ -5,44 +5,59 @@ import { useEffect, useMemo, useState } from 'react';
 import { Label } from '../../../components/ui/label';
 import { Modal } from '../../../components/ui/modal';
 import { Select } from '../../../components/ui/select';
-import type { Area, User } from '../../_mock/admin';
+import type { Area, User } from '../../admin/admin.api';
 
 export interface UserFormValues {
-  name: string;
   email: string;
-  areaId: string;
+  name: string;
+  lastName: string;
+  password?: string;
+  areaId?: number;
   roles: Role[];
-  active: boolean;
+  isActive: boolean;
 }
 
 interface UserFormModalProps {
   open: boolean;
   initial?: User | null;
   areas: Area[];
+  submitting?: boolean;
+  error?: string | null;
   onClose: () => void;
   onSubmit: (values: UserFormValues) => void;
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserFormModalProps) {
-  const activeAreas = useMemo(() => areas.filter((a) => a.active), [areas]);
+export function UserFormModal({
+  open,
+  initial,
+  areas,
+  submitting,
+  error: serverError,
+  onClose,
+  onSubmit,
+}: UserFormModalProps) {
+  const activeAreas = useMemo(() => areas.filter((a) => a.isActive), [areas]);
 
   const [name, setName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [areaId, setAreaId] = useState('');
+  const [password, setPassword] = useState('');
+  const [areaId, setAreaId] = useState<string>('');
   const [roles, setRoles] = useState<Role[]>([]);
-  const [active, setActive] = useState(true);
+  const [isActive, setIsActive] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
     setName(initial?.name ?? '');
+    setLastName(initial?.lastName ?? '');
     setEmail(initial?.email ?? '');
-    // Si el área del usuario quedó inactiva, igual la mostramos (área histórica).
-    setAreaId(initial?.areaId ?? activeAreas[0]?.id ?? '');
+    setPassword('');
+    setAreaId(initial?.areaId != null ? String(initial.areaId) : String(activeAreas[0]?.id ?? ''));
     setRoles(initial?.roles ?? []);
-    setActive(initial?.active ?? true);
+    setIsActive(initial?.isActive ?? true);
     setError(null);
   }, [open, initial, activeAreas]);
 
@@ -51,15 +66,26 @@ export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserF
 
   const handleSubmit = () => {
     if (!name.trim()) return setError('El nombre es obligatorio.');
+    if (!lastName.trim()) return setError('El apellido es obligatorio.');
     if (!EMAIL_RE.test(email.trim())) return setError('El email no es válido.');
-    if (!areaId) return setError('Selecciona un área.');
+    if (!initial && password.trim().length < 6) {
+      return setError('La contraseña debe tener al menos 6 caracteres.');
+    }
     if (roles.length === 0) return setError('Asigna al menos un rol.');
-    onSubmit({ name: name.trim(), email: email.trim(), areaId, roles, active });
+    onSubmit({
+      name: name.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      password: initial ? undefined : password,
+      areaId: areaId ? Number(areaId) : undefined,
+      roles,
+      isActive,
+    });
   };
 
   // El usuario editado puede tener un área que ya está inactiva: la incluimos.
   const selectableAreas = useMemo(() => {
-    if (initial && !activeAreas.some((a) => a.id === initial.areaId)) {
+    if (initial?.areaId != null && !activeAreas.some((a) => a.id === initial.areaId)) {
       const own = areas.find((a) => a.id === initial.areaId);
       return own ? [own, ...activeAreas] : activeAreas;
     }
@@ -74,22 +100,35 @@ export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserF
       description={initial ? 'Actualiza los datos del usuario.' : 'Registra un nuevo usuario.'}
       footer={
         <>
-          <Button variant="neutral" onClick={onClose}>
+          <Button variant="neutral" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>{initial ? 'Guardar cambios' : 'Crear usuario'}</Button>
+          <Button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear usuario'}
+          </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="user-name">Nombre</Label>
-          <Input
-            id="user-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Nombre completo"
-          />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="user-name">Nombre</Label>
+            <Input
+              id="user-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nombre"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="user-lastname">Apellido</Label>
+            <Input
+              id="user-lastname"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Apellido"
+            />
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -99,9 +138,28 @@ export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserF
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="nombre@aletheia.mx"
+            placeholder="nombre@aletheia.com"
+            // El email no se puede modificar en edición (el backend no lo acepta).
+            readOnly={Boolean(initial)}
+            disabled={Boolean(initial)}
           />
+          {initial ? (
+            <p className="font-mono text-xs text-foreground/50">El correo no se puede modificar.</p>
+          ) : null}
         </div>
+
+        {!initial ? (
+          <div className="space-y-1.5">
+            <Label htmlFor="user-password">Contraseña</Label>
+            <Input
+              id="user-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Mínimo 6 caracteres"
+            />
+          </div>
+        ) : null}
 
         <div className="space-y-1.5">
           <Label htmlFor="user-area">Área</Label>
@@ -111,10 +169,11 @@ export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserF
             </p>
           ) : (
             <Select id="user-area" value={areaId} onChange={(e) => setAreaId(e.target.value)}>
+              <option value="">Sin área</option>
               {selectableAreas.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}
-                  {a.active ? '' : ' (inactiva)'}
+                  {a.isActive ? '' : ' (inactiva)'}
                 </option>
               ))}
             </Select>
@@ -144,20 +203,22 @@ export function UserFormModal({ open, initial, areas, onClose, onSubmit }: UserF
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Checkbox
-            id="user-active"
-            checked={active}
-            onCheckedChange={(v) => setActive(Boolean(v))}
-          />
-          <Label htmlFor="user-active" className="cursor-pointer">
-            Usuario activo
-          </Label>
-        </div>
+        {initial ? (
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="user-active"
+              checked={isActive}
+              onCheckedChange={(v) => setIsActive(Boolean(v))}
+            />
+            <Label htmlFor="user-active" className="cursor-pointer">
+              Usuario activo
+            </Label>
+          </div>
+        ) : null}
 
-        {error ? (
+        {error || serverError ? (
           <Badge variant="destructive" className="block w-full py-2 text-center normal-case">
-            {error}
+            {error ?? serverError}
           </Badge>
         ) : null}
       </div>

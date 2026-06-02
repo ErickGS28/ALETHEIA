@@ -19,32 +19,79 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Select } from '../../../components/ui/select';
+import { adaptContracts } from '../../_shared/api/adapters';
 import {
-  AREAS,
+  useCancelContractMutation,
+  useListAreasQuery,
+  useListContractsQuery,
+  useRecoverContractMutation,
+  useSubmitContractMutation,
+} from '../../_shared/api/contracts-api';
+import { CancelContractModal } from '../../_shared/components/CancelContractModal';
+import { ErrorBanner } from '../../_shared/components/ErrorBanner';
+import { PageHeader } from '../../_shared/components/PageHeader';
+import { SlaIndicator } from '../../_shared/components/SlaIndicator';
+import { StatusBadge } from '../../_shared/components/StatusBadge';
+import {
   type Contract,
   type ContractStatus,
   PROVIDER_TYPE_LABEL,
   STATUS_LABEL,
   STATUS_ORDER,
-  USER_AREA,
-  useContracts,
-} from '../../_mock/contracts';
-import { CancelContractModal } from '../../_shared/components/CancelContractModal';
-import { PageHeader } from '../../_shared/components/PageHeader';
-import { SlaIndicator } from '../../_shared/components/SlaIndicator';
-import { StatusBadge } from '../../_shared/components/StatusBadge';
+} from '../../_shared/domain/contract';
+import { getErrorMessage } from '../../_shared/lib/error';
 import { useContractFilters } from '../hooks/useContractFilters';
 import { ContractRowActions } from './ContractRowActions';
 
 export function ContractListView() {
   const router = useRouter();
-  const { contracts, ready, submitContract, cancelContract, recoverContract } = useContracts();
+
+  const { data, isLoading, isError, refetch } = useListContractsQuery();
+  const { data: areas } = useListAreasQuery();
+
+  const [submitContract] = useSubmitContractMutation();
+  const [cancelContract] = useCancelContractMutation();
+  const [recoverContract] = useRecoverContractMutation();
+
+  const contracts = React.useMemo<Contract[]>(() => (data ? adaptContracts(data) : []), [data]);
+
   const { filters, update, reset, rows, viewAll, viewAreaOnly, noAccess } =
     useContractFilters(contracts);
 
   const [cancelTarget, setCancelTarget] = React.useState<Contract | null>(null);
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
   const goDetail = (c: Contract) => router.push(`/${c.id}`);
+
+  const handleSubmit = async (c: Contract) => {
+    setActionError(null);
+    try {
+      await submitContract(c.numericId).unwrap();
+    } catch (error) {
+      setActionError(
+        getErrorMessage(error, `No se pudo enviar a revisión la solicitud ${c.folio}.`),
+      );
+    }
+  };
+
+  const handleRecover = async (c: Contract) => {
+    setActionError(null);
+    try {
+      await recoverContract(c.numericId).unwrap();
+    } catch (error) {
+      setActionError(getErrorMessage(error, `No se pudo recuperar la solicitud ${c.folio}.`));
+    }
+  };
+
+  const handleCancel = async (target: Contract, reason: string) => {
+    setActionError(null);
+    try {
+      await cancelContract({ id: target.numericId, reason }).unwrap();
+      setCancelTarget(null);
+    } catch (error) {
+      setActionError(getErrorMessage(error, `No se pudo cancelar la solicitud ${target.folio}.`));
+    }
+  };
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -63,8 +110,13 @@ export function ContractListView() {
 
         {viewAreaOnly && (
           <div className="rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-mono text-xs text-foreground/70">
-            Vista limitada a tu área: <strong>{USER_AREA}</strong>
+            Vista limitada a los contratos de tu área.
           </div>
+        )}
+
+        {/* Backend errors (403/400) from row actions */}
+        {actionError && (
+          <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />
         )}
 
         <Card>
@@ -109,9 +161,9 @@ export function ContractListView() {
                   </label>
                   <Select value={filters.area} onChange={(e) => update({ area: e.target.value })}>
                     <option value="ALL">Todas</option>
-                    {AREAS.map((a) => (
-                      <option key={a} value={a}>
-                        {a}
+                    {(areas ?? []).map((a) => (
+                      <option key={a.id} value={String(a.id)}>
+                        {a.name}
                       </option>
                     ))}
                   </Select>
@@ -138,13 +190,27 @@ export function ContractListView() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {!ready ? (
+                  {isLoading ? (
                     <TableRow>
                       <TableCell
                         colSpan={7}
                         className="h-24 text-center font-mono text-foreground/40"
                       >
                         Cargando…
+                      </TableCell>
+                    </TableRow>
+                  ) : isError ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center font-mono text-red-600">
+                        <span className="block">No se pudieron cargar los contratos.</span>
+                        <Button
+                          variant="neutral"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => refetch()}
+                        >
+                          Reintentar
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ) : noAccess ? (
@@ -194,9 +260,12 @@ export function ContractListView() {
                             contract={contract}
                             onView={goDetail}
                             onEdit={(c) => router.push(`/crear?id=${c.id}`)}
-                            onSubmit={(c) => submitContract(c.id)}
-                            onCancel={(c) => setCancelTarget(c)}
-                            onRecover={(c) => recoverContract(c.id)}
+                            onSubmit={handleSubmit}
+                            onCancel={(c) => {
+                              setActionError(null);
+                              setCancelTarget(c);
+                            }}
+                            onRecover={handleRecover}
                           />
                         </TableCell>
                       </TableRow>
@@ -215,8 +284,7 @@ export function ContractListView() {
         contract={cancelTarget}
         onClose={() => setCancelTarget(null)}
         onConfirm={(reason) => {
-          if (cancelTarget) cancelContract(cancelTarget.id, reason);
-          setCancelTarget(null);
+          if (cancelTarget) handleCancel(cancelTarget, reason);
         }}
       />
     </main>

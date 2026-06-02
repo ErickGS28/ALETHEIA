@@ -5,9 +5,8 @@ import { useMemo, useState } from 'react';
 import { EmptyState } from '../../../components/EmptyState';
 import { PageShell } from '../../../components/PageShell';
 import { InboxIcon } from '../../../components/ui/icons';
-import type { WorkflowContract } from '../../_mock/workflow';
-import { BASE_NOW } from '../../_shared/now';
-import { useWorkflow } from '../../_shared/useWorkflow';
+import type { WorkflowContract } from '../../_shared/adapters';
+import { errorMessage, useWorkflow } from '../../_shared/useWorkflow';
 import {
   PRIVILEGE_NOT_GRANTED,
   ROLE_REVIEW_PRIVILEGE,
@@ -16,13 +15,7 @@ import {
 } from '../../_shared/workflow-rules';
 import { type ReviewActionKind, ReviewActionModal } from './ReviewActionModal';
 import { ReviewContractCard } from './ReviewContractCard';
-
-// Display name used as `performedBy` when the current user acts.
-const ACTOR_BY_ROLE: Record<string, string> = {
-  ADMINISTRADOR: 'Carlos Admin',
-  ABOGADO: 'Mariana Abogada',
-  APROBADOR: 'Roberto Aprobador',
-};
+import { ReviewerNotifications } from './ReviewerNotifications';
 
 export function ReviewPanel() {
   const { role, can } = useRole();
@@ -30,6 +23,7 @@ export function ReviewPanel() {
 
   const [modalKind, setModalKind] = useState<ReviewActionKind | null>(null);
   const [target, setTarget] = useState<WorkflowContract | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const queueStatuses = queueStatusesForRole(role);
   const queue = useMemo(
@@ -42,6 +36,7 @@ export function ReviewPanel() {
   const canReview = reviewPrivilege ? can(reviewPrivilege) : false;
 
   const openAction = (kind: ReviewActionKind, contract: WorkflowContract) => {
+    setActionError(null);
     setTarget(contract);
     setModalKind(kind);
   };
@@ -51,13 +46,19 @@ export function ReviewPanel() {
     setTarget(null);
   };
 
-  const handleConfirm = (comment: string) => {
-    if (!target || !modalKind || !role) return;
-    const performedBy = ACTOR_BY_ROLE[role] ?? role;
-    if (modalKind === 'approve') wf.approve(target.id, { performedBy, comment });
-    else if (modalKind === 'return') wf.returnToDraft(target.id, { performedBy, comment });
-    else if (modalKind === 'reject') wf.reject(target.id, { performedBy, comment });
-    closeModal();
+  const handleConfirm = async (comment: string) => {
+    if (!target || !modalKind) return;
+    setActionError(null);
+    try {
+      if (modalKind === 'approve') await wf.approve(target.id, { comment });
+      else if (modalKind === 'return') await wf.returnToDraft(target.id, { comment });
+      else if (modalKind === 'reject') await wf.reject(target.id, { comment });
+      closeModal();
+    } catch (err) {
+      // 403 (privilege not granted) or any validation error from the gateway.
+      setActionError(errorMessage(err));
+      closeModal();
+    }
   };
 
   const subtitle = hasReviewRole
@@ -70,13 +71,33 @@ export function ReviewPanel() {
       subtitle={subtitle}
       active="panel"
       actions={
-        <Button variant="neutral" size="sm" onClick={wf.reset} title="Restaurar datos de demo">
-          Reiniciar demo
+        <Button
+          variant="neutral"
+          size="sm"
+          disabled={wf.isFetching}
+          onClick={() => wf.refetch()}
+          title="Actualizar lista"
+        >
+          {wf.isFetching ? 'Actualizando…' : 'Actualizar'}
         </Button>
       }
     >
+      <ReviewerNotifications />
+
+      {actionError ? (
+        <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-mono text-sm text-[#991b1b]">
+          {actionError}
+        </div>
+      ) : null}
+
       {!wf.hydrated ? (
         <EmptyState title="Cargando contratos…" />
+      ) : wf.isError ? (
+        <EmptyState
+          icon={<InboxIcon className="h-10 w-10" />}
+          title="No se pudieron cargar los contratos"
+          description={errorMessage(wf.error)}
+        />
       ) : !hasReviewRole ? (
         <EmptyState
           icon={<InboxIcon className="h-10 w-10" />}
@@ -107,7 +128,7 @@ export function ReviewPanel() {
                 key={contract.id}
                 contract={contract}
                 role={role!}
-                now={BASE_NOW}
+                disabled={wf.mutating}
                 onAction={openAction}
               />
             ))}
@@ -119,6 +140,7 @@ export function ReviewPanel() {
         open={modalKind !== null}
         kind={modalKind}
         contract={target}
+        busy={wf.mutating}
         onClose={closeModal}
         onConfirm={handleConfirm}
       />

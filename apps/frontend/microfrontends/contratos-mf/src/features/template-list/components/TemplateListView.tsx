@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardContent,
+  Input,
   Table,
   TableBody,
   TableCell,
@@ -18,29 +19,22 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { NoAccess } from '../../../components/ui/no-access';
 import { PageHeader } from '../../../components/ui/page-header';
-import { Select } from '../../../components/ui/select';
-import { SOCIETIES, societyName } from '../../_mock/societies';
-import type { Template } from '../../_mock/templates';
-import { useTemplates } from '../../_mock/useTemplates';
+import { useListTemplatesQuery, useUpdateTemplateMutation } from '../../api/templatesApi';
+import { type Template, toUiTemplate } from '../../templates/types';
 
 function TemplateTableRow({
   template,
   onToggle,
+  toggling,
 }: {
   template: Template;
-  onToggle: (id: string) => void;
+  onToggle: (template: Template) => void;
+  toggling: boolean;
 }) {
-  const { id, name, societyId, active } = template;
+  const { id, name, active } = template;
   return (
     <TableRow>
       <TableCell className="font-base">{name}</TableCell>
-      <TableCell>
-        {societyId ? (
-          <span className="font-mono text-sm">{societyName(societyId)}</span>
-        ) : (
-          <Badge variant="outline">General</Badge>
-        )}
-      </TableCell>
       <TableCell>
         <Badge variant={active ? 'default' : 'secondary'}>{active ? 'Activa' : 'Inactiva'}</Badge>
       </TableCell>
@@ -54,7 +48,8 @@ function TemplateTableRow({
           <Button
             variant={active ? 'outline' : 'default'}
             size="sm"
-            onClick={() => onToggle(id)}
+            onClick={() => onToggle(template)}
+            disabled={toggling}
             aria-label={active ? `Desactivar ${name}` : `Activar ${name}`}
           >
             {active ? (
@@ -76,7 +71,7 @@ function TemplateTableRow({
 function EmptyRow({ message }: { message: string }) {
   return (
     <TableRow>
-      <TableCell colSpan={4} className="h-24 text-center font-mono text-foreground/40">
+      <TableCell colSpan={3} className="h-24 text-center font-mono text-foreground/40">
         {message}
       </TableCell>
     </TableRow>
@@ -85,16 +80,36 @@ function EmptyRow({ message }: { message: string }) {
 
 export function TemplateListView() {
   const { can } = useRole();
-  const { templates, ready, toggleActive } = useTemplates();
-  const [societyFilter, setSocietyFilter] = useState<string>('ALL');
+  const canManage = can('TEMPLATES_MANAGE');
+  const { data, isLoading, isError } = useListTemplatesQuery(undefined, { skip: !canManage });
+  const [updateTemplate, { isLoading: isToggling }] = useUpdateTemplateMutation();
+  const [search, setSearch] = useState('');
+  const [toggleError, setToggleError] = useState<string | null>(null);
+
+  const templates = useMemo<Template[]>(() => (data ?? []).map(toUiTemplate), [data]);
 
   const filtered = useMemo(() => {
-    if (societyFilter === 'ALL') return templates;
-    if (societyFilter === 'GENERAL') return templates.filter((t) => t.societyId === null);
-    return templates.filter((t) => t.societyId === societyFilter);
-  }, [templates, societyFilter]);
+    const term = search.trim().toLowerCase();
+    if (!term) return templates;
+    return templates.filter((t) => t.name.toLowerCase().includes(term));
+  }, [templates, search]);
 
-  if (!can('TEMPLATES_MANAGE')) return <NoAccess />;
+  const handleToggle = async (template: Template) => {
+    setToggleError(null);
+    try {
+      await updateTemplate({
+        id: Number(template.id),
+        body: { isActive: !template.active },
+      }).unwrap();
+    } catch (err) {
+      const message =
+        (err as { data?: { message?: string } })?.data?.message ??
+        'No se pudo cambiar el estado de la plantilla. Intenta de nuevo.';
+      setToggleError(message);
+    }
+  };
+
+  if (!canManage) return <NoAccess />;
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -110,25 +125,25 @@ export function TemplateListView() {
           }
         />
 
+        {toggleError ? (
+          <p className="font-mono text-xs text-red-600" role="alert">
+            {toggleError}
+          </p>
+        ) : null}
+
         <Card>
           <CardContent className="p-0">
             <div className="flex items-center gap-4 border-b-2 border-border px-4 py-3">
               <span className="font-mono text-xs text-foreground/50 uppercase tracking-widest">
-                Filtrar por sociedad
+                Buscar por nombre
               </span>
-              <Select
-                value={societyFilter}
-                onChange={(e) => setSocietyFilter(e.target.value)}
-                className="w-56"
-              >
-                <option value="ALL">Todas</option>
-                <option value="GENERAL">General</option>
-                {SOCIETIES.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </Select>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Nombre de la plantilla…"
+                aria-label="Buscar plantillas por nombre"
+                className="w-72"
+              />
               <span className="ml-auto font-mono text-xs text-foreground/40">
                 {filtered.length} plantilla(s)
               </span>
@@ -138,19 +153,25 @@ export function TemplateListView() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Sociedad</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!ready ? (
+                {isLoading ? (
                   <EmptyRow message="Cargando plantillas…" />
+                ) : isError ? (
+                  <EmptyRow message="No se pudieron cargar las plantillas." />
                 ) : filtered.length === 0 ? (
-                  <EmptyRow message="No hay plantillas para este filtro." />
+                  <EmptyRow message="No hay plantillas que coincidan con la búsqueda." />
                 ) : (
                   filtered.map((tpl) => (
-                    <TemplateTableRow key={tpl.id} template={tpl} onToggle={toggleActive} />
+                    <TemplateTableRow
+                      key={tpl.id}
+                      template={tpl}
+                      onToggle={handleToggle}
+                      toggling={isToggling}
+                    />
                   ))
                 )}
               </TableBody>

@@ -19,26 +19,33 @@ import {
 } from '@aletheia/frontend-commons';
 import { useRef, useState } from 'react';
 import { FileIcon, PlusIcon } from '../../../components/ui/icons';
-import { getDocumentLabel } from '../../_mock/data/requirements';
-import { formatBytes, formatDate, formatMimeType } from '../../_mock/format';
-import type { DocumentRecord } from '../../_mock/types';
+import { formatBytes, formatDate, formatMimeType } from '../../../lib/format';
+import type { DocumentRecord } from '../../../lib/types';
 
 interface DocumentVersionsCardProps {
   document: DocumentRecord;
-  onAddVersion: (file: File) => void;
+  /** Resolves to true when the version was added; we only clear the input then. */
+  onAddVersion: (file: File) => undefined | boolean | Promise<undefined | boolean>;
+  disabled?: boolean;
 }
 
 /** Version history for one document + "subir nueva versión" control. */
-export function DocumentVersionsCard({ document, onAddVersion }: DocumentVersionsCardProps) {
+export function DocumentVersionsCard({
+  document,
+  onAddVersion,
+  disabled = false,
+}: DocumentVersionsCardProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   // Latest first for display.
   const ordered = [...document.versions].sort((a, b) => b.version - a.version);
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!pendingFile) return;
-    onAddVersion(pendingFile);
+    const result = await onAddVersion(pendingFile);
+    // Keep the selected file when it failed so the user can retry.
+    if (result === false) return;
     setPendingFile(null);
     if (inputRef.current) inputRef.current.value = '';
   }
@@ -49,7 +56,7 @@ export function DocumentVersionsCard({ document, onAddVersion }: DocumentVersion
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <FileIcon className="h-5 w-5" />
-            <CardTitle className="text-xl">{getDocumentLabel(document.key)}</CardTitle>
+            <CardTitle className="text-xl">{document.label}</CardTitle>
           </div>
           <Badge variant="default">Versión activa: v{document.currentVersion}</Badge>
         </div>
@@ -108,7 +115,7 @@ export function DocumentVersionsCard({ document, onAddVersion }: DocumentVersion
               className="sm:max-w-xs"
               onChange={(e) => setPendingFile(e.target.files?.[0] ?? null)}
             />
-            <Button onClick={handleAdd} disabled={!pendingFile}>
+            <Button onClick={handleAdd} disabled={!pendingFile || disabled}>
               <PlusIcon className="h-4 w-4" />
               Subir nueva versión
             </Button>

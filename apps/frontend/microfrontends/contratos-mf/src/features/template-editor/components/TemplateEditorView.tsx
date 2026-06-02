@@ -22,13 +22,14 @@ import { useEffect, useRef, useState } from 'react';
 import { Label } from '../../../components/ui/label';
 import { NoAccess } from '../../../components/ui/no-access';
 import { PageHeader } from '../../../components/ui/page-header';
-import { Select } from '../../../components/ui/select';
-import { SOCIETIES } from '../../_mock/societies';
-import { useTemplates } from '../../_mock/useTemplates';
+import {
+  useCreateTemplateMutation,
+  useGetTemplateQuery,
+  useUpdateTemplateMutation,
+} from '../../api/templatesApi';
+import { DEFAULT_FOOTER, DEFAULT_HEADER } from '../../templates/types';
 
 const EMPTY_CONTENT = '<h2>Nueva plantilla</h2><p>Escribe aquí las cláusulas del contrato…</p>';
-const DEFAULT_HEADER = '<p style="text-align:center"><strong>ALETHEIA</strong></p>';
-const DEFAULT_FOOTER = '<p style="text-align:center">Documento confidencial · Página {{page}}</p>';
 
 function ActiveToggleButton({
   active,
@@ -57,7 +58,6 @@ function ActiveToggleButton({
 interface TemplateFormProps {
   isEdit: boolean;
   name: string;
-  societyId: string;
   content: string;
   header: string;
   footer: string;
@@ -65,8 +65,8 @@ interface TemplateFormProps {
   active: boolean;
   error: string | null;
   savedAt: string | null;
+  saving: boolean;
   onNameChange: (v: string) => void;
-  onSocietyChange: (v: string) => void;
   onContentChange: (v: string) => void;
   onHeaderChange: (v: string) => void;
   onFooterChange: (v: string) => void;
@@ -78,7 +78,6 @@ function TemplateForm(props: TemplateFormProps) {
   const {
     isEdit,
     name,
-    societyId,
     content,
     header,
     footer,
@@ -86,8 +85,8 @@ function TemplateForm(props: TemplateFormProps) {
     active,
     error,
     savedAt,
+    saving,
     onNameChange,
-    onSocietyChange,
     onContentChange,
     onHeaderChange,
     onFooterChange,
@@ -109,31 +108,14 @@ function TemplateForm(props: TemplateFormProps) {
           ) : null}
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="tpl-name">Nombre</Label>
-              <Input
-                id="tpl-name"
-                placeholder="Ej. Contrato de Prestación de Servicios"
-                value={name}
-                onChange={(e) => onNameChange(e.target.value)}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="tpl-society">Sociedad asociada (opcional)</Label>
-              <Select
-                id="tpl-society"
-                value={societyId}
-                onChange={(e) => onSocietyChange(e.target.value)}
-              >
-                <option value="">General (todas las sociedades)</option>
-                {SOCIETIES.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="tpl-name">Nombre</Label>
+            <Input
+              id="tpl-name"
+              placeholder="Ej. Contrato de Prestación de Servicios"
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
+            />
           </div>
           {error ? (
             <p className="font-mono text-xs text-red-600" role="alert">
@@ -187,8 +169,9 @@ function TemplateForm(props: TemplateFormProps) {
             ariaLabel="Contenido de la plantilla"
           />
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onSave}>
-              <Save className="h-4 w-4" /> {isEdit ? 'Guardar cambios' : 'Crear plantilla'}
+            <Button onClick={onSave} disabled={saving}>
+              <Save className="h-4 w-4" />{' '}
+              {saving ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear plantilla'}
             </Button>
             <Button variant="neutral" onClick={() => setShowPreview((v) => !v)}>
               {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -223,12 +206,23 @@ interface TemplateEditorViewProps {
 
 export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
   const { can } = useRole();
-  const { ready, getById, create, update, toggleActive } = useTemplates();
+  const canManage = can('TEMPLATES_MANAGE');
   const router = useRouter();
 
   const isEdit = Boolean(templateId);
+  const numericId = templateId ? Number(templateId) : Number.NaN;
+  const skipFetch = !canManage || !isEdit || Number.isNaN(numericId);
+
+  const {
+    data: template,
+    isLoading: isFetching,
+    isError: isFetchError,
+    error: fetchError,
+  } = useGetTemplateQuery(numericId, { skip: skipFetch });
+  const [createTemplate, { isLoading: isCreating }] = useCreateTemplateMutation();
+  const [updateTemplate, { isLoading: isUpdating }] = useUpdateTemplateMutation();
+
   const [name, setName] = useState('');
-  const [societyId, setSocietyId] = useState<string>('');
   const [content, setContent] = useState<string>(EMPTY_CONTENT);
   const [header, setHeader] = useState<string>(DEFAULT_HEADER);
   const [footer, setFooter] = useState<string>(DEFAULT_FOOTER);
@@ -238,58 +232,60 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
   const [error, setError] = useState<string | null>(null);
   const loadedRef = useRef(false);
 
-  // Carga inicial de la plantilla en modo edición.
+  // Carga inicial de la plantilla en modo edición (desde el backend).
   useEffect(() => {
-    if (!ready || !isEdit || loadedRef.current || !templateId) return;
-    const tpl = getById(templateId);
-    if (tpl) {
-      setName(tpl.name);
-      setSocietyId(tpl.societyId ?? '');
-      setContent(tpl.content);
-      setHeader(tpl.header);
-      setFooter(tpl.footer);
-      setPageSetup(tpl.pageSetup);
-      setActive(tpl.active);
-    }
+    if (!template || loadedRef.current) return;
+    setName(template.name);
+    setContent(template.content);
+    setActive(template.isActive);
     loadedRef.current = true;
-  }, [ready, isEdit, templateId, getById]);
+  }, [template]);
 
-  if (!can('TEMPLATES_MANAGE')) return <NoAccess />;
+  if (!canManage) return <NoAccess />;
 
-  const notFound = Boolean(
-    isEdit && ready && loadedRef.current && templateId && !getById(templateId),
-  );
+  const hasFetchError = Boolean(isEdit && !skipFetch && isFetchError);
+  // RTK errors expose a numeric HTTP `status` for server responses (FetchBaseQueryError).
+  const errorStatus =
+    fetchError && typeof fetchError === 'object' && 'status' in fetchError
+      ? (fetchError as { status?: number | string }).status
+      : undefined;
+  const notFound = hasFetchError && errorStatus === 404;
+  const loadFailed = hasFetchError && !notFound;
+  const isLoadingTemplate = Boolean(isEdit && !skipFetch && isFetching);
+  const isSaving = isCreating || isUpdating;
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name.trim()) {
       setError('El nombre de la plantilla es obligatorio.');
       return;
     }
     setError(null);
-    const payload = {
-      name,
-      societyId: societyId || null,
-      content,
-      header,
-      footer,
-      pageSetup,
-      active,
-    };
-    if (isEdit && templateId) {
-      update(templateId, payload);
-    } else {
-      const created = create(payload);
-      router.push(`/plantillas/${created.id}`);
-      return;
+    try {
+      if (isEdit && !Number.isNaN(numericId)) {
+        await updateTemplate({
+          id: numericId,
+          body: { name: name.trim(), content, isActive: active },
+        }).unwrap();
+        setSavedAt(new Date().toLocaleTimeString('es-MX'));
+      } else {
+        const created = await createTemplate({ name: name.trim(), content }).unwrap();
+        router.push(`/plantillas/${created.id}`);
+      }
+    } catch {
+      setError('No se pudo guardar la plantilla. Intenta de nuevo.');
     }
-    setSavedAt(new Date().toLocaleTimeString('es-MX'));
   };
 
-  const handleToggleActive = () => {
-    if (!templateId) return;
-    toggleActive(templateId);
-    setActive((a) => !a);
-    setSavedAt(new Date().toLocaleTimeString('es-MX'));
+  const handleToggleActive = async () => {
+    if (!templateId || Number.isNaN(numericId)) return;
+    const next = !active;
+    try {
+      await updateTemplate({ id: numericId, body: { isActive: next } }).unwrap();
+      setActive(next);
+      setSavedAt(new Date().toLocaleTimeString('es-MX'));
+    } catch {
+      setError('No se pudo cambiar el estado de la plantilla.');
+    }
   };
 
   return (
@@ -303,24 +299,36 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
             isEdit ? (
               <ActiveToggleButton
                 active={active}
-                disabled={notFound}
+                disabled={notFound || loadFailed || isLoadingTemplate || isSaving}
                 onClick={handleToggleActive}
               />
             ) : null
           }
         />
 
-        {notFound ? (
+        {isLoadingTemplate ? (
+          <Card>
+            <CardContent className="py-12 text-center font-mono text-foreground/60">
+              Cargando plantilla…
+            </CardContent>
+          </Card>
+        ) : notFound ? (
           <Card>
             <CardContent className="py-12 text-center font-mono text-foreground/60">
               La plantilla solicitada no existe.
+            </CardContent>
+          </Card>
+        ) : loadFailed ? (
+          <Card>
+            <CardContent className="py-12 text-center font-mono text-foreground/60">
+              No se pudo cargar la plantilla. Verifica tu conexión o tus permisos e intenta de
+              nuevo.
             </CardContent>
           </Card>
         ) : (
           <TemplateForm
             isEdit={isEdit}
             name={name}
-            societyId={societyId}
             content={content}
             header={header}
             footer={footer}
@@ -328,8 +336,8 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
             active={active}
             error={error}
             savedAt={savedAt}
+            saving={isSaving}
             onNameChange={setName}
-            onSocietyChange={setSocietyId}
             onContentChange={setContent}
             onHeaderChange={setHeader}
             onFooterChange={setFooter}

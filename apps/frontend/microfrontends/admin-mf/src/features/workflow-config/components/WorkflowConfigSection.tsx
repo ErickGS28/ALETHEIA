@@ -16,42 +16,77 @@ import {
   TableHeader,
   TableRow,
 } from '@aletheia/frontend-commons';
-import { ArrowDown, ArrowUp, Clock, Pencil, Plus, Trash2, Workflow } from 'lucide-react';
-import { useState } from 'react';
-import { ConfirmDialog } from '../../../components/ui/confirm-dialog';
-import { EmptyState } from '../../../components/ui/states';
-import { type WorkflowStage, useWorkflowStages } from '../../_mock/admin';
+import { ArrowDown, ArrowUp, Clock, Pencil, Plus, Workflow } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { EmptyState, ErrorState, LoadingState } from '../../../components/ui/states';
+import {
+  type WorkflowStage,
+  useCreateStageMutation,
+  useListStagesQuery,
+  useUpdateStageMutation,
+} from '../../admin/admin.api';
+import { apiErrorMessage } from '../../admin/error';
 import { StageFormModal, type StageFormValues } from './StageFormModal';
 
 const roleLabel = (id: string) => ROLES.find((r) => r.id === id)?.label ?? id;
 
 export function WorkflowConfigSection() {
-  const { stages, create, update, remove, move } = useWorkflowStages();
+  const { data: rawStages = [], isLoading, isError, refetch } = useListStagesQuery();
+  const [createStage, createState] = useCreateStageMutation();
+  const [updateStage, updateState] = useUpdateStageMutation();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<WorkflowStage | null>(null);
-  const [toDelete, setToDelete] = useState<WorkflowStage | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const stages = useMemo(() => [...rawStages].sort((a, b) => a.order - b.order), [rawStages]);
 
   const openCreate = () => {
     setEditing(null);
+    setFormError(null);
     setModalOpen(true);
   };
   const openEdit = (stage: WorkflowStage) => {
     setEditing(stage);
+    setFormError(null);
     setModalOpen(true);
   };
 
-  const handleSubmit = (values: StageFormValues) => {
-    if (editing) update(editing.id, values);
-    else create(values);
-    setModalOpen(false);
+  const handleSubmit = async (values: StageFormValues) => {
+    setFormError(null);
+    try {
+      if (editing) {
+        await updateStage({ id: editing.id, body: values }).unwrap();
+      } else {
+        await createStage(values).unwrap();
+      }
+      setModalOpen(false);
+    } catch (err) {
+      setFormError(apiErrorMessage(err, 'No se pudo guardar la etapa.'));
+    }
   };
 
-  const handleDelete = () => {
-    if (toDelete) remove(toDelete.id);
-    setToDelete(null);
+  // Reordena intercambiando el `order` con la etapa adyacente (dos PATCH).
+  const move = async (index: number, direction: 'up' | 'down') => {
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= stages.length) return;
+    const a = stages[index];
+    const b = stages[target];
+    setActionError(null);
+    try {
+      await Promise.all([
+        updateStage({ id: a.id, body: { order: b.order } }).unwrap(),
+        updateStage({ id: b.id, body: { order: a.order } }).unwrap(),
+      ]);
+    } catch (err) {
+      setActionError(apiErrorMessage(err, 'No se pudo reordenar la etapa.'));
+    }
   };
 
   const totalSla = stages.reduce((sum, s) => sum + s.slaHours, 0);
+  const nextOrder = stages.reduce((max, s) => Math.max(max, s.order), 0) + 1;
+  const reordering = updateState.isLoading;
 
   return (
     <Card>
@@ -67,7 +102,16 @@ export function WorkflowConfigSection() {
         </Button>
       </CardHeader>
       <CardContent>
-        {stages.length === 0 ? (
+        {actionError ? (
+          <Badge variant="destructive" className="mb-4 block w-full py-2 text-center normal-case">
+            {actionError}
+          </Badge>
+        ) : null}
+        {isLoading ? (
+          <LoadingState message="Cargando etapas…" />
+        ) : isError ? (
+          <ErrorState message="No se pudieron cargar las etapas." onRetry={() => refetch()} />
+        ) : stages.length === 0 ? (
           <EmptyState
             icon={<Workflow className="h-5 w-5" />}
             title="Sin etapas"
@@ -97,7 +141,7 @@ export function WorkflowConfigSection() {
                   </TableCell>
                   <TableCell className="font-base">{s.name}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{roleLabel(s.role)}</Badge>
+                    <Badge variant="secondary">{roleLabel(s.roleRequired)}</Badge>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1 text-foreground/70">
@@ -109,8 +153,8 @@ export function WorkflowConfigSection() {
                       <Button
                         variant="neutral"
                         size="icon"
-                        disabled={i === 0}
-                        onClick={() => move(s.id, 'up')}
+                        disabled={i === 0 || reordering}
+                        onClick={() => move(i, 'up')}
                         aria-label="Subir etapa"
                       >
                         <ArrowUp />
@@ -118,22 +162,14 @@ export function WorkflowConfigSection() {
                       <Button
                         variant="neutral"
                         size="icon"
-                        disabled={i === stages.length - 1}
-                        onClick={() => move(s.id, 'down')}
+                        disabled={i === stages.length - 1 || reordering}
+                        onClick={() => move(i, 'down')}
                         aria-label="Bajar etapa"
                       >
                         <ArrowDown />
                       </Button>
                       <Button variant="neutral" size="sm" onClick={() => openEdit(s)}>
                         <Pencil /> Editar
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => setToDelete(s)}
-                        aria-label="Eliminar etapa"
-                      >
-                        <Trash2 />
                       </Button>
                     </span>
                   </TableCell>
@@ -147,18 +183,11 @@ export function WorkflowConfigSection() {
       <StageFormModal
         open={modalOpen}
         initial={editing}
+        nextOrder={nextOrder}
+        submitting={createState.isLoading || updateState.isLoading}
+        error={formError}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
-      />
-
-      <ConfirmDialog
-        open={toDelete !== null}
-        title="Eliminar etapa"
-        description={toDelete ? `Se eliminará la etapa "${toDelete.name}".` : undefined}
-        confirmLabel="Eliminar"
-        destructive
-        onConfirm={handleDelete}
-        onCancel={() => setToDelete(null)}
       />
     </Card>
   );

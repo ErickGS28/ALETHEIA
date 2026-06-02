@@ -10,11 +10,12 @@ import {
 } from '@aletheia/frontend-commons';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { EmptyState } from '../../../components/EmptyState';
 import { PageShell } from '../../../components/PageShell';
 import { TimelineIcon } from '../../../components/ui/icons';
-import { useWorkflow } from '../../_shared/useWorkflow';
+import { providerTypeLabel } from '../../_shared/adapters';
+import { errorMessage, useContractWorkflow, useWorkflow } from '../../_shared/useWorkflow';
 import { STATUS_LABELS, statusBadgeVariant } from '../../_shared/workflow-rules';
 import { TimelineList } from './TimelineList';
 
@@ -25,7 +26,7 @@ export function WorkflowTimeline() {
 
   const [selectedId, setSelectedId] = useState<string | null>(initial);
 
-  // Default to the first contract once hydrated if nothing is selected.
+  // Default to the first contract once loaded if nothing valid is selected.
   useEffect(() => {
     if (!wf.hydrated) return;
     if (selectedId && wf.getContract(selectedId)) return;
@@ -34,10 +35,10 @@ export function WorkflowTimeline() {
   }, [wf.hydrated, wf.contracts, wf.getContract, selectedId]);
 
   const contract = selectedId ? wf.getContract(selectedId) : undefined;
-  const transitions = useMemo(
-    () => (selectedId ? wf.transitionsFor(selectedId) : []),
-    [wf, selectedId],
-  );
+  const detail = useContractWorkflow(selectedId);
+  const transitions = detail.transitions;
+  // The workflow detail carries the live status; fall back to the listed contract.
+  const status = detail.workflow?.status ?? contract?.status;
 
   return (
     <PageShell
@@ -47,6 +48,12 @@ export function WorkflowTimeline() {
     >
       {!wf.hydrated ? (
         <EmptyState title="Cargando historial…" />
+      ) : wf.isError ? (
+        <EmptyState
+          icon={<TimelineIcon className="h-10 w-10" />}
+          title="No se pudieron cargar los contratos"
+          description={errorMessage(wf.error)}
+        />
       ) : wf.contracts.length === 0 ? (
         <EmptyState
           icon={<TimelineIcon className="h-10 w-10" />}
@@ -86,16 +93,21 @@ export function WorkflowTimeline() {
                     <CardTitle className="text-xl">{contract.folio}</CardTitle>
                     <p className="font-mono text-sm text-foreground/80">{contract.provider}</p>
                     <p className="font-mono text-xs text-foreground/50">
-                      {contract.society} · {contract.area} · Solicitó {contract.requestedBy}
+                      {contract.society} · {contract.area} ·{' '}
+                      {providerTypeLabel(contract.providerType)}
                     </p>
                   </div>
-                  <Badge variant={statusBadgeVariant(contract.status)}>
-                    {STATUS_LABELS[contract.status]}
-                  </Badge>
+                  {status ? (
+                    <Badge variant={statusBadgeVariant(status)}>{STATUS_LABELS[status]}</Badge>
+                  ) : null}
                 </div>
               </CardHeader>
               <CardContent>
-                {transitions.length === 0 ? (
+                {detail.isLoading ? (
+                  <p className="font-mono text-sm text-foreground/50">Cargando transiciones…</p>
+                ) : detail.isError ? (
+                  <p className="font-mono text-sm text-[#dc2626]">{errorMessage(detail.error)}</p>
+                ) : transitions.length === 0 ? (
                   <p className="font-mono text-sm text-foreground/50">
                     Este contrato aún no tiene transiciones registradas.
                   </p>

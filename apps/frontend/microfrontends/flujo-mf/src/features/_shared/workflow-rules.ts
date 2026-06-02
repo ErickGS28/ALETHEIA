@@ -2,7 +2,15 @@
 // role → queue mapping and the transition state machine. No React, no I/O.
 
 import type { Privilege, Role } from '@aletheia/frontend-commons';
-import { type ContractStatus, type TransitionAction, slaHoursForStatus } from '../_mock/workflow';
+import type { ContractStatus, TransitionAction } from './adapters';
+
+// Stages, in flow order, that carry an SLA budget (the active review stages).
+export const SLA_TRACKED_STATUSES: ContractStatus[] = [
+  'SUBMITTED',
+  'ADMIN_REVIEW',
+  'LAWYER_REVIEW',
+  'APPROVAL_PENDING',
+];
 
 // ─── Status presentation ──────────────────────────────────────────────────
 
@@ -104,7 +112,9 @@ export function canDefinitiveReject(status: ContractStatus): boolean {
   return status === 'APPROVAL_PENDING';
 }
 
-// ─── SLA computation (HU-12) ──────────────────────────────────────────────
+// ─── SLA semaphore types (HU-12) ──────────────────────────────────────────
+// The semaphore color is computed by the backend (GREEN/YELLOW/RED) and mapped
+// to these levels in `adapters.toSlaResult`. The UI only consumes SlaResult.
 
 export type SlaLevel = 'green' | 'yellow' | 'red' | 'none';
 
@@ -119,49 +129,6 @@ export interface SlaResult {
   /** Hours left before breaching SLA (negative when overdue). */
   remainingHours: number | null;
   label: string;
-}
-
-/**
- * Computes the SLA semaphore for a contract.
- * Green < 60% consumed · Yellow 60–100% · Red >= 100%.
- */
-export function computeSla(
-  status: ContractStatus,
-  enteredAt: string,
-  now: Date = new Date(),
-): SlaResult {
-  const slaHours = slaHoursForStatus(status);
-  const entered = new Date(enteredAt).getTime();
-  const elapsedHours = Math.max(0, (now.getTime() - entered) / 3600_000);
-
-  if (slaHours == null) {
-    return {
-      level: 'none',
-      elapsedHours,
-      slaHours: null,
-      ratio: null,
-      remainingHours: null,
-      label: 'Sin SLA',
-    };
-  }
-
-  const ratio = elapsedHours / slaHours;
-  const remainingHours = slaHours - elapsedHours;
-
-  let level: SlaLevel;
-  let label: string;
-  if (ratio >= 1) {
-    level = 'red';
-    label = 'SLA superado';
-  } else if (ratio >= 0.6) {
-    level = 'yellow';
-    label = 'Por vencer';
-  } else {
-    level = 'green';
-    label = 'En tiempo';
-  }
-
-  return { level, elapsedHours, slaHours, ratio, remainingHours, label };
 }
 
 // ─── Formatting helpers ───────────────────────────────────────────────────

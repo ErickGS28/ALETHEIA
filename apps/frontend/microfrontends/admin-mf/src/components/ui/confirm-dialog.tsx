@@ -43,7 +43,7 @@ export function ConfirmDialog({
       }
     >
       <p className="text-sm font-mono text-foreground/70">
-        Esta acción se guardará en los datos locales (mock) del navegador.
+        Esta acción se aplicará en el servidor y no se puede deshacer.
       </p>
     </Modal>
   );

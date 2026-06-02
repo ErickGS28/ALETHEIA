@@ -3,19 +3,25 @@
 import { Badge, Button, Input } from '@aletheia/frontend-commons';
 import { useRef, useState } from 'react';
 import { CheckIcon, FileIcon, UploadIcon } from '../../../components/ui/icons';
-import type { RequiredDocument } from '../../_mock/data/requirements';
-import { formatBytes, formatDate, formatMimeType } from '../../_mock/format';
-import type { DocumentRecord } from '../../_mock/types';
+import { formatBytes, formatDate, formatMimeType } from '../../../lib/format';
+import type { DocumentRecord, RequiredDocument } from '../../../lib/types';
 
 interface DocumentUploadRowProps {
   requirement: RequiredDocument;
   /** Existing document for this slot, if already uploaded. */
   document?: DocumentRecord;
-  onUpload: (file: File, expiryDate?: string) => void;
+  /** Resolves to true when the upload succeeded; we only clear the input then. */
+  onUpload: (file: File, expiryDate?: string) => undefined | boolean | Promise<undefined | boolean>;
+  disabled?: boolean;
 }
 
-/** A single required-document slot: pendiente / cargado + mock file picker. */
-export function DocumentUploadRow({ requirement, document, onUpload }: DocumentUploadRowProps) {
+/** A single required-document slot: pendiente / cargado + file picker. */
+export function DocumentUploadRow({
+  requirement,
+  document,
+  onUpload,
+  disabled = false,
+}: DocumentUploadRowProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [expiryDate, setExpiryDate] = useState('');
@@ -23,9 +29,14 @@ export function DocumentUploadRow({ requirement, document, onUpload }: DocumentU
   const isUploaded = Boolean(document);
   const active = document?.versions[document.versions.length - 1];
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!pendingFile) return;
-    onUpload(pendingFile, requirement.tracksExpiry && expiryDate ? expiryDate : undefined);
+    const result = await onUpload(
+      pendingFile,
+      requirement.tracksExpiry && expiryDate ? expiryDate : undefined,
+    );
+    // Keep the selected file when the upload failed so the user can retry.
+    if (result === false) return;
     setPendingFile(null);
     setExpiryDate('');
     if (inputRef.current) inputRef.current.value = '';
@@ -105,7 +116,7 @@ export function DocumentUploadRow({ requirement, document, onUpload }: DocumentU
             </div>
           ) : null}
 
-          <Button onClick={handleConfirm} disabled={!pendingFile}>
+          <Button onClick={handleConfirm} disabled={!pendingFile || disabled}>
             <UploadIcon className="h-4 w-4" />
             Cargar
           </Button>

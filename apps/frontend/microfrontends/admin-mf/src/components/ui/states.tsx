@@ -1,7 +1,7 @@
 'use client';
 
-import { Card, CardContent } from '@aletheia/frontend-commons';
-import { Lock } from 'lucide-react';
+import { Button, Card, CardContent } from '@aletheia/frontend-commons';
+import { AlertTriangle, Loader2, Lock } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 /** Estado "sin permiso" para una sección gateada por privilegio. */
@@ -45,6 +45,42 @@ export function EmptyState({
         <p className="max-w-sm text-sm font-mono text-foreground/60">{description}</p>
       ) : null}
       {action}
+    </div>
+  );
+}
+
+/** Estado de carga genérico para tablas/listas. */
+export function LoadingState({ message }: { message?: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <Loader2 className="h-6 w-6 animate-spin text-foreground/60" />
+      <p className="text-sm font-mono text-foreground/60">{message ?? 'Cargando…'}</p>
+    </div>
+  );
+}
+
+/** Estado de error con reintento. */
+export function ErrorState({
+  message,
+  onRetry,
+}: {
+  message?: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-base border-2 border-border bg-secondary-background">
+        <AlertTriangle className="h-5 w-5 text-destructive" />
+      </div>
+      <p className="text-lg font-heading">No se pudo cargar</p>
+      <p className="max-w-sm text-sm font-mono text-foreground/60">
+        {message ?? 'Ocurrió un error al consultar el servidor.'}
+      </p>
+      {onRetry ? (
+        <Button variant="neutral" size="sm" onClick={onRetry}>
+          Reintentar
+        </Button>
+      ) : null}
     </div>
   );
 }

@@ -17,29 +17,59 @@ import {
 } from '@aletheia/frontend-commons';
 import { Building2, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
-import { EmptyState } from '../../../components/ui/states';
+import { EmptyState, ErrorState, LoadingState } from '../../../components/ui/states';
 import { Switch } from '../../../components/ui/switch';
-import { type Area, useAreas } from '../../_mock/admin';
+import {
+  type Area,
+  useCreateAreaMutation,
+  useListAreasQuery,
+  useUpdateAreaMutation,
+} from '../../admin/admin.api';
+import { apiErrorMessage } from '../../admin/error';
 import { AreaFormModal, type AreaFormValues } from './AreaFormModal';
 
 export function AreasSection() {
-  const { areas, create, update, toggleActive } = useAreas();
+  const { data: areas = [], isLoading, isError, refetch } = useListAreasQuery();
+  const [createArea, createState] = useCreateAreaMutation();
+  const [updateArea, updateState] = useUpdateAreaMutation();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Area | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const openCreate = () => {
     setEditing(null);
+    setFormError(null);
     setModalOpen(true);
   };
   const openEdit = (area: Area) => {
     setEditing(area);
+    setFormError(null);
     setModalOpen(true);
   };
 
-  const handleSubmit = (values: AreaFormValues) => {
-    if (editing) update(editing.id, values);
-    else create(values);
-    setModalOpen(false);
+  const handleSubmit = async (values: AreaFormValues) => {
+    setFormError(null);
+    try {
+      if (editing) {
+        await updateArea({ id: editing.id, body: values }).unwrap();
+      } else {
+        await createArea({ name: values.name }).unwrap();
+      }
+      setModalOpen(false);
+    } catch (err) {
+      setFormError(apiErrorMessage(err, 'No se pudo guardar el área.'));
+    }
+  };
+
+  const toggleActive = async (area: Area) => {
+    setActionError(null);
+    try {
+      await updateArea({ id: area.id, body: { isActive: !area.isActive } }).unwrap();
+    } catch (err) {
+      setActionError(apiErrorMessage(err, 'No se pudo cambiar el estado del área.'));
+    }
   };
 
   return (
@@ -48,7 +78,7 @@ export function AreasSection() {
         <div className="space-y-1.5">
           <CardTitle>Áreas</CardTitle>
           <CardDescription>
-            Áreas de la organización ({areas.length}). Una área inactiva no se puede asignar.
+            Áreas de la organización ({areas.length}). Un área inactiva no se puede asignar.
           </CardDescription>
         </div>
         <Button onClick={openCreate}>
@@ -56,7 +86,16 @@ export function AreasSection() {
         </Button>
       </CardHeader>
       <CardContent>
-        {areas.length === 0 ? (
+        {actionError ? (
+          <Badge variant="destructive" className="mb-4 block w-full py-2 text-center normal-case">
+            {actionError}
+          </Badge>
+        ) : null}
+        {isLoading ? (
+          <LoadingState message="Cargando áreas…" />
+        ) : isError ? (
+          <ErrorState message="No se pudieron cargar las áreas." onRetry={() => refetch()} />
+        ) : areas.length === 0 ? (
           <EmptyState
             icon={<Building2 className="h-5 w-5" />}
             title="Sin áreas"
@@ -83,12 +122,12 @@ export function AreasSection() {
                   <TableCell>
                     <span className="flex items-center gap-2">
                       <Switch
-                        checked={a.active}
-                        onCheckedChange={() => toggleActive(a.id)}
-                        aria-label={a.active ? 'Desactivar área' : 'Activar área'}
+                        checked={a.isActive}
+                        onCheckedChange={() => toggleActive(a)}
+                        aria-label={a.isActive ? 'Desactivar área' : 'Activar área'}
                       />
-                      <Badge variant={a.active ? 'default' : 'neutral'}>
-                        {a.active ? 'Activa' : 'Inactiva'}
+                      <Badge variant={a.isActive ? 'default' : 'neutral'}>
+                        {a.isActive ? 'Activa' : 'Inactiva'}
                       </Badge>
                     </span>
                   </TableCell>
@@ -107,6 +146,8 @@ export function AreasSection() {
       <AreaFormModal
         open={modalOpen}
         initial={editing}
+        submitting={createState.isLoading || updateState.isLoading}
+        error={formError}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
       />

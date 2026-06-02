@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@aletheia/frontend-commons';
-import { type ContractStatus, STATUS_COLOR, STATUS_LABEL } from '../../_mock/contracts';
+import { type ContractStatus, STATUS_COLOR, STATUS_LABEL } from '../domain/contract';
 
 // Status pill. Renders a <span> (NOT a Badge/div) so it is safe inside <p>.
 

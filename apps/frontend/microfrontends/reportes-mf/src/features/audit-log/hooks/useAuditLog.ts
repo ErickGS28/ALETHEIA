@@ -1,21 +1,23 @@
 'use client';
 
 import { useMemo } from 'react';
-import { AUDIT_LOG, type AuditEntry, CONTRACTS } from '../../_mock/reports';
+import { type AuditLog, useAuditLogQuery } from '../../contract-reports/api/reportsApi';
 
 /**
  * Returns the full audit trail for a contract, sorted newest-first (HU-24).
- * `contractId` empty/unknown => empty list.
+ * `contractId` 0/unset => skips the request and returns an empty list.
  */
-export function useAuditLog(contractId: string) {
-  const contract = useMemo(() => CONTRACTS.find((c) => c.id === contractId) ?? null, [contractId]);
+export function useAuditLog(contractId: number) {
+  const { data, isLoading, isFetching, isError, refetch } = useAuditLogQuery(contractId, {
+    skip: !contractId,
+  });
 
-  const entries = useMemo<AuditEntry[]>(() => {
-    if (!contractId) return [];
-    return AUDIT_LOG.filter((e) => e.contractId === contractId).sort(
+  const entries = useMemo<AuditLog[]>(() => {
+    if (!data) return [];
+    return [...data].sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [contractId]);
+  }, [data]);
 
-  return { contract, entries };
+  return { entries, isLoading, isFetching, isError, refetch };
 }

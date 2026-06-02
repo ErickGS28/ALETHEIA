@@ -4,7 +4,7 @@ import { Badge, Button } from '@aletheia/frontend-commons';
 import { useEffect, useState } from 'react';
 import { Modal } from '../../../components/ui/modal';
 import { Textarea } from '../../../components/ui/textarea';
-import type { WorkflowContract } from '../../_mock/workflow';
+import type { WorkflowContract } from '../../_shared/adapters';
 import { STATUS_LABELS, approveLabel, nextStatusOnApprove } from '../../_shared/workflow-rules';
 
 export type ReviewActionKind = 'approve' | 'return' | 'reject';
@@ -13,6 +13,8 @@ interface ReviewActionModalProps {
   open: boolean;
   kind: ReviewActionKind | null;
   contract: WorkflowContract | null;
+  /** True while the underlying mutation is in flight. */
+  busy?: boolean;
   onClose: () => void;
   /** Called with the (trimmed) comment; empty string when not required. */
   onConfirm: (comment: string) => void;
@@ -52,6 +54,7 @@ export function ReviewActionModal({
   open,
   kind,
   contract,
+  busy,
   onClose,
   onConfirm,
 }: ReviewActionModalProps) {
@@ -95,15 +98,15 @@ export function ReviewActionModal({
       description={`${contract.folio} · ${contract.provider}`}
       footer={
         <>
-          <Button variant="neutral" onClick={onClose}>
+          <Button variant="neutral" onClick={onClose} disabled={busy}>
             Cancelar
           </Button>
           <Button
             variant={meta.confirmVariant}
             onClick={handleConfirm}
-            disabled={invalid && touched}
+            disabled={(invalid && touched) || busy}
           >
-            {kind === 'approve' ? approveLabel(contract.status) : meta.title}
+            {busy ? 'Procesando…' : kind === 'approve' ? approveLabel(contract.status) : meta.title}
           </Button>
         </>
       }

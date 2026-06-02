@@ -380,6 +380,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.1.1
         version: 1.2.4(@types/react@19.2.16)(react@19.2.7)
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -446,6 +449,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.1
@@ -462,6 +468,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.7)
@@ -474,6 +483,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -502,6 +514,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.7)
@@ -514,6 +529,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -542,6 +560,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       next:
         specifier: ^15.1.0
         version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -551,6 +572,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -579,6 +603,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       next:
         specifier: ^15.1.0
         version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -588,6 +615,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -616,6 +646,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       next:
         specifier: ^15.1.0
         version: 15.5.19(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -625,6 +658,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -653,6 +689,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.7)
@@ -665,6 +704,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0
@@ -693,6 +735,9 @@ importers:
       '@aletheia/frontend-commons':
         specifier: workspace:*
         version: link:../../commons
+      '@reduxjs/toolkit':
+        specifier: ^2.4.0
+        version: 2.12.0(react-redux@9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.7)
@@ -705,6 +750,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-redux:
+        specifier: ^9.1.0
+        version: 9.3.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.0.0

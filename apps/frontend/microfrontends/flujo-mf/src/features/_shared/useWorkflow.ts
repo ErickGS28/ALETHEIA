@@ -1,166 +1,124 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   type ContractStatus,
   type WorkflowContract,
-  type WorkflowState,
   type WorkflowTransition,
-  loadWorkflowState,
-  resetWorkflowState,
-  saveWorkflowState,
-} from '../_mock/workflow';
-import { nextStatusOnApprove } from './workflow-rules';
+  toSlaResult,
+  toWorkflowContract,
+  toWorkflowTransition,
+} from './adapters';
+import {
+  useApproveWorkflowMutation,
+  useGetWorkflowQuery,
+  useListContractsQuery,
+  useRejectWorkflowMutation,
+  useReturnWorkflowMutation,
+} from './flujo-api';
+import type { SlaResult } from './workflow-rules';
 
-function uid(): string {
-  return `tr-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+/** Human-readable message extracted from an RTK Query error (gateway shape). */
+export function errorMessage(error: unknown): string {
+  if (!error) return 'Ocurrió un error inesperado.';
+  const e = error as { status?: number; data?: { message?: string | string[] } };
+  const raw = e.data?.message;
+  const msg = Array.isArray(raw) ? raw.join(' · ') : raw;
+  if (msg) return msg;
+  if (e.status === 403) return 'No cuentas con el privilegio necesario para esta acción.';
+  if (e.status === 401) return 'Tu sesión expiró. Inicia sesión de nuevo.';
+  return 'No se pudo completar la operación. Intenta de nuevo.';
 }
 
 interface ActorArgs {
-  /** Display name of the user performing the action. */
-  performedBy: string;
-  /** Optional comment. */
   comment?: string;
 }
 
 /**
- * Central hook for the review workflow. Holds the mock state (hydrated from
- * localStorage), exposes the contract list and transition history, and the
- * mutating actions used by the review panel.
- *
- * Privilege gating is the caller's responsibility (UI guards) — this hook only
- * enforces the state machine.
+ * Central hook for the review workflow, now backed by the gateway via RTK Query.
+ * Lists contracts and exposes the approve / return / reject mutations. Per-contract
+ * workflow detail (SLA color + transitions) is fetched with `useContractWorkflow`.
  */
 export function useWorkflow() {
-  const [state, setState] = useState<WorkflowState>({ contracts: [], transitions: [] });
-  const [hydrated, setHydrated] = useState(false);
+  const { data, isLoading, isFetching, isError, error, refetch } = useListContractsQuery();
 
-  // Hydrate from localStorage on mount (avoids SSR/CSR mismatch).
-  useEffect(() => {
-    setState(loadWorkflowState());
-    setHydrated(true);
-  }, []);
+  const [approveMutation, approveState] = useApproveWorkflowMutation();
+  const [returnMutation, returnState] = useReturnWorkflowMutation();
+  const [rejectMutation, rejectState] = useRejectWorkflowMutation();
 
-  const persist = useCallback((next: WorkflowState) => {
-    setState(next);
-    saveWorkflowState(next);
-  }, []);
+  const contracts: WorkflowContract[] = useMemo(() => (data ?? []).map(toWorkflowContract), [data]);
 
-  /** All contracts. */
-  const contracts = state.contracts;
-  /** All transitions. */
-  const transitions = state.transitions;
+  // True once the first list response settled (mirrors the old `hydrated` gate).
+  const hydrated = !isLoading;
 
-  /** Contracts filtered to a set of statuses (e.g. a role's queue). */
   const listByStatus = useCallback(
-    (statuses: ContractStatus[]) => state.contracts.filter((c) => statuses.includes(c.status)),
-    [state.contracts],
+    (statuses: ContractStatus[]) => contracts.filter((c) => statuses.includes(c.status)),
+    [contracts],
   );
 
-  /** Transitions for one contract, chronological (oldest → newest). */
-  const transitionsFor = useCallback(
-    (contractId: string) =>
-      state.transitions
-        .filter((tr) => tr.contractId === contractId)
-        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()),
-    [state.transitions],
-  );
-
-  /** Lookup a single contract. */
   const getContract = useCallback(
-    (id: string): WorkflowContract | undefined => state.contracts.find((c) => c.id === id),
-    [state.contracts],
+    (id: string): WorkflowContract | undefined => contracts.find((c) => c.id === id),
+    [contracts],
   );
 
-  /** Internal: apply a status change and record a transition. */
-  const transition = useCallback(
-    (
-      contractId: string,
-      to: ContractStatus,
-      action: WorkflowTransition['action'],
-      { performedBy, comment }: ActorArgs,
-    ): boolean => {
-      const contract = state.contracts.find((c) => c.id === contractId);
-      if (!contract) return false;
-
-      const now = new Date().toISOString();
-      const record: WorkflowTransition = {
-        id: uid(),
-        contractId,
-        from: contract.status,
-        to,
-        action,
-        performedBy,
-        comment: comment?.trim() || undefined,
-        timestamp: now,
-      };
-
-      const next: WorkflowState = {
-        contracts: state.contracts.map((c) =>
-          c.id === contractId ? { ...c, status: to, enteredAt: now } : c,
-        ),
-        transitions: [...state.transitions, record],
-      };
-      persist(next);
-      return true;
-    },
-    [persist, state.contracts, state.transitions],
-  );
-
-  /** Advance a contract one stage (approve). Returns false if not advanceable. */
   const approve = useCallback(
-    (contractId: string, args: ActorArgs): boolean => {
-      const contract = state.contracts.find((c) => c.id === contractId);
-      if (!contract) return false;
-      const to = nextStatusOnApprove(contract.status);
-      if (!to) return false;
-      return transition(contractId, to, 'APPROVE', args);
-    },
-    [state.contracts, transition],
+    (contractId: string, args: ActorArgs) =>
+      approveMutation({ contractId: Number(contractId), comment: args.comment }).unwrap(),
+    [approveMutation],
   );
 
-  /** Return a contract to DRAFT with a mandatory comment. */
   const returnToDraft = useCallback(
-    (contractId: string, args: ActorArgs): boolean => {
-      if (!args.comment?.trim()) return false;
-      return transition(contractId, 'DRAFT', 'RETURN', args);
-    },
-    [transition],
+    (contractId: string, args: ActorArgs) =>
+      returnMutation({ contractId: Number(contractId), comment: args.comment }).unwrap(),
+    [returnMutation],
   );
 
-  /** Definitive rejection (approver only) → REJECTED, mandatory comment. */
   const reject = useCallback(
-    (contractId: string, args: ActorArgs): boolean => {
-      if (!args.comment?.trim()) return false;
-      return transition(contractId, 'REJECTED', 'REJECT', args);
-    },
-    [transition],
+    (contractId: string, args: ActorArgs) =>
+      rejectMutation({ contractId: Number(contractId), comment: args.comment }).unwrap(),
+    [rejectMutation],
   );
-
-  /** Reset to seed data (demo helper). */
-  const reset = useCallback(() => {
-    persist(resetWorkflowState());
-  }, [persist]);
 
   const counts = useMemo(() => {
     const byStatus = {} as Record<ContractStatus, number>;
-    for (const c of state.contracts) {
-      byStatus[c.status] = (byStatus[c.status] ?? 0) + 1;
-    }
+    for (const c of contracts) byStatus[c.status] = (byStatus[c.status] ?? 0) + 1;
     return byStatus;
-  }, [state.contracts]);
+  }, [contracts]);
+
+  const mutating = approveState.isLoading || returnState.isLoading || rejectState.isLoading;
 
   return {
     hydrated,
+    isFetching,
+    isError,
+    error,
+    refetch,
     contracts,
-    transitions,
     counts,
     listByStatus,
-    transitionsFor,
     getContract,
     approve,
     returnToDraft,
     reject,
-    reset,
+    mutating,
   };
+}
+
+/** Per-contract workflow detail (real SLA color + transition history). */
+export function useContractWorkflow(contractId: string | null) {
+  const id = contractId != null ? Number(contractId) : undefined;
+  const { data, isLoading, isFetching, isError, error } = useGetWorkflowQuery(id as number, {
+    skip: id == null || Number.isNaN(id),
+  });
+
+  const sla: SlaResult | null = useMemo(() => (data ? toSlaResult(data) : null), [data]);
+
+  const transitions: WorkflowTransition[] = useMemo(() => {
+    if (!data) return [];
+    return [...data.transitions]
+      .map((tr) => toWorkflowTransition(data.contractId, tr))
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }, [data]);
+
+  return { workflow: data, sla, transitions, isLoading, isFetching, isError, error };
 }

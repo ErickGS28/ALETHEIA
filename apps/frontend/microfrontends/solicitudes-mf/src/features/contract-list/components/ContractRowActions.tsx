@@ -11,7 +11,7 @@ import {
   useRole,
 } from '@aletheia/frontend-commons';
 import { Eye, MoreHorizontal, Pencil, RotateCcw, Send, XCircle } from 'lucide-react';
-import type { Contract } from '../../_mock/contracts';
+import type { Contract } from '../../_shared/domain/contract';
 
 // Per-row action menu. Each item is gated by privilege AND state.
 

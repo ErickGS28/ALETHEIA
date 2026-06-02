@@ -1,3 +1,4 @@
+import { ApiProvider } from '@aletheia/frontend-commons';
 import type { Metadata } from 'next';
 import { Anton, DM_Sans } from 'next/font/google';
 import './globals.css';
@@ -16,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${dmSans.variable} ${anton.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
-        {children}
+        <ApiProvider>{children}</ApiProvider>
       </body>
     </html>
   );

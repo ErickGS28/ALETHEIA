@@ -10,9 +10,11 @@ import {
   CardTitle,
 } from '@aletheia/frontend-commons';
 import { useRouter } from 'next/navigation';
-import { useMemo } from 'react';
-import { attorneyById } from '../../_mock/signatures';
-import { useSignatures } from '../../signatures/hooks/useSignatures';
+import {
+  useGetContractQuery,
+  useListApoderadosQuery,
+  useListSignaturesQuery,
+} from '../../signatures/api/signaturesApi';
 
 interface SignatureDetailViewProps {
   contractId: string;
@@ -27,10 +29,24 @@ function formatDate(iso: string): string {
 
 export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
   const router = useRouter();
-  const { ready, getById } = useSignatures();
-  const contract = useMemo(() => getById(contractId), [getById, contractId]);
 
-  const attorney = attorneyById(contract?.signature?.attorneyId);
+  const {
+    data: contract,
+    isLoading: loadingContract,
+    isError: errorContract,
+  } = useGetContractQuery(contractId);
+  const {
+    data: signatures,
+    isLoading: loadingSignatures,
+    isError: errorSignatures,
+  } = useListSignaturesQuery(contractId);
+  const { data: apoderados } = useListApoderadosQuery();
+
+  const apoderadoById = (id?: number) =>
+    id ? (apoderados ?? []).find((a) => a.id === id) : undefined;
+
+  const loading = loadingContract || loadingSignatures;
+  const list = signatures ?? [];
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -42,13 +58,13 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
           </Button>
         </header>
 
-        {!ready ? (
+        {loading ? (
           <Card>
             <CardContent className="p-6">
               <p className="font-mono text-sm text-foreground/50">Cargando…</p>
             </CardContent>
           </Card>
-        ) : !contract ? (
+        ) : errorContract || !contract ? (
           <Card>
             <CardContent className="space-y-4 p-6">
               <Badge variant="secondary">Contrato no encontrado</Badge>
@@ -59,15 +75,23 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
               </div>
             </CardContent>
           </Card>
-        ) : !contract.signature ? (
+        ) : errorSignatures ? (
+          <Card>
+            <CardContent className="p-6">
+              <Badge variant="destructive">No se pudieron cargar las firmas.</Badge>
+            </CardContent>
+          </Card>
+        ) : list.length === 0 ? (
           <Card>
             <CardContent className="space-y-4 p-6">
               <Badge variant="secondary">Este contrato aún no ha sido firmado</Badge>
-              <div>
-                <Button size="sm" onClick={() => router.push(`/firmar/${contract.id}`)}>
-                  Firmar ahora
-                </Button>
-              </div>
+              {contract.status === 'SIGNING' ? (
+                <div>
+                  <Button size="sm" onClick={() => router.push(`/firmar/${contract.id}`)}>
+                    Firmar ahora
+                  </Button>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
         ) : (
@@ -75,56 +99,63 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{contract.folio}</CardTitle>
-                <Badge variant="default">FIRMADO</Badge>
+                <Badge variant="default">{contract.status}</Badge>
               </div>
               <CardDescription>
-                {contract.provider} &middot; {contract.society}
+                {contract.vendorName} &middot; {contract.society?.name ?? '—'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Imagen de la firma (base64) */}
-              <div className="space-y-2">
-                <span className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                  Firma
-                </span>
-                <div className="rounded-base border-2 border-border bg-background p-4 shadow-shadow">
-                  <img
-                    src={contract.signature.image}
-                    alt={`Firma del contrato ${contract.folio}`}
-                    className="mx-auto block max-h-56 w-auto"
-                  />
-                </div>
-              </div>
+            <CardContent className="space-y-8">
+              {list.map((sig) => {
+                const attorney = apoderadoById(sig.apoderadoId);
+                return (
+                  <div key={sig.id} className="space-y-6">
+                    {/* Imagen de la firma (base64) */}
+                    <div className="space-y-2">
+                      <span className="text-xs font-heading uppercase tracking-widest text-foreground/70">
+                        Firma · {sig.method}
+                      </span>
+                      <div className="rounded-base border-2 border-border bg-background p-4 shadow-shadow">
+                        <img
+                          src={sig.signatureData}
+                          alt={`Firma del contrato ${contract.folio}`}
+                          className="mx-auto block max-h-56 w-auto"
+                        />
+                      </div>
+                    </div>
 
-              {/* Metadatos de la firma */}
-              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-1">
-                  <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                    Apoderado
-                  </dt>
-                  <dd className="font-mono text-sm">{attorney?.name ?? '—'}</dd>
-                </div>
-                <div className="space-y-1">
-                  <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                    Poder legal
-                  </dt>
-                  <dd className="font-mono text-sm text-foreground/70">
-                    {attorney?.legalPower ?? '—'}
-                  </dd>
-                </div>
-                <div className="space-y-1">
-                  <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                    Firmado por
-                  </dt>
-                  <dd className="font-mono text-sm">{contract.signature.signedBy}</dd>
-                </div>
-                <div className="space-y-1">
-                  <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                    Fecha
-                  </dt>
-                  <dd className="font-mono text-sm">{formatDate(contract.signature.signedAt)}</dd>
-                </div>
-              </dl>
+                    {/* Metadatos de la firma */}
+                    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
+                          Apoderado
+                        </dt>
+                        <dd className="font-mono text-sm">{attorney?.name ?? '—'}</dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
+                          Poder legal
+                        </dt>
+                        <dd className="font-mono text-sm text-foreground/70">
+                          {attorney?.legalPower ?? '—'}
+                        </dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
+                          Firmado por (id)
+                        </dt>
+                        <dd className="font-mono text-sm">{sig.signedById}</dd>
+                      </div>
+                      <div className="space-y-1">
+                        <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
+                          Fecha
+                        </dt>
+                        <dd className="font-mono text-sm">{formatDate(sig.signedAt)}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         )}

@@ -1,9 +1,10 @@
 'use client';
 
+import { loadSession } from '@aletheia/frontend-commons';
 import { type ReactNode, useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
-import { loadAuth } from '../lib/persist';
-import { loginAs } from './authSlice';
+import type { Privilege } from '../data/roles';
+import { loginWithSession } from './authSlice';
 import { type AppStore, makeStore } from './store';
 
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -12,10 +13,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     storeRef.current = makeStore();
   }
 
-  // Hidrata el rol persistido (localStorage) tras montar en cliente.
+  // Hidrata la sesión real persistida (commons: cookie + localStorage) tras montar en cliente.
   useEffect(() => {
-    const role = loadAuth();
-    if (role) storeRef.current?.dispatch(loginAs(role));
+    const session = loadSession();
+    if (session) {
+      storeRef.current?.dispatch(
+        loginWithSession({
+          role: session.role,
+          privileges: session.privileges as Privilege[],
+        }),
+      );
+    }
   }, []);
 
   return <Provider store={storeRef.current}>{children}</Provider>;

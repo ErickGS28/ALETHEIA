@@ -21,15 +21,30 @@ import { Label } from '../../../components/ui/label';
 import { NoAccess } from '../../../components/ui/no-access';
 import { PageHeader } from '../../../components/ui/page-header';
 import { Select } from '../../../components/ui/select';
-import { MOCK_CONTRACTS, readContractDoc, writeContractDoc } from '../../_mock/contracts';
-import { societyName } from '../../_mock/societies';
-import { useTemplates } from '../../_mock/useTemplates';
+import { useListContractsQuery, useListTemplatesQuery } from '../../api/templatesApi';
+import { readContractDoc, writeContractDoc } from '../../catalogs/contract-drafts';
+import { type Template, toUiTemplate } from '../../templates/types';
 
 export function ContractEditorView() {
   const { can } = useRole();
-  const { templates, ready } = useTemplates();
+  const {
+    data: contractsData,
+    isLoading: isLoadingContracts,
+    isError: isContractsError,
+  } = useListContractsQuery();
+  const {
+    data: templatesData,
+    isLoading: isLoadingTemplates,
+    isError: isTemplatesError,
+  } = useListTemplatesQuery();
 
-  const [contractId, setContractId] = useState<string>(MOCK_CONTRACTS[0].id);
+  const contracts = useMemo(() => contractsData ?? [], [contractsData]);
+  const templates = useMemo<Template[]>(
+    () => (templatesData ?? []).map(toUiTemplate),
+    [templatesData],
+  );
+
+  const [contractId, setContractId] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [body, setBody] = useState<string>('');
   const [header, setHeader] = useState<string>('');
@@ -39,24 +54,25 @@ export function ContractEditorView() {
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
-  const contract = useMemo(
-    () => MOCK_CONTRACTS.find((c) => c.id === contractId) ?? MOCK_CONTRACTS[0],
-    [contractId],
-  );
-
-  // Plantillas elegibles: activas y (de la sociedad del contrato o generales).
-  const eligibleTemplates = useMemo(
-    () =>
-      templates.filter(
-        (t) => t.active && (t.societyId === null || t.societyId === contract.societyId),
-      ),
-    [templates, contract.societyId],
-  );
-
-  // Al cambiar de contrato: carga el documento guardado (si existe) y resetea.
+  // Selecciona el primer contrato disponible una vez que se cargan.
   useEffect(() => {
-    if (!ready) return;
-    const existing = readContractDoc(contract.id);
+    if (!contractId && contracts.length > 0) {
+      setContractId(String(contracts[0].id));
+    }
+  }, [contracts, contractId]);
+
+  const contract = useMemo(
+    () => contracts.find((c) => String(c.id) === contractId) ?? null,
+    [contracts, contractId],
+  );
+
+  // Plantillas elegibles: las plantillas activas (no tienen sociedad asociada en el backend).
+  const eligibleTemplates = useMemo(() => templates.filter((t) => t.active), [templates]);
+
+  // Al cambiar de contrato: carga el borrador local guardado (si existe) y resetea.
+  useEffect(() => {
+    if (!contractId) return;
+    const existing = readContractDoc(contractId);
     setBody(existing?.body ?? '');
     setHeader(existing?.header ?? '');
     setFooter(existing?.footer ?? '');
@@ -65,7 +81,7 @@ export function ContractEditorView() {
     setDirty(false);
     setSavedAt(null);
     setShowPreview(false);
-  }, [contract.id, ready]);
+  }, [contractId]);
 
   const canAccess = can('TEMPLATES_MANAGE') || can('CONTRACT_EDIT');
   if (!canAccess) {
@@ -91,10 +107,15 @@ export function ContractEditorView() {
   };
 
   const handleSave = () => {
-    writeContractDoc(contract.id, { body, header, footer, pageSetup });
+    if (!contractId) return;
+    writeContractDoc(contractId, { body, header, footer, pageSetup });
     setSavedAt(new Date().toLocaleTimeString('es-MX'));
     setDirty(false);
   };
+
+  const contractsReady = !isLoadingContracts;
+  const templatesReady = !isLoadingTemplates;
+  const noContracts = contractsReady && !isContractsError && contracts.length === 0;
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -117,47 +138,81 @@ export function ContractEditorView() {
                   id="contract-select"
                   value={contractId}
                   onChange={(e) => setContractId(e.target.value)}
+                  disabled={!contractsReady || isContractsError || contracts.length === 0}
                 >
-                  {MOCK_CONTRACTS.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.id} · {c.title}
+                  <option value="">
+                    {isLoadingContracts
+                      ? 'Cargando contratos…'
+                      : isContractsError
+                        ? 'No se pudieron cargar los contratos'
+                        : contracts.length === 0
+                          ? 'No hay contratos disponibles'
+                          : 'Selecciona un contrato…'}
+                  </option>
+                  {contracts.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.folio} · {c.title}
                     </option>
                   ))}
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="template-select">Plantilla (filtrada por sociedad)</Label>
+                <Label htmlFor="template-select">Plantilla</Label>
                 <Select
                   id="template-select"
                   value={selectedTemplateId}
                   onChange={(e) => applyTemplate(e.target.value)}
-                  disabled={!ready || eligibleTemplates.length === 0}
+                  disabled={
+                    !contractId ||
+                    !templatesReady ||
+                    isTemplatesError ||
+                    eligibleTemplates.length === 0
+                  }
                 >
                   <option value="">
-                    {eligibleTemplates.length === 0
-                      ? 'Sin plantillas activas para esta sociedad'
-                      : 'Selecciona una plantilla…'}
+                    {isLoadingTemplates
+                      ? 'Cargando plantillas…'
+                      : isTemplatesError
+                        ? 'No se pudieron cargar las plantillas'
+                        : eligibleTemplates.length === 0
+                          ? 'Sin plantillas activas'
+                          : 'Selecciona una plantilla…'}
                   </option>
                   {eligibleTemplates.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.name}
-                      {t.societyId === null ? ' (General)' : ''}
                     </option>
                   ))}
                 </Select>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-foreground/60">
-              <span>Sociedad:</span>
-              <Badge variant="secondary">{societyName(contract.societyId)}</Badge>
-              <span>· Contraparte:</span>
-              <span>{contract.counterparty}</span>
-            </div>
+            {contract ? (
+              <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-foreground/60">
+                <span>Sociedad:</span>
+                <Badge variant="secondary">{contract.society?.name ?? 'Sin sociedad'}</Badge>
+                <span>· Proveedor:</span>
+                <span>{contract.vendorName}</span>
+              </div>
+            ) : null}
+
+            <p className="font-mono text-xs text-foreground/50">
+              El documento elaborado es una previsualización/borrador local: se guarda solo en este
+              navegador y aún no se persiste en el servidor.
+            </p>
           </CardContent>
         </Card>
 
-        {body ? (
+        {noContracts ? (
+          <Card>
+            <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
+              <FileText className="h-8 w-8 text-foreground/40" />
+              <p className="font-mono text-sm text-foreground/50">
+                No hay contratos disponibles para elaborar un documento.
+              </p>
+            </CardContent>
+          </Card>
+        ) : body ? (
           <>
             <Card>
               <CardHeader className="flex-row items-center justify-between">
@@ -176,7 +231,7 @@ export function ContractEditorView() {
 
                 <div className="flex flex-wrap items-center gap-3">
                   <Button onClick={handleSave}>
-                    <Save className="h-4 w-4" /> Guardar documento
+                    <Save className="h-4 w-4" /> Guardar borrador local
                   </Button>
                   <Button variant="neutral" onClick={() => setShowPreview((v) => !v)}>
                     {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -184,7 +239,7 @@ export function ContractEditorView() {
                   </Button>
                   {savedAt ? (
                     <span className="font-mono text-xs text-foreground/50">
-                      Guardado a las {savedAt}
+                      Borrador local guardado a las {savedAt}
                     </span>
                   ) : null}
                 </div>

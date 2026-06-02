@@ -8,21 +8,42 @@ import {
   CardHeader,
   CardTitle,
 } from '@aletheia/frontend-commons';
-import { Download } from 'lucide-react';
-import { downloadTextFile } from '../../../lib/download';
+import { AlertTriangle, Download, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { exportContractsCsv } from '../../export/exportReport';
 import { useReports } from '../hooks/useReports';
 import { ContractsTable } from './ContractsTable';
 import { ReportFiltersBar } from './ReportFiltersBar';
 import { ReportKpis } from './ReportKpis';
 
 export function ContractReportsPanel() {
-  const { filters, setFilter, resetFilters, hasActiveFilters, contracts, total, kpis, toCsv } =
-    useReports();
+  const {
+    filters,
+    setFilter,
+    resetFilters,
+    hasActiveFilters,
+    contracts,
+    total,
+    kpis,
+    areaOptions,
+    isLoading,
+    isError,
+    refetch,
+  } = useReports();
 
-  const handleExport = () => {
-    const csv = toCsv();
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadTextFile(csv, `reporte-contratos-${stamp}.csv`);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const handleExport = async () => {
+    setExporting(true);
+    setExportError(null);
+    try {
+      await exportContractsCsv();
+    } catch {
+      setExportError('No se pudo exportar el CSV. Inténtalo de nuevo.');
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -34,21 +55,43 @@ export function ContractReportsPanel() {
           <div className="space-y-1.5">
             <CardTitle>Reporte de contratos</CardTitle>
             <CardDescription>
-              Filtra por estado, área y responsable. Exporta el resultado a CSV.
+              Filtra por estado, área y tipo de proveedor. Exporta el reporte completo a CSV.
             </CardDescription>
           </div>
-          <Button onClick={handleExport} disabled={total === 0}>
-            <Download /> Exportar CSV
+          <Button onClick={handleExport} disabled={exporting}>
+            {exporting ? <Loader2 className="animate-spin" /> : <Download />} Exportar CSV
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
+          {exportError && (
+            <div className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-mono text-sm text-destructive">
+              <AlertTriangle className="h-4 w-4" /> {exportError}
+            </div>
+          )}
+
           <ReportFiltersBar
             filters={filters}
             hasActiveFilters={hasActiveFilters}
+            areaOptions={areaOptions}
             onChange={setFilter}
             onReset={resetFilters}
           />
-          <ContractsTable contracts={contracts} />
+
+          {isError ? (
+            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+              <span>No se pudieron cargar los reportes.</span>
+              <Button variant="neutral" size="sm" onClick={() => refetch()}>
+                Reintentar
+              </Button>
+            </div>
+          ) : isLoading ? (
+            <div className="flex items-center justify-center gap-2 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 font-mono text-sm text-foreground/60">
+              <Loader2 className="h-4 w-4 animate-spin" /> Cargando reportes…
+            </div>
+          ) : (
+            <ContractsTable contracts={contracts} />
+          )}
         </CardContent>
       </Card>
     </div>

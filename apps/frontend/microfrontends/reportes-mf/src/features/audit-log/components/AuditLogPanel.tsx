@@ -2,26 +2,50 @@
 
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@aletheia/frontend-commons';
-import { useState } from 'react';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Select } from '../../../components/ui/select';
-import { CONTRACTS, statusMeta } from '../../_mock/reports';
+import { statusMeta } from '../../../lib/contract-meta';
+import { useReportContractsQuery } from '../../contract-reports/api/reportsApi';
 import { useAuditLog } from '../hooks/useAuditLog';
 import { AuditTimeline } from './AuditTimeline';
 
-const CONTRACT_OPTIONS = CONTRACTS.map((c) => ({
-  value: c.id,
-  label: `${c.folio} · ${c.title}`,
-}));
-
 export function AuditLogPanel() {
-  const [contractId, setContractId] = useState('');
-  const { contract, entries } = useAuditLog(contractId);
+  const [contractId, setContractId] = useState(0);
+
+  const {
+    data: contracts,
+    isLoading: contractsLoading,
+    isError: contractsError,
+  } = useReportContractsQuery();
+
+  const {
+    entries,
+    isLoading: entriesLoading,
+    isError: entriesError,
+    refetch,
+  } = useAuditLog(contractId);
+
+  const contractOptions = useMemo(
+    () =>
+      (contracts ?? []).map((c) => ({
+        value: String(c.id),
+        label: `${c.folio} · ${c.title}`,
+      })),
+    [contracts],
+  );
+
+  const contract = useMemo(
+    () => (contracts ?? []).find((c) => c.id === contractId) ?? null,
+    [contracts, contractId],
+  );
 
   return (
     <Card>
@@ -38,12 +62,19 @@ export function AuditLogPanel() {
           </span>
           <Select
             id="audit-contract"
-            options={CONTRACT_OPTIONS}
-            placeholder="Selecciona un contrato…"
-            value={contractId}
-            onChange={(e) => setContractId(e.target.value)}
+            options={contractOptions}
+            placeholder={contractsLoading ? 'Cargando contratos…' : 'Selecciona un contrato…'}
+            value={contractId ? String(contractId) : ''}
+            disabled={contractsLoading || contractsError}
+            onChange={(e) => setContractId(Number(e.target.value) || 0)}
           />
         </label>
+
+        {contractsError && (
+          <div className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-mono text-sm text-destructive">
+            <AlertTriangle className="h-4 w-4" /> No se pudieron cargar los contratos.
+          </div>
+        )}
 
         {contract && (
           <div className="flex flex-wrap items-center gap-3 rounded-base border-2 border-border bg-secondary-background/40 p-4">
@@ -58,12 +89,24 @@ export function AuditLogPanel() {
           </div>
         )}
 
-        {contractId ? (
-          <AuditTimeline entries={entries} />
-        ) : (
+        {!contractId ? (
           <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
             Selecciona un contrato para consultar su bitácora.
           </div>
+        ) : entriesError ? (
+          <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+            <AlertTriangle className="h-6 w-6 text-destructive" />
+            <span>No se pudo cargar la bitácora.</span>
+            <Button variant="neutral" size="sm" onClick={() => refetch()}>
+              Reintentar
+            </Button>
+          </div>
+        ) : entriesLoading ? (
+          <div className="flex items-center justify-center gap-2 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 font-mono text-sm text-foreground/60">
+            <Loader2 className="h-4 w-4 animate-spin" /> Cargando bitácora…
+          </div>
+        ) : (
+          <AuditTimeline entries={entries} />
         )}
       </CardContent>
     </Card>

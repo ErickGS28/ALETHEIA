@@ -9,14 +9,16 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
-  useRole,
 } from '@aletheia/frontend-commons';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
-import { ATTORNEYS, attorneyById } from '../../_mock/signatures';
-import { useSignatures } from '../../signatures/hooks/useSignatures';
+import {
+  useCreateSignatureMutation,
+  useGetContractQuery,
+  useListApoderadosQuery,
+} from '../../signatures/api/signaturesApi';
 import { SignaturePad, type SignaturePadHandle } from './SignaturePad';
 
 interface SignatureCanvasViewProps {
@@ -25,24 +27,27 @@ interface SignatureCanvasViewProps {
 
 export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
   const router = useRouter();
-  const { role } = useRole();
-  const { ready, getById, sign } = useSignatures();
+
+  const {
+    data: contract,
+    isLoading: loadingContract,
+    isError: errorContract,
+  } = useGetContractQuery(contractId);
+  const { data: apoderados } = useListApoderadosQuery();
+  const [createSignature, { isLoading: saving }] = useCreateSignatureMutation();
 
   const [pad, setPad] = useState<SignaturePadHandle | null>(null);
   const [hasDrawing, setHasDrawing] = useState(false);
-  const [attorneyId, setAttorneyId] = useState<string>('');
+  const [apoderadoId, setApoderadoId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
-  const contract = useMemo(() => getById(contractId), [getById, contractId]);
+  const activeApoderados = (apoderados ?? []).filter((a) => a.isActive);
+  const selectedApoderado = activeApoderados.find((a) => String(a.id) === apoderadoId);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setError(null);
     if (!pad || pad.isEmpty()) {
       setError('Dibuja la firma antes de guardar.');
-      return;
-    }
-    if (!attorneyId) {
-      setError('Selecciona el apoderado asociado.');
       return;
     }
     const image = pad.toDataURL();
@@ -50,12 +55,17 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
       setError('No se pudo capturar la firma. Intenta de nuevo.');
       return;
     }
-    sign(contractId, {
-      image,
-      attorneyId,
-      signedBy: role ?? 'Firmante',
-    });
-    router.push(`/detalle/${contractId}`);
+    try {
+      await createSignature({
+        contractId: Number(contractId),
+        method: 'CANVAS',
+        signatureData: image,
+        apoderadoId: apoderadoId ? Number(apoderadoId) : undefined,
+      }).unwrap();
+      router.push(`/detalle/${contractId}`);
+    } catch {
+      setError('No se pudo registrar la firma. Verifica tus permisos e intenta de nuevo.');
+    }
   };
 
   return (
@@ -78,7 +88,13 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
             </Card>
           }
         >
-          {ready && !contract ? (
+          {loadingContract ? (
+            <Card>
+              <CardContent className="p-6">
+                <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+              </CardContent>
+            </Card>
+          ) : errorContract || !contract ? (
             <Card>
               <CardContent className="space-y-4 p-6">
                 <Badge variant="secondary">Contrato no encontrado</Badge>
@@ -89,12 +105,10 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 </div>
               </CardContent>
             </Card>
-          ) : null}
-
-          {ready && contract && contract.status !== 'SIGNING' ? (
+          ) : contract.status !== 'SIGNING' ? (
             <Card>
               <CardContent className="space-y-4 p-6">
-                <Badge variant="secondary">Este contrato ya está firmado</Badge>
+                <Badge variant="secondary">Este contrato no está disponible para firma</Badge>
                 <div>
                   <Button
                     variant="neutral"
@@ -106,34 +120,32 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 </div>
               </CardContent>
             </Card>
-          ) : null}
-
-          {ready && contract && contract.status === 'SIGNING' ? (
+          ) : (
             <Card>
               <CardHeader>
                 <CardTitle>{contract.folio}</CardTitle>
                 <CardDescription>
-                  {contract.provider} &middot; {contract.society}
+                  {contract.vendorName} &middot; {contract.society?.name ?? '—'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="attorney">Apoderado</Label>
+                  <Label htmlFor="attorney">Apoderado (opcional)</Label>
                   <Select
                     id="attorney"
-                    value={attorneyId}
-                    onChange={(e) => setAttorneyId(e.target.value)}
+                    value={apoderadoId}
+                    onChange={(e) => setApoderadoId(e.target.value)}
                   >
-                    <option value="">Selecciona un apoderado…</option>
-                    {ATTORNEYS.map((a) => (
+                    <option value="">Sin apoderado</option>
+                    {activeApoderados.map((a) => (
                       <option key={a.id} value={a.id}>
                         {a.name} — {a.legalPower}
                       </option>
                     ))}
                   </Select>
-                  {attorneyId ? (
+                  {selectedApoderado ? (
                     <p className="font-mono text-xs text-foreground/50">
-                      Poder legal: {attorneyById(attorneyId)?.legalPower}
+                      Poder legal: {selectedApoderado.legalPower}
                     </p>
                   ) : null}
                 </div>
@@ -150,13 +162,13 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 ) : null}
 
                 <div className="flex items-center justify-end gap-3">
-                  <Button type="button" onClick={handleSave} disabled={!hasDrawing || !attorneyId}>
-                    Guardar firma
+                  <Button type="button" onClick={handleSave} disabled={!hasDrawing || saving}>
+                    {saving ? 'Guardando…' : 'Guardar firma'}
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          ) : null}
+          )}
         </CookiePrivilegeGuard>
       </div>
     </main>

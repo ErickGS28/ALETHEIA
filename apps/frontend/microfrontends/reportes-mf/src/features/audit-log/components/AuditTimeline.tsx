@@ -1,29 +1,12 @@
 'use client';
 
 import { Badge } from '@aletheia/frontend-commons';
-import { ArrowRight } from 'lucide-react';
+import { auditActionLabel } from '../../../lib/contract-meta';
 import { formatDateTime } from '../../../lib/format';
-import { type AuditEntry, auditActionLabel, userName } from '../../_mock/reports';
+import type { AuditLog } from '../../contract-reports/api/reportsApi';
 
 interface AuditTimelineProps {
-  entries: AuditEntry[];
-}
-
-/** Renders the value-change diff (old → new) when the entry carries one. */
-function ValueChange({ entry }: { entry: AuditEntry }) {
-  if (entry.oldValue == null && entry.newValue == null) return null;
-  return (
-    <div className="mt-2 flex flex-wrap items-center gap-2 font-mono text-xs">
-      {entry.field && <span className="text-foreground/50">{entry.field}:</span>}
-      <span className="rounded-base border-2 border-border bg-secondary-background px-2 py-0.5 line-through opacity-70">
-        {entry.oldValue ?? '∅'}
-      </span>
-      <ArrowRight className="h-3 w-3 text-foreground/50" />
-      <span className="rounded-base border-2 border-border bg-main px-2 py-0.5 text-main-foreground">
-        {entry.newValue ?? '∅'}
-      </span>
-    </div>
-  );
+  entries: AuditLog[];
 }
 
 export function AuditTimeline({ entries }: AuditTimelineProps) {
@@ -50,9 +33,13 @@ export function AuditTimeline({ entries }: AuditTimelineProps) {
               </time>
             </div>
             <div className="mt-2 font-mono text-sm text-foreground/70">
-              Por {userName(entry.userId)}
+              Por Usuario #{entry.userId}
             </div>
-            <ValueChange entry={entry} />
+            {entry.detail && (
+              <div className="mt-2 rounded-base border-2 border-border bg-secondary-background px-2 py-1 font-mono text-xs text-foreground/70">
+                {entry.detail}
+              </div>
+            )}
           </div>
         </li>
       ))}

@@ -16,35 +16,93 @@ import {
   TableHeader,
   TableRow,
 } from '@aletheia/frontend-commons';
-import { Pencil, Plus, Users as UsersIcon } from 'lucide-react';
+import { Pencil, Plus, Trash2, Users as UsersIcon } from 'lucide-react';
 import { useState } from 'react';
-import { EmptyState } from '../../../components/ui/states';
-import { Switch } from '../../../components/ui/switch';
-import { type User, useUsers } from '../../_mock/admin';
+import { ConfirmDialog } from '../../../components/ui/confirm-dialog';
+import { EmptyState, ErrorState, LoadingState } from '../../../components/ui/states';
+import {
+  type User,
+  useCreateUserMutation,
+  useDeleteUserMutation,
+  useListAreasQuery,
+  useListUsersQuery,
+  useUpdateUserMutation,
+} from '../../admin/admin.api';
+import { apiErrorMessage } from '../../admin/error';
 import { UserFormModal, type UserFormValues } from './UserFormModal';
 
 const roleLabel = (id: string) => ROLES.find((r) => r.id === id)?.label ?? id;
 
 export function UsersSection() {
-  const { users, areas, create, update, toggleActive } = useUsers();
+  const { data: users = [], isLoading, isError, refetch } = useListUsersQuery();
+  const { data: areas = [] } = useListAreasQuery();
+  const [createUser, createState] = useCreateUserMutation();
+  const [updateUser, updateState] = useUpdateUserMutation();
+  const [deleteUser] = useDeleteUserMutation();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
+  const [toDelete, setToDelete] = useState<User | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const areaName = (id: string) => areas.find((a) => a.id === id)?.name ?? '—';
+  const areaName = (id?: number) =>
+    id == null ? '—' : (areas.find((a) => a.id === id)?.name ?? '—');
 
   const openCreate = () => {
     setEditing(null);
+    setFormError(null);
     setModalOpen(true);
   };
   const openEdit = (user: User) => {
     setEditing(user);
+    setFormError(null);
     setModalOpen(true);
   };
 
-  const handleSubmit = (values: UserFormValues) => {
-    if (editing) update(editing.id, values);
-    else create(values);
-    setModalOpen(false);
+  const handleSubmit = async (values: UserFormValues) => {
+    setFormError(null);
+    try {
+      if (editing) {
+        // El gateway (UpdateUserDto) NO acepta `email`: omitirlo del PATCH.
+        // `areaId` se envía como `null` cuando se elige "Sin área" para limpiarlo.
+        await updateUser({
+          id: editing.id,
+          body: {
+            name: values.name,
+            lastName: values.lastName,
+            roles: values.roles,
+            areaId: values.areaId ?? null,
+            isActive: values.isActive,
+          },
+        }).unwrap();
+      } else {
+        await createUser({
+          email: values.email,
+          name: values.name,
+          lastName: values.lastName,
+          password: values.password ?? '',
+          roles: values.roles,
+          areaId: values.areaId,
+        }).unwrap();
+      }
+      setModalOpen(false);
+    } catch (err) {
+      setFormError(apiErrorMessage(err, 'No se pudo guardar el usuario.'));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setActionError(null);
+    try {
+      await deleteUser(toDelete.id).unwrap();
+      setToDelete(null);
+      refetch();
+    } catch (err) {
+      setToDelete(null);
+      setActionError(apiErrorMessage(err, 'No se pudo eliminar el usuario.'));
+    }
   };
 
   return (
@@ -61,7 +119,16 @@ export function UsersSection() {
         </Button>
       </CardHeader>
       <CardContent>
-        {users.length === 0 ? (
+        {actionError ? (
+          <Badge variant="destructive" className="mb-4 block w-full py-2 text-center normal-case">
+            {actionError}
+          </Badge>
+        ) : null}
+        {isLoading ? (
+          <LoadingState message="Cargando usuarios…" />
+        ) : isError ? (
+          <ErrorState message="No se pudieron cargar los usuarios." onRetry={() => refetch()} />
+        ) : users.length === 0 ? (
           <EmptyState
             icon={<UsersIcon className="h-5 w-5" />}
             title="Sin usuarios"
@@ -87,7 +154,9 @@ export function UsersSection() {
             <TableBody>
               {users.map((u) => (
                 <TableRow key={u.id}>
-                  <TableCell className="font-base">{u.name}</TableCell>
+                  <TableCell className="font-base">
+                    {u.name} {u.lastName}
+                  </TableCell>
                   <TableCell className="text-foreground/70">{u.email}</TableCell>
                   <TableCell>{areaName(u.areaId)}</TableCell>
                   <TableCell>
@@ -100,21 +169,24 @@ export function UsersSection() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="flex items-center gap-2">
-                      <Switch
-                        checked={u.active}
-                        onCheckedChange={() => toggleActive(u.id)}
-                        aria-label={u.active ? 'Desactivar usuario' : 'Activar usuario'}
-                      />
-                      <Badge variant={u.active ? 'default' : 'neutral'}>
-                        {u.active ? 'Activo' : 'Inactivo'}
-                      </Badge>
-                    </span>
+                    <Badge variant={u.isActive ? 'default' : 'neutral'}>
+                      {u.isActive ? 'Activo' : 'Inactivo'}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="neutral" size="sm" onClick={() => openEdit(u)}>
-                      <Pencil /> Editar
-                    </Button>
+                    <span className="flex items-center justify-end gap-1">
+                      <Button variant="neutral" size="sm" onClick={() => openEdit(u)}>
+                        <Pencil /> Editar
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => setToDelete(u)}
+                        aria-label="Eliminar usuario"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}
@@ -127,8 +199,22 @@ export function UsersSection() {
         open={modalOpen}
         initial={editing}
         areas={areas}
+        submitting={createState.isLoading || updateState.isLoading}
+        error={formError}
         onClose={() => setModalOpen(false)}
         onSubmit={handleSubmit}
+      />
+
+      <ConfirmDialog
+        open={toDelete !== null}
+        title="Eliminar usuario"
+        description={
+          toDelete ? `Se eliminará a "${toDelete.name} ${toDelete.lastName}".` : undefined
+        }
+        confirmLabel="Eliminar"
+        destructive
+        onConfirm={handleDelete}
+        onCancel={() => setToDelete(null)}
       />
     </Card>
   );

@@ -12,17 +12,29 @@ import {
 import { ArrowLeft, Pencil, RotateCcw, Send, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import { adaptAuditLog, adaptContract, adaptTransition } from '../../_shared/api/adapters';
 import {
-  type Contract,
-  PROVIDER_TYPE_LABEL,
-  computeSla,
-  useContracts,
-} from '../../_mock/contracts';
+  useCancelContractMutation,
+  useGetAuditQuery,
+  useGetContractQuery,
+  useGetWorkflowQuery,
+  useRecoverContractMutation,
+  useSubmitContractMutation,
+} from '../../_shared/api/contracts-api';
 import { CancelContractModal } from '../../_shared/components/CancelContractModal';
+import { ErrorBanner } from '../../_shared/components/ErrorBanner';
 import { PageHeader } from '../../_shared/components/PageHeader';
 import { RequiredDocsList } from '../../_shared/components/RequiredDocsList';
 import { SlaIndicator } from '../../_shared/components/SlaIndicator';
 import { StatusBadge } from '../../_shared/components/StatusBadge';
+import {
+  type AuditEntry,
+  PROVIDER_TYPE_LABEL,
+  type SlaLevel,
+  computeSla,
+  slaFromColor,
+} from '../../_shared/domain/contract';
+import { getErrorMessage } from '../../_shared/lib/error';
 import { formatDate } from '../../_shared/lib/format';
 import { AuditTimeline } from './AuditTimeline';
 
@@ -39,13 +51,90 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 
 export function ContractDetailView({ contractId }: { contractId: string }) {
   const router = useRouter();
-  const { ready, getById, submitContract, cancelContract, recoverContract } = useContracts();
   const { can } = useRole();
   const [cancelOpen, setCancelOpen] = React.useState(false);
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
-  const contract = getById(contractId) as Contract | undefined;
+  const numericId = Number(contractId);
+  const validId = !Number.isNaN(numericId);
+  const canViewReports = can('REPORTS_VIEW');
 
-  if (!ready) {
+  const {
+    data: backendContract,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetContractQuery(numericId, { skip: !validId });
+
+  // Workflow → timeline + real SLA (accesible para todos los roles): es la
+  // fuente principal de la bitácora. El audit log (GET /reports/audit/:id)
+  // exige REPORTS_VIEW, así que solo se consulta cuando el rol lo permite;
+  // de lo contrario el SOLICITANTE recibe 403 y la bitácora se rompe.
+  const { data: workflow } = useGetWorkflowQuery(numericId, { skip: !validId });
+  const { data: auditLog } = useGetAuditQuery(numericId, {
+    skip: !validId || !canViewReports,
+  });
+
+  const [submitContract] = useSubmitContractMutation();
+  const [cancelContract] = useCancelContractMutation();
+  const [recoverContract] = useRecoverContractMutation();
+
+  const handleSubmit = async (id: number) => {
+    setActionError(null);
+    try {
+      await submitContract(id).unwrap();
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'No se pudo enviar la solicitud a revisión.'));
+    }
+  };
+
+  const handleRecover = async (id: number) => {
+    setActionError(null);
+    try {
+      await recoverContract(id).unwrap();
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'No se pudo recuperar la solicitud.'));
+    }
+  };
+
+  const handleCancel = async (id: number, reason: string) => {
+    setActionError(null);
+    try {
+      await cancelContract({ id, reason }).unwrap();
+      setCancelOpen(false);
+    } catch (error) {
+      setActionError(getErrorMessage(error, 'No se pudo cancelar la solicitud.'));
+    }
+  };
+
+  if (!validId || isError) {
+    return (
+      <main className="bg-grid min-h-screen p-6">
+        <div className="mx-auto max-w-4xl space-y-6">
+          <PageHeader title="Solicitud" />
+          <Card>
+            <CardContent className="space-y-4 p-6">
+              <p className="font-mono text-sm text-foreground/70">
+                {validId ? 'No se pudo cargar la solicitud.' : 'Solicitud no encontrada.'}
+              </p>
+              <div className="flex gap-2">
+                {validId && (
+                  <Button variant="neutral" size="sm" onClick={() => refetch()}>
+                    Reintentar
+                  </Button>
+                )}
+                <Button variant="neutral" size="sm" onClick={() => router.push('/')}>
+                  <ArrowLeft className="h-4 w-4" /> Volver al listado
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
+
+  if (isLoading || !backendContract) {
     return (
       <main className="bg-grid min-h-screen p-6">
         <div className="mx-auto max-w-4xl">
@@ -55,23 +144,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     );
   }
 
-  if (!contract) {
-    return (
-      <main className="bg-grid min-h-screen p-6">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <PageHeader title="Solicitud" />
-          <Card>
-            <CardContent className="space-y-4 p-6">
-              <p className="font-mono text-sm text-foreground/70">Solicitud no encontrada.</p>
-              <Button variant="neutral" size="sm" onClick={() => router.push('/')}>
-                <ArrowLeft className="h-4 w-4" /> Volver al listado
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-    );
-  }
+  const contract = adaptContract(backendContract);
 
   const isDraft = contract.status === 'DRAFT';
   const isCancelled = contract.status === 'CANCELLED';
@@ -86,7 +159,16 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
   const canRecover = can('CONTRACT_RECOVER') && isCancelled;
   const hasActions = canEdit || canSubmit || canCancel || canRecover;
 
-  const sla = computeSla(contract);
+  // Real SLA comes from the workflow; fall back to the time-based heuristic.
+  const sla: SlaLevel = workflow?.sla ? slaFromColor(workflow.sla.color) : computeSla(contract);
+
+  // Bitácora: workflow transitions are the primary source (accesible para todos
+  // los roles). El audit log solo se usa como complemento cuando el rol tiene
+  // REPORTS_VIEW y el workflow aún no tiene transiciones.
+  const timeline: AuditEntry[] =
+    workflow && workflow.transitions.length > 0
+      ? workflow.transitions.map(adaptTransition)
+      : (auditLog ?? []).map(adaptAuditLog);
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -127,21 +209,37 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
               </Button>
             )}
             {canSubmit && (
-              <Button size="sm" onClick={() => submitContract(contract.id)}>
+              <Button size="sm" onClick={() => handleSubmit(contract.numericId)}>
                 <Send className="h-4 w-4" /> Enviar a revisión
               </Button>
             )}
             {canRecover && (
-              <Button variant="secondary" size="sm" onClick={() => recoverContract(contract.id)}>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleRecover(contract.numericId)}
+              >
                 <RotateCcw className="h-4 w-4" /> Recuperar
               </Button>
             )}
             {canCancel && (
-              <Button variant="destructive" size="sm" onClick={() => setCancelOpen(true)}>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  setActionError(null);
+                  setCancelOpen(true);
+                }}
+              >
                 <XCircle className="h-4 w-4" /> Cancelar
               </Button>
             )}
           </div>
+        )}
+
+        {/* Backend errors (403/400) from the actions above */}
+        {actionError && (
+          <ErrorBanner message={actionError} onDismiss={() => setActionError(null)} />
         )}
 
         <div className="grid gap-6 lg:grid-cols-5">
@@ -156,12 +254,15 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
                 <InfoRow label="Sociedad">{contract.society}</InfoRow>
                 <InfoRow label="Área requirente">{contract.area}</InfoRow>
                 <InfoRow label="Proveedor">{contract.providerName}</InfoRow>
-                <InfoRow label="Email">{contract.providerEmail}</InfoRow>
+                <InfoRow label="Email">{contract.providerEmail || '—'}</InfoRow>
                 <InfoRow label="Tipo de proveedor">
                   {PROVIDER_TYPE_LABEL[contract.providerType]}
                 </InfoRow>
                 <InfoRow label="Creada">{formatDate(contract.createdAt)}</InfoRow>
                 <InfoRow label="Actualizada">{formatDate(contract.updatedAt)}</InfoRow>
+                {contract.cancelReason && (
+                  <InfoRow label="Motivo de cancelación">{contract.cancelReason}</InfoRow>
+                )}
               </CardContent>
             </Card>
 
@@ -184,7 +285,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
                 <CardDescription>Historial cronológico</CardDescription>
               </CardHeader>
               <CardContent>
-                <AuditTimeline entries={contract.log} />
+                <AuditTimeline entries={timeline} />
               </CardContent>
             </Card>
           </div>
@@ -194,10 +295,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
       <CancelContractModal
         contract={cancelOpen ? contract : null}
         onClose={() => setCancelOpen(false)}
-        onConfirm={(reason) => {
-          cancelContract(contract.id, reason);
-          setCancelOpen(false);
-        }}
+        onConfirm={(reason) => handleCancel(contract.numericId, reason)}
       />
     </main>
   );

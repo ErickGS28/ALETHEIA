@@ -9,12 +9,18 @@ import {
   TableHeader,
   TableRow,
 } from '@aletheia/frontend-commons';
+import { statusMeta } from '../../../lib/contract-meta';
 import { formatDate } from '../../../lib/format';
-import { type Contract, areaName, statusMeta, userName } from '../../_mock/reports';
+import type { Contract } from '../api/reportsApi';
 
 interface ContractsTableProps {
   contracts: Contract[];
 }
+
+const PROVIDER_LABELS: Record<Contract['providerType'], string> = {
+  FISICA: 'Persona física',
+  MORAL: 'Persona moral',
+};
 
 export function ContractsTable({ contracts }: ContractsTableProps) {
   if (contracts.length === 0) {
@@ -35,7 +41,7 @@ export function ContractsTable({ contracts }: ContractsTableProps) {
             <TableHead>Proveedor</TableHead>
             <TableHead>Estado</TableHead>
             <TableHead>Área</TableHead>
-            <TableHead>Responsable</TableHead>
+            <TableHead>Tipo</TableHead>
             <TableHead>Creado</TableHead>
           </TableRow>
         </TableHeader>
@@ -50,8 +56,10 @@ export function ContractsTable({ contracts }: ContractsTableProps) {
                 <TableCell>
                   <Badge variant={meta.variant}>{meta.label}</Badge>
                 </TableCell>
-                <TableCell>{areaName(c.areaId)}</TableCell>
-                <TableCell>{userName(c.responsibleId)}</TableCell>
+                <TableCell>{c.area?.name ?? `Área #${c.areaId}`}</TableCell>
+                <TableCell className="text-foreground/70">
+                  {PROVIDER_LABELS[c.providerType]}
+                </TableCell>
                 <TableCell className="whitespace-nowrap text-foreground/70">
                   {formatDate(c.createdAt)}
                 </TableCell>

@@ -18,31 +18,33 @@ import { Field } from '../../../components/ui/field';
 import { RadioCards } from '../../../components/ui/radio-cards';
 import { Select } from '../../../components/ui/select';
 import {
-  AREAS,
-  PROVIDER_TYPE_LABEL,
-  type ProviderType,
-  SOCIETIES,
-  useContracts,
-} from '../../_mock/contracts';
+  useCreateContractMutation,
+  useGetContractQuery,
+  useListAreasQuery,
+  useListSocietiesQuery,
+  useUpdateContractMutation,
+} from '../../_shared/api/contracts-api';
+import { toBackendProviderType } from '../../_shared/api/types';
 import { PageHeader } from '../../_shared/components/PageHeader';
 import { RequiredDocsList } from '../../_shared/components/RequiredDocsList';
+import { PROVIDER_TYPE_LABEL, type ProviderType } from '../../_shared/domain/contract';
 
 interface FormState {
   title: string;
-  society: string;
+  societyId: number | '';
   providerName: string;
   providerEmail: string;
   providerType: ProviderType;
-  area: string;
+  areaId: number | '';
 }
 
 const EMPTY: FormState = {
   title: '',
-  society: SOCIETIES[0],
+  societyId: '',
   providerName: '',
   providerEmail: '',
   providerType: 'PERSONA_FISICA',
-  area: AREAS[0],
+  areaId: '',
 };
 
 type Errors = Partial<Record<keyof FormState, string>>;
@@ -56,55 +58,82 @@ function validate(form: FormState): Errors {
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.providerEmail.trim())) {
     errors.providerEmail = 'Email inválido.';
   }
+  if (form.societyId === '') errors.societyId = 'Selecciona una sociedad.';
+  if (form.areaId === '') errors.areaId = 'Selecciona un área.';
   return errors;
 }
 
 export function CreateContractView() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get('id');
+  const editIdParam = searchParams.get('id');
+  const editId = editIdParam ? Number(editIdParam) : null;
+  const isEdit = editId != null && !Number.isNaN(editId);
 
-  const { ready, getById, createContract, updateContract, nextFolioPreview } = useContracts();
   const { can } = useRole();
+
+  const { data: societies } = useListSocietiesQuery();
+  const { data: areas } = useListAreasQuery();
+  const {
+    data: existing,
+    isLoading: loadingExisting,
+    isError: errorExisting,
+  } = useGetContractQuery(editId as number, { skip: !isEdit });
+
+  const [createContract, { isLoading: creating }] = useCreateContractMutation();
+  const [updateContract, { isLoading: updating }] = useUpdateContractMutation();
 
   const [form, setForm] = React.useState<FormState>(EMPTY);
   const [errors, setErrors] = React.useState<Errors>({});
   const [loaded, setLoaded] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
-  const existing = editId ? getById(editId) : undefined;
-  const isEdit = Boolean(editId);
-
-  // Hydrate the form in edit mode once the store is ready.
+  // Hydrate the form in edit mode once the contract loads.
   React.useEffect(() => {
-    if (!ready) return;
     if (isEdit && existing && !loaded) {
       setForm({
         title: existing.title,
-        society: existing.society,
-        providerName: existing.providerName,
-        providerEmail: existing.providerEmail,
-        providerType: existing.providerType,
-        area: existing.area,
+        societyId: existing.societyId,
+        providerName: existing.vendorName,
+        providerEmail: existing.vendorEmail ?? '',
+        providerType: existing.providerType === 'FISICA' ? 'PERSONA_FISICA' : 'PERSONA_MORAL',
+        areaId: existing.areaId,
       });
       setLoaded(true);
     }
-  }, [ready, isEdit, existing, loaded]);
+  }, [isEdit, existing, loaded]);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submitting = creating || updating;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     const v = validate(form);
     setErrors(v);
     if (Object.keys(v).length > 0) return;
 
-    if (isEdit && existing) {
-      updateContract(existing.id, form);
-      router.push(`/${existing.id}`);
-    } else {
-      const created = createContract(form);
-      router.push(`/${created.id}`);
+    const body = {
+      title: form.title.trim(),
+      vendorName: form.providerName.trim(),
+      vendorEmail: form.providerEmail.trim() || undefined,
+      providerType: toBackendProviderType(form.providerType),
+      areaId: form.areaId as number,
+      societyId: form.societyId as number,
+    };
+
+    try {
+      if (isEdit && existing) {
+        await updateContract({ id: existing.id, body }).unwrap();
+        router.push(`/${existing.id}`);
+      } else {
+        const created = await createContract(body).unwrap();
+        router.push(`/${created.id}`);
+      }
+    } catch {
+      setSubmitError('No se pudo guardar la solicitud. Intenta de nuevo.');
     }
   };
 
@@ -124,7 +153,17 @@ export function CreateContractView() {
     );
   }
 
-  if (isEdit && ready && (!existing || existing.status !== 'DRAFT')) {
+  if (isEdit && loadingExisting) {
+    return (
+      <main className="bg-grid min-h-screen p-6">
+        <div className="mx-auto max-w-2xl">
+          <p className="font-mono text-sm text-foreground/40">Cargando…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (isEdit && (errorExisting || !existing || existing.status !== 'DRAFT')) {
     return (
       <main className="bg-grid min-h-screen p-6">
         <div className="mx-auto max-w-2xl space-y-6">
@@ -132,7 +171,7 @@ export function CreateContractView() {
           <Card>
             <CardContent className="space-y-4 p-6">
               <p className="font-mono text-sm text-foreground/70">
-                {existing
+                {existing && existing.status !== 'DRAFT'
                   ? 'Solo las solicitudes en estado Borrador pueden editarse.'
                   : 'Solicitud no encontrada.'}
               </p>
@@ -164,7 +203,10 @@ export function CreateContractView() {
             <CardHeader>
               <CardTitle>Datos de la solicitud</CardTitle>
               <CardDescription>
-                Folio: {isEdit ? existing?.folio : nextFolioPreview()} · Estado inicial: Borrador
+                {isEdit
+                  ? `Folio: ${existing?.folio}`
+                  : 'El folio se asigna automáticamente al crear'}{' '}
+                · Estado inicial: Borrador
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
@@ -177,15 +219,18 @@ export function CreateContractView() {
                 />
               </Field>
 
-              <Field label="Sociedad" htmlFor="society" required>
+              <Field label="Sociedad" htmlFor="society" required error={errors.societyId}>
                 <Select
                   id="society"
-                  value={form.society}
-                  onChange={(e) => set('society', e.target.value)}
+                  value={form.societyId === '' ? '' : String(form.societyId)}
+                  onChange={(e) =>
+                    set('societyId', e.target.value === '' ? '' : Number(e.target.value))
+                  }
                 >
-                  {SOCIETIES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
+                  <option value="">Selecciona una sociedad…</option>
+                  {(societies ?? []).map((s) => (
+                    <option key={s.id} value={String(s.id)}>
+                      {s.name}
                     </option>
                   ))}
                 </Select>
@@ -242,11 +287,18 @@ export function CreateContractView() {
                 />
               </Field>
 
-              <Field label="Área requirente" htmlFor="area" required>
-                <Select id="area" value={form.area} onChange={(e) => set('area', e.target.value)}>
-                  {AREAS.map((a) => (
-                    <option key={a} value={a}>
-                      {a}
+              <Field label="Área requirente" htmlFor="area" required error={errors.areaId}>
+                <Select
+                  id="area"
+                  value={form.areaId === '' ? '' : String(form.areaId)}
+                  onChange={(e) =>
+                    set('areaId', e.target.value === '' ? '' : Number(e.target.value))
+                  }
+                >
+                  <option value="">Selecciona un área…</option>
+                  {(areas ?? []).map((a) => (
+                    <option key={a.id} value={String(a.id)}>
+                      {a.name}
                     </option>
                   ))}
                 </Select>
@@ -266,11 +318,19 @@ export function CreateContractView() {
             </CardContent>
           </Card>
 
+          {submitError && (
+            <p className="rounded-base border-2 border-border bg-red-100 px-3 py-2 font-mono text-sm text-red-700">
+              {submitError}
+            </p>
+          )}
+
           <div className="flex justify-end gap-2">
             <Button type="button" variant="neutral" onClick={() => router.push('/')}>
               Cancelar
             </Button>
-            <Button type="submit">{isEdit ? 'Guardar cambios' : 'Crear solicitud'}</Button>
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear solicitud'}
+            </Button>
           </div>
         </form>
       </div>

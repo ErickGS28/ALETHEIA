@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Badge,
   Button,
   Card,
   CardContent,
@@ -9,56 +8,66 @@ import {
   CardTitle,
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@aletheia/frontend-commons';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { EmptyState } from '../../../components/EmptyState';
 import { PageShell } from '../../../components/PageShell';
 import { GaugeIcon } from '../../../components/ui/icons';
-import { SlaBadge, SlaIndicator } from '../../../components/ui/sla-indicator';
-import { SLA_TRACKED_STATUSES } from '../../_mock/workflow';
-import { BASE_NOW } from '../../_shared/now';
-import { useWorkflow } from '../../_shared/useWorkflow';
-import {
-  STATUS_LABELS,
-  type SlaLevel,
-  computeSla,
-  formatDuration,
-} from '../../_shared/workflow-rules';
+import { errorMessage, useWorkflow } from '../../_shared/useWorkflow';
+import { SLA_TRACKED_STATUSES, type SlaLevel } from '../../_shared/workflow-rules';
+import { SlaRow } from './SlaRow';
 import { SlaSummary } from './SlaSummary';
 
 export function SlaDashboard() {
   const wf = useWorkflow();
 
-  const rows = useMemo(() => {
-    if (!wf.hydrated) return [];
-    return (
-      wf
-        .listByStatus(SLA_TRACKED_STATUSES)
-        .map((c) => ({ contract: c, sla: computeSla(c.status, c.enteredAt, BASE_NOW) }))
-        // worst SLA first (highest consumed ratio)
-        .sort((a, b) => (b.sla.ratio ?? 0) - (a.sla.ratio ?? 0))
-    );
-  }, [wf]);
+  // Resolved SLA level per contract (reported by each SlaRow as its
+  // /workflow/:id query settles), used to aggregate the color summary.
+  const [levels, setLevels] = useState<Record<string, SlaLevel>>({});
+  const onLevel = useCallback((id: string, level: SlaLevel) => {
+    setLevels((prev) => (prev[id] === level ? prev : { ...prev, [id]: level }));
+  }, []);
+
+  const rows = useMemo(() => (wf.hydrated ? wf.listByStatus(SLA_TRACKED_STATUSES) : []), [wf]);
 
   const counts = useMemo(() => {
     const acc: Record<SlaLevel, number> = { green: 0, yellow: 0, red: 0, none: 0 };
-    for (const r of rows) acc[r.sla.level] += 1;
+    for (const r of rows) {
+      const level = levels[r.id] ?? 'none';
+      acc[level] += 1;
+    }
     return acc;
-  }, [rows]);
+  }, [rows, levels]);
 
   return (
     <PageShell
       title="Semáforo SLA"
-      subtitle={`Tiempo de cada contrato en su etapa actual frente al SLA (base ${BASE_NOW.toLocaleDateString('es-MX')})`}
+      subtitle="Tiempo de cada contrato en su etapa actual frente al SLA (en tiempo real)"
       active="sla"
+      actions={
+        <Button
+          variant="neutral"
+          size="sm"
+          disabled={wf.isFetching}
+          onClick={() => wf.refetch()}
+          title="Actualizar"
+        >
+          {wf.isFetching ? 'Actualizando…' : 'Actualizar'}
+        </Button>
+      }
     >
       {!wf.hydrated ? (
         <EmptyState title="Cargando indicadores…" />
+      ) : wf.isError ? (
+        <EmptyState
+          icon={<GaugeIcon className="h-10 w-10" />}
+          title="No se pudieron cargar los indicadores"
+          description={errorMessage(wf.error)}
+        />
       ) : rows.length === 0 ? (
         <EmptyState
           icon={<GaugeIcon className="h-10 w-10" />}
@@ -89,31 +98,8 @@ export function SlaDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {rows.map(({ contract, sla }) => (
-                    <TableRow key={contract.id}>
-                      <TableCell>
-                        <Link
-                          href={`/timeline?contract=${contract.id}`}
-                          className="font-heading hover:underline"
-                        >
-                          {contract.folio}
-                        </Link>
-                        <span className="block text-xs text-foreground/50">
-                          {contract.provider}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{STATUS_LABELS[contract.status]}</Badge>
-                      </TableCell>
-                      <TableCell>{formatDuration(sla.elapsedHours)}</TableCell>
-                      <TableCell>{sla.slaHours} h</TableCell>
-                      <TableCell className="min-w-40">
-                        <SlaIndicator sla={sla} />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <SlaBadge sla={sla} />
-                      </TableCell>
-                    </TableRow>
+                  {rows.map((contract) => (
+                    <SlaRow key={contract.id} contract={contract} onLevel={onLevel} />
                   ))}
                 </TableBody>
               </Table>
@@ -122,7 +108,8 @@ export function SlaDashboard() {
 
           <p className="font-mono text-xs text-foreground/50">
             Verde: menos del 60% del SLA consumido · Amarillo: entre 60% y 100% · Rojo: SLA superado
-            (100% o más). El cálculo usa el momento en que el contrato entró a su etapa actual.
+            (100% o más). El color lo calcula el servicio de flujo según el tiempo en la etapa
+            actual.
           </p>
 
           <div>

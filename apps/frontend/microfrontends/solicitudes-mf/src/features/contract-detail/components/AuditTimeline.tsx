@@ -1,7 +1,7 @@
 'use client';
 
 import { Clock } from 'lucide-react';
-import type { AuditEntry } from '../../_mock/contracts';
+import type { AuditEntry } from '../../_shared/domain/contract';
 import { formatDateTime } from '../../_shared/lib/format';
 
 // Chronological audit trail (bitácora). Most recent last.

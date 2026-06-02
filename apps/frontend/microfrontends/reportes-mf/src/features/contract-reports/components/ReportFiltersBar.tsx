@@ -3,26 +3,32 @@
 import { Button } from '@aletheia/frontend-commons';
 import { X } from 'lucide-react';
 import { Select } from '../../../components/ui/select';
-import { AREAS, CONTRACT_STATUSES, USERS } from '../../_mock/reports';
-import type { ReportFilters } from '../hooks/useReports';
+import { CONTRACT_STATUSES } from '../../../lib/contract-meta';
+import type { AreaOption, ReportFilters } from '../hooks/useReports';
 
 interface ReportFiltersBarProps {
   filters: ReportFilters;
   hasActiveFilters: boolean;
+  areaOptions: AreaOption[];
   onChange: <K extends keyof ReportFilters>(key: K, value: ReportFilters[K]) => void;
   onReset: () => void;
 }
 
 const STATUS_OPTIONS = CONTRACT_STATUSES.map((s) => ({ value: s.id, label: s.label }));
-const AREA_OPTIONS = AREAS.map((a) => ({ value: a.id, label: a.name }));
-const USER_OPTIONS = USERS.map((u) => ({ value: u.id, label: u.name }));
+const PROVIDER_OPTIONS = [
+  { value: 'FISICA', label: 'Persona física' },
+  { value: 'MORAL', label: 'Persona moral' },
+];
 
 export function ReportFiltersBar({
   filters,
   hasActiveFilters,
+  areaOptions,
   onChange,
   onReset,
 }: ReportFiltersBarProps) {
+  const areaSelectOptions = areaOptions.map((a) => ({ value: a.id, label: a.name }));
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <label htmlFor="filter-status" className="flex flex-col gap-1.5">
@@ -44,23 +50,25 @@ export function ReportFiltersBar({
         </span>
         <Select
           id="filter-area"
-          options={AREA_OPTIONS}
+          options={areaSelectOptions}
           placeholder="Todas"
           value={filters.areaId}
           onChange={(e) => onChange('areaId', e.target.value)}
         />
       </label>
 
-      <label htmlFor="filter-responsible" className="flex flex-col gap-1.5">
+      <label htmlFor="filter-provider" className="flex flex-col gap-1.5">
         <span className="font-heading text-xs uppercase tracking-widest text-foreground/60">
-          Responsable
+          Tipo de proveedor
         </span>
         <Select
-          id="filter-responsible"
-          options={USER_OPTIONS}
+          id="filter-provider"
+          options={PROVIDER_OPTIONS}
           placeholder="Todos"
-          value={filters.responsibleId}
-          onChange={(e) => onChange('responsibleId', e.target.value)}
+          value={filters.providerType}
+          onChange={(e) =>
+            onChange('providerType', e.target.value as ReportFilters['providerType'])
+          }
         />
       </label>
 

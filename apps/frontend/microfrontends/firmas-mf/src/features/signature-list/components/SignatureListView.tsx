@@ -18,8 +18,7 @@ import {
   useRole,
 } from '@aletheia/frontend-commons';
 import { useRouter } from 'next/navigation';
-import { attorneyById } from '../../_mock/signatures';
-import { useSignatures } from '../../signatures/hooks/useSignatures';
+import { useListContractsQuery } from '../../signatures/api/signaturesApi';
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('es-MX', {
@@ -31,7 +30,20 @@ function formatDate(iso: string): string {
 export function SignatureListView() {
   const router = useRouter();
   const { role, privileges } = useRole();
-  const { ready, listToSign, listSigned } = useSignatures();
+
+  const {
+    data: toSign,
+    isLoading: loadingToSign,
+    isError: errorToSign,
+  } = useListContractsQuery({ status: 'SIGNING' });
+  const {
+    data: signed,
+    isLoading: loadingSigned,
+    isError: errorSigned,
+  } = useListContractsQuery({ status: 'SIGNED' });
+
+  const listToSign = toSign ?? [];
+  const listSigned = signed ?? [];
 
   return (
     <main className="bg-grid min-h-screen p-6">
@@ -57,8 +69,10 @@ export function SignatureListView() {
             <CardDescription>Contratos en estado SIGNING pendientes de tu firma.</CardDescription>
           </CardHeader>
           <CardContent>
-            {!ready ? (
+            {loadingToSign ? (
               <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+            ) : errorToSign ? (
+              <Badge variant="destructive">No se pudieron cargar los contratos por firmar.</Badge>
             ) : listToSign.length === 0 ? (
               <p className="font-mono text-sm text-foreground/50">
                 No hay contratos pendientes de firma.
@@ -77,8 +91,8 @@ export function SignatureListView() {
                   {listToSign.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-heading">{c.folio}</TableCell>
-                      <TableCell>{c.provider}</TableCell>
-                      <TableCell className="text-foreground/60">{c.society}</TableCell>
+                      <TableCell>{c.vendorName}</TableCell>
+                      <TableCell className="text-foreground/60">{c.society?.name ?? '—'}</TableCell>
                       <TableCell className="text-right">
                         <CookiePrivilegeGuard
                           privilege="CONTRACT_SIGN"
@@ -101,11 +115,13 @@ export function SignatureListView() {
         <Card>
           <CardHeader>
             <CardTitle>Contratos firmados</CardTitle>
-            <CardDescription>Historial de firmas registradas.</CardDescription>
+            <CardDescription>Historial de contratos en estado SIGNED.</CardDescription>
           </CardHeader>
           <CardContent>
-            {!ready ? (
+            {loadingSigned ? (
               <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+            ) : errorSigned ? (
+              <Badge variant="destructive">No se pudieron cargar los contratos firmados.</Badge>
             ) : listSigned.length === 0 ? (
               <p className="font-mono text-sm text-foreground/50">Aún no hay firmas registradas.</p>
             ) : (
@@ -114,8 +130,8 @@ export function SignatureListView() {
                   <TableRow>
                     <TableHead>Folio</TableHead>
                     <TableHead>Proveedor</TableHead>
-                    <TableHead>Apoderado</TableHead>
-                    <TableHead>Fecha</TableHead>
+                    <TableHead>Sociedad</TableHead>
+                    <TableHead>Actualizado</TableHead>
                     <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -123,12 +139,10 @@ export function SignatureListView() {
                   {listSigned.map((c) => (
                     <TableRow key={c.id}>
                       <TableCell className="font-heading">{c.folio}</TableCell>
-                      <TableCell>{c.provider}</TableCell>
+                      <TableCell>{c.vendorName}</TableCell>
+                      <TableCell className="text-foreground/60">{c.society?.name ?? '—'}</TableCell>
                       <TableCell className="text-foreground/60">
-                        {attorneyById(c.signature?.attorneyId)?.name ?? '—'}
-                      </TableCell>
-                      <TableCell className="text-foreground/60">
-                        {c.signature ? formatDate(c.signature.signedAt) : '—'}
+                        {formatDate(c.updatedAt)}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button

@@ -1,5 +1,10 @@
 // @aletheia/frontend-commons — código compartido del frontend (SOFEA).
 
+// Capa de API (RTK Query) — base compartida, sesión cross-zone y provider por MF
+export * from './api/base-api';
+export * from './api/session';
+export * from './api/ApiProvider';
+
 // Utilidades
 export * from './utils/cn';
 export * from './utils/sanitize';
