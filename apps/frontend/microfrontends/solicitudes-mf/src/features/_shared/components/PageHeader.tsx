@@ -21,7 +21,7 @@ export function PageHeader({
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="space-y-1">
         <h1 className="font-heading text-4xl leading-none">{title}</h1>
-        {subtitle && <p className="font-mono text-sm text-foreground/60">{subtitle}</p>}
+        {subtitle && <p className="font-sans text-sm text-foreground/60">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-2">
         <Badge variant="secondary">{roleLabel}</Badge>

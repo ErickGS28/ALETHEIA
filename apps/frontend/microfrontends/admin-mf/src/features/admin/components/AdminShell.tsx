@@ -57,12 +57,12 @@ export function AdminShell() {
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-4xl font-heading">Administración</h1>
-            <p className="font-mono text-sm text-foreground/60">
+            <p className="font-sans text-sm text-foreground/60">
               Configuración del sistema CLM (HU-20 a HU-23).
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 font-mono text-sm text-foreground/70">
+            <span className="flex items-center gap-2 font-sans text-sm text-foreground/70">
               <span>Rol:</span>
               <Badge variant="default">{role ?? 'sin sesión'}</Badge>
               <span className="text-foreground/40">·</span>

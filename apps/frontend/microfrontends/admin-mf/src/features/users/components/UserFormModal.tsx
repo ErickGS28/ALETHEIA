@@ -144,7 +144,7 @@ export function UserFormModal({
             disabled={Boolean(initial)}
           />
           {initial ? (
-            <p className="font-mono text-xs text-foreground/50">El correo no se puede modificar.</p>
+            <p className="font-sans text-xs text-foreground/50">El correo no se puede modificar.</p>
           ) : null}
         </div>
 
@@ -164,7 +164,7 @@ export function UserFormModal({
         <div className="space-y-1.5">
           <Label htmlFor="user-area">Área</Label>
           {selectableAreas.length === 0 ? (
-            <p className="text-sm font-mono text-foreground/60">
+            <p className="text-sm font-sans text-foreground/60">
               No hay áreas activas. Crea o activa un área primero.
             </p>
           ) : (
@@ -196,7 +196,7 @@ export function UserFormModal({
                 />
                 <span className="flex flex-col">
                   <span className="font-base text-sm">{r.label}</span>
-                  <span className="font-mono text-xs text-foreground/50">{r.description}</span>
+                  <span className="font-sans text-xs text-foreground/50">{r.description}</span>
                 </span>
               </label>
             ))}

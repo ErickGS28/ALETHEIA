@@ -71,7 +71,7 @@ function TemplateTableRow({
 function EmptyRow({ message }: { message: string }) {
   return (
     <TableRow>
-      <TableCell colSpan={3} className="h-24 text-center font-mono text-foreground/40">
+      <TableCell colSpan={3} className="h-24 text-center font-sans text-foreground/40">
         {message}
       </TableCell>
     </TableRow>
@@ -126,7 +126,7 @@ export function TemplateListView() {
         />
 
         {toggleError ? (
-          <p className="font-mono text-xs text-red-600" role="alert">
+          <p className="font-sans text-xs text-red-600" role="alert">
             {toggleError}
           </p>
         ) : null}
@@ -134,7 +134,7 @@ export function TemplateListView() {
         <Card>
           <CardContent className="p-0">
             <div className="flex items-center gap-4 border-b-2 border-border px-4 py-3">
-              <span className="font-mono text-xs text-foreground/50 uppercase tracking-widest">
+              <span className="font-sans text-xs text-foreground/50 uppercase tracking-widest">
                 Buscar por nombre
               </span>
               <Input
@@ -144,7 +144,7 @@ export function TemplateListView() {
                 aria-label="Buscar plantillas por nombre"
                 className="w-72"
               />
-              <span className="ml-auto font-mono text-xs text-foreground/40">
+              <span className="ml-auto font-sans text-xs text-foreground/40">
                 {filtered.length} plantilla(s)
               </span>
             </div>
@@ -178,7 +178,7 @@ export function TemplateListView() {
             </Table>
 
             <div className="border-t-2 border-border px-4 py-2">
-              <span className="font-mono text-xs text-foreground/40">
+              <span className="font-sans text-xs text-foreground/40">
                 Las plantillas no se eliminan; solo se activan o desactivan (HU-18).
               </span>
             </div>

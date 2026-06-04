@@ -188,7 +188,7 @@ export function ContractEditorView() {
             </div>
 
             {contract ? (
-              <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-foreground/60">
+              <div className="flex flex-wrap items-center gap-2 font-sans text-xs text-foreground/60">
                 <span>Sociedad:</span>
                 <Badge variant="secondary">{contract.society?.name ?? 'Sin sociedad'}</Badge>
                 <span>· Proveedor:</span>
@@ -196,7 +196,7 @@ export function ContractEditorView() {
               </div>
             ) : null}
 
-            <p className="font-mono text-xs text-foreground/50">
+            <p className="font-sans text-xs text-foreground/50">
               El documento elaborado es una previsualización/borrador local: se guarda solo en este
               navegador y aún no se persiste en el servidor.
             </p>
@@ -207,7 +207,7 @@ export function ContractEditorView() {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
               <FileText className="h-8 w-8 text-foreground/40" />
-              <p className="font-mono text-sm text-foreground/50">
+              <p className="font-sans text-sm text-foreground/50">
                 No hay contratos disponibles para elaborar un documento.
               </p>
             </CardContent>
@@ -238,7 +238,7 @@ export function ContractEditorView() {
                     {showPreview ? 'Ocultar vista previa' : 'Ver documento'}
                   </Button>
                   {savedAt ? (
-                    <span className="font-mono text-xs text-foreground/50">
+                    <span className="font-sans text-xs text-foreground/50">
                       Borrador local guardado a las {savedAt}
                     </span>
                   ) : null}
@@ -311,7 +311,7 @@ export function ContractEditorView() {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
               <FileText className="h-8 w-8 text-foreground/40" />
-              <p className="font-mono text-sm text-foreground/50">
+              <p className="font-sans text-sm text-foreground/50">
                 Selecciona una plantilla para cargar el contenido inicial. Luego podrás editarlo
                 libremente.
               </p>

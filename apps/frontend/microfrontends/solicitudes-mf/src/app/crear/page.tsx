@@ -5,7 +5,7 @@ import { CreateContractView } from '../../features/create-contract/components/Cr
 export default function Page() {
   return (
     <Suspense
-      fallback={<div className="bg-grid min-h-screen p-6 font-mono text-sm">Cargando…</div>}
+      fallback={<div className="bg-grid min-h-screen p-6 font-sans text-sm">Cargando…</div>}
     >
       <CreateContractView />
     </Suspense>

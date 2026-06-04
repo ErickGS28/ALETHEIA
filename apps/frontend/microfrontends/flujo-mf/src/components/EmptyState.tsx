@@ -17,7 +17,7 @@ export function EmptyState({ title, description, icon }: EmptyStateProps) {
         {icon ? <div className="text-foreground/40">{icon}</div> : null}
         <p className="font-heading text-lg">{title}</p>
         {description ? (
-          <p className="max-w-md font-mono text-sm text-foreground/50">{description}</p>
+          <p className="max-w-md font-sans text-sm text-foreground/50">{description}</p>
         ) : null}
       </CardContent>
     </Card>

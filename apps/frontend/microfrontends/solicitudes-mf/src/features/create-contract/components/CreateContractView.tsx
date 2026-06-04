@@ -157,7 +157,7 @@ export function CreateContractView() {
     return (
       <main className="bg-grid min-h-screen p-6">
         <div className="mx-auto max-w-2xl">
-          <p className="font-mono text-sm text-foreground/40">Cargando…</p>
+          <p className="font-sans text-sm text-foreground/40">Cargando…</p>
         </div>
       </main>
     );
@@ -170,7 +170,7 @@ export function CreateContractView() {
           <PageHeader title="Editar solicitud" />
           <Card>
             <CardContent className="space-y-4 p-6">
-              <p className="font-mono text-sm text-foreground/70">
+              <p className="font-sans text-sm text-foreground/70">
                 {existing && existing.status !== 'DRAFT'
                   ? 'Solo las solicitudes en estado Borrador pueden editarse.'
                   : 'Solicitud no encontrada.'}
@@ -319,7 +319,7 @@ export function CreateContractView() {
           </Card>
 
           {submitError && (
-            <p className="rounded-base border-2 border-border bg-red-100 px-3 py-2 font-mono text-sm text-red-700">
+            <p className="rounded-base border-2 border-border bg-red-100 px-3 py-2 font-sans text-sm text-red-700">
               {submitError}
             </p>
           )}

@@ -30,6 +30,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 20px;
   }
 
   * {
@@ -40,6 +41,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-size: 1.5rem; /* 18px — DM Sans se lee mejor ligeramente más grande */
+    line-height: 1.7;
     font-variation-settings: "opsz" 14;
   }
 

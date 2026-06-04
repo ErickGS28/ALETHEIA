@@ -78,7 +78,7 @@ export default function ComponentesPage() {
               className="flex items-center gap-2 text-foreground/50 hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-mono">Inicio</span>
+              <span className="text-sm font-sans">Inicio</span>
             </Link>
             <div className="h-4 w-[2px] bg-border" />
             <div className="flex items-center gap-2">
@@ -90,11 +90,11 @@ export default function ComponentesPage() {
                 className="object-contain"
               />
               <span className="font-heading text-sm tracking-widest uppercase">ALETHEIA</span>
-              <span className="font-mono text-sm text-foreground/40">/ Sistema de Diseño</span>
+              <span className="font-sans text-sm text-foreground/40">/ Sistema de Diseño</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-foreground/30 hidden md:block">
+            <span className="text-xs font-sans text-foreground/30 hidden md:block">
               Neobrutalism · Tailwind v4 · shadcn/ui
             </span>
           </div>
@@ -104,7 +104,7 @@ export default function ComponentesPage() {
       {/* ── PAGE HEADER ─────────────────────────────────────────────── */}
       <div className="border-b-2 border-border py-16 bg-grid">
         <div className="max-w-7xl mx-auto px-6">
-          <p className="text-xs font-mono text-foreground/40 tracking-widest mb-3">
+          <p className="text-xs font-sans text-foreground/40 tracking-widest mb-3">
             // ALETHEIA · SISTEMA DE DISEÑO
           </p>
           <h1 className="text-[clamp(2.5rem,5vw,4rem)] font-heading leading-none tracking-wide uppercase mb-5">
@@ -123,7 +123,7 @@ export default function ComponentesPage() {
         <div className="max-w-7xl mx-auto px-6 space-y-5">
           {/* Buttons */}
           <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-            <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">BOTONES</p>
+            <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">BOTONES</p>
             <p className="text-sm text-foreground/50 mb-5">
               9 variantes · 3 tamaños · neobrutalism hover (translate + shadow)
             </p>
@@ -146,7 +146,7 @@ export default function ComponentesPage() {
 
           {/* Status badges */}
           <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-            <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+            <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
               ESTADOS DEL CONTRATO
             </p>
             <p className="text-sm text-foreground/50 mb-5">
@@ -167,7 +167,7 @@ export default function ComponentesPage() {
           {/* Badges + Inputs */}
           <div className="grid md:grid-cols-2 gap-5">
             <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-              <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+              <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
                 BADGES (shadcn)
               </p>
               <p className="text-sm text-foreground/50 mb-5">
@@ -182,7 +182,7 @@ export default function ComponentesPage() {
               </div>
             </div>
             <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-              <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+              <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
                 INPUTS
               </p>
               <p className="text-sm text-foreground/50 mb-5">
@@ -197,7 +197,7 @@ export default function ComponentesPage() {
 
           {/* Stat cards */}
           <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-            <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+            <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
               TARJETAS DE MÉTRICAS
             </p>
             <p className="text-sm text-foreground/50 mb-5">
@@ -217,7 +217,7 @@ export default function ComponentesPage() {
                   <div className="h-1.5 w-full rounded-full bg-secondary-background mb-3 overflow-hidden">
                     <div className={`h-full ${c.bar} rounded-full`} style={{ width: c.pct }} />
                   </div>
-                  <p className="text-[10px] font-mono text-foreground/40 tracking-widest">
+                  <p className="text-[10px] font-sans text-foreground/40 tracking-widest">
                     {c.label.toUpperCase()}
                   </p>
                   <p className="text-4xl font-heading mt-0.5">{c.value}</p>
@@ -228,7 +228,7 @@ export default function ComponentesPage() {
 
           {/* Roles cards */}
           <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-            <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+            <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
               TARJETAS DE ROL
             </p>
             <p className="text-sm text-foreground/50 mb-5">
@@ -249,7 +249,7 @@ export default function ComponentesPage() {
                     {role.privileges.map((p) => (
                       <div
                         key={p}
-                        className={`text-[9px] font-mono px-1.5 py-0.5 rounded border tracking-wider ${role.accent ? 'border-main-foreground/20 bg-main-foreground/10' : 'border-border bg-secondary-background'}`}
+                        className={`text-[9px] font-sans px-1.5 py-0.5 rounded border tracking-wider ${role.accent ? 'border-main-foreground/20 bg-main-foreground/10' : 'border-border bg-secondary-background'}`}
                       >
                         {p}
                       </div>
@@ -262,7 +262,7 @@ export default function ComponentesPage() {
 
           {/* Data Table */}
           <div className="border-2 border-border bg-background rounded-base p-6 shadow-shadow">
-            <p className="text-[10px] font-mono text-foreground/40 tracking-widest mb-1">
+            <p className="text-[10px] font-sans text-foreground/40 tracking-widest mb-1">
               DATA TABLE
             </p>
             <p className="text-sm text-foreground/50 mb-5">
@@ -276,7 +276,7 @@ export default function ComponentesPage() {
 
       {/* ── STRIP ───────────────────────────────────────────────────── */}
       <div className="bg-foreground text-background py-4 border-b-2 border-border">
-        <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-x-10 gap-y-2 font-mono text-sm items-center">
+        <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-x-10 gap-y-2 font-sans text-sm items-center">
           {(
             [
               [Zap, 'Tailwind CSS v4 · CSS-first'],
@@ -309,7 +309,7 @@ export default function ComponentesPage() {
             />
             <span className="font-heading text-sm tracking-widest uppercase">ALETHEIA</span>
           </Link>
-          <span className="text-xs font-mono text-foreground/30">
+          <span className="text-xs font-sans text-foreground/30">
             Sistema de Diseño · Neobrutalism
           </span>
         </div>

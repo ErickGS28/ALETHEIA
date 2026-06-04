@@ -44,7 +44,7 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
       <span className="font-heading text-xs tracking-widest uppercase text-foreground/60">
         {label}
       </span>
-      <span className="font-mono text-sm">{children}</span>
+      <span className="font-sans text-sm">{children}</span>
     </div>
   );
 }
@@ -114,7 +114,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
           <PageHeader title="Solicitud" />
           <Card>
             <CardContent className="space-y-4 p-6">
-              <p className="font-mono text-sm text-foreground/70">
+              <p className="font-sans text-sm text-foreground/70">
                 {validId ? 'No se pudo cargar la solicitud.' : 'Solicitud no encontrada.'}
               </p>
               <div className="flex gap-2">
@@ -138,7 +138,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     return (
       <main className="bg-grid min-h-screen p-6">
         <div className="mx-auto max-w-4xl">
-          <p className="font-mono text-sm text-foreground/40">Cargando…</p>
+          <p className="font-sans text-sm text-foreground/40">Cargando…</p>
         </div>
       </main>
     );

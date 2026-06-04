@@ -41,14 +41,14 @@ export function SlaRow({ contract, onLevel }: SlaRowProps) {
         ) : isError ? (
           <Badge variant="destructive">SLA no disponible</Badge>
         ) : (
-          <span className="font-mono text-xs text-foreground/40">Calculando…</span>
+          <span className="font-sans text-xs text-foreground/40">Calculando…</span>
         )}
       </TableCell>
       <TableCell className="text-right">
         {sla ? (
           <SlaBadge sla={sla} />
         ) : (
-          <span className="font-mono text-xs text-foreground/40">—</span>
+          <span className="font-sans text-xs text-foreground/40">—</span>
         )}
       </TableCell>
     </TableRow>

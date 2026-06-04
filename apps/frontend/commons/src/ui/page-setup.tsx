@@ -78,7 +78,7 @@ export function PageSetupControl({ value, onChange, className }: PageSetupContro
         <div className="mt-1.5 grid grid-cols-4 gap-2">
           {MARGIN_FIELDS.map(([key, label]) => (
             <label key={key} className="space-y-1 text-center">
-              <span className="block font-mono text-[0.65rem] text-foreground/60">{label}</span>
+              <span className="block font-sans text-[0.65rem] text-foreground/60">{label}</span>
               <input
                 type="number"
                 min={0}

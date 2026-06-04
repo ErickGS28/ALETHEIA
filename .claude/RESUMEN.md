@@ -5,7 +5,7 @@
 > aprobación. Proyecto académico con requisitos obligatorios: **SOFEA + microfrontends +
 > microservicios + Next.js/NestJS + PostgreSQL + JWT/roles/privilegios**.
 
-Última actualización: 2026-06-02.
+Última actualización: 2026-06-03.
 
 ---
 
@@ -102,7 +102,11 @@ ALETHEIA/
   Prisma schema `auth` + seed (`admin@aletheia.com` / `password123`).
 - `contracts/workflow/documents-service` booteables (Redis) con su Prisma schema y handler ping.
 - ⏳ **Pendiente runtime**: levantar Docker (postgres+redis) + migraciones + probar
-  `login` end-to-end gateway→auth (no se ha corrido por falta de Docker arrancado).
+  `login` end-to-end gateway→auth (requiere Docker Desktop arrancado y `pnpm db:migrate`).
+
+### Dependencias (2026-06-03)
+- `pnpm install` verificado ✅ — `node_modules` generado correctamente en la raíz del monorepo.
+- `pnpm dev:fe` verificado ✅ — los 8 frontends arrancan en paralelo (puertos 4000–4007).
 
 ### Frontend (compila ✅ 8/8 + validado en vivo)
 - **web-shell**: login con **5 botones de rol** (mock, sin backend) → dashboard que
@@ -127,12 +131,14 @@ ALETHEIA/
 ## 6. Cómo correr
 
 ```powershell
-pnpm install
+pnpm install       # instala todas las dependencias del workspace (verificado ✅)
 pnpm infra:up      # postgres + redis (requiere Docker Desktop arrancado)
 pnpm dev           # TODO (8 frontends + gateway + 4 servicios)
-pnpm dev:fe        # SOLO los 8 frontends (host + 7 MFs)
+pnpm dev:fe        # SOLO los 8 frontends (host + 7 MFs) — funciona sin Docker (verificado ✅)
 pnpm dev:core      # subset: gateway + auth/contracts/workflow + web-shell + solicitudes-mf + flujo-mf
 ```
+
+> Guía completa para el equipo: `docs/DocumentacionParaElEquipo/como-ejecutar.md`
 
 **Puertos del frontend** (Multi-Zones — se entra siempre por el host :4000, que reescribe a cada MF):
 

@@ -112,7 +112,7 @@ export function ReviewActionModal({
       }
     >
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-foreground/60">
+        <div className="flex flex-wrap items-center gap-2 font-sans text-xs text-foreground/60">
           <Badge variant="secondary">{STATUS_LABELS[contract.status]}</Badge>
           <span aria-hidden>→</span>
           <Badge variant={kind === 'approve' ? 'default' : 'destructive'}>
@@ -137,11 +137,11 @@ export function ReviewActionModal({
         </label>
 
         {invalid && touched ? (
-          <p className="font-mono text-xs text-[#dc2626]">
+          <p className="font-sans text-xs text-[#dc2626]">
             Debes ingresar un comentario para continuar.
           </p>
         ) : (
-          <p className="font-mono text-xs text-foreground/50">{meta.hint}</p>
+          <p className="font-sans text-xs text-foreground/50">{meta.hint}</p>
         )}
       </div>
     </Modal>

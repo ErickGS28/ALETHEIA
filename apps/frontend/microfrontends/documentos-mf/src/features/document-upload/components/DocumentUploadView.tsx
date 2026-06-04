@@ -142,7 +142,7 @@ export function DocumentUploadView() {
           </CardHeader>
           <CardContent className="space-y-4">
             {contractsError ? (
-              <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+              <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
                 <AlertIcon className="h-6 w-6 text-red-700" />
                 <span>No se pudieron cargar los contratos.</span>
                 <Button variant="neutral" size="sm" onClick={() => refetchContracts()}>
@@ -159,17 +159,17 @@ export function DocumentUploadView() {
                     disabled={contractsLoading}
                   />
                   <div className="space-y-1.5">
-                    <div className="font-mono text-xs uppercase tracking-wide text-foreground/60">
+                    <div className="font-sans text-xs uppercase tracking-wide text-foreground/60">
                       Tipo de proveedor
                     </div>
-                    <div className="flex h-10 items-center rounded-base border-2 border-border bg-secondary-background/40 px-3 font-mono text-sm">
+                    <div className="flex h-10 items-center rounded-base border-2 border-border bg-secondary-background/40 px-3 font-sans text-sm">
                       {PROVIDER_TYPE_LABELS[providerType]}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between rounded-base border-2 border-border bg-secondary-background/40 px-4 py-3">
-                  <span className="font-mono text-xs text-foreground/70">
+                  <span className="font-sans text-xs text-foreground/70">
                     Progreso de carga &middot; {PROVIDER_TYPE_LABELS[providerType]}
                   </span>
                   <Badge variant={total > 0 && uploadedCount === total ? 'default' : 'secondary'}>
@@ -184,12 +184,12 @@ export function DocumentUploadView() {
         {uploadError ? (
           <div className="flex items-start gap-3 rounded-base border-2 border-border bg-red-100 px-4 py-3 shadow-shadow">
             <AlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />
-            <p className="flex-1 font-mono text-sm text-red-700">{uploadError}</p>
+            <p className="flex-1 font-sans text-sm text-red-700">{uploadError}</p>
           </div>
         ) : null}
 
         {contractsError ? null : !ready ? (
-          <p className="font-mono text-sm text-foreground/50">Cargando documentos…</p>
+          <p className="font-sans text-sm text-foreground/50">Cargando documentos…</p>
         ) : (
           <div className="space-y-3">
             {requirements.map((req) => {

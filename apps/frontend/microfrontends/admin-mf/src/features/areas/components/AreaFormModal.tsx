@@ -84,7 +84,7 @@ export function AreaFormModal({
                 Área activa
               </Label>
             </div>
-            <p className="text-xs font-mono text-foreground/50">
+            <p className="text-xs font-sans text-foreground/50">
               Un área inactiva no puede asignarse a usuarios nuevos.
             </p>
           </>

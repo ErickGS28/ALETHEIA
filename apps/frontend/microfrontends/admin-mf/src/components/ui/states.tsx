@@ -13,7 +13,7 @@ export function NoPermission({ message }: { message?: string }) {
           <Lock className="h-6 w-6" />
         </div>
         <p className="text-xl font-heading">Sin permiso</p>
-        <p className="max-w-sm text-sm font-mono text-foreground/60">
+        <p className="max-w-sm text-sm font-sans text-foreground/60">
           {message ?? 'Tu rol actual no tiene el privilegio necesario para acceder a esta sección.'}
         </p>
       </CardContent>
@@ -42,7 +42,7 @@ export function EmptyState({
       ) : null}
       <p className="text-lg font-heading">{title}</p>
       {description ? (
-        <p className="max-w-sm text-sm font-mono text-foreground/60">{description}</p>
+        <p className="max-w-sm text-sm font-sans text-foreground/60">{description}</p>
       ) : null}
       {action}
     </div>
@@ -54,7 +54,7 @@ export function LoadingState({ message }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
       <Loader2 className="h-6 w-6 animate-spin text-foreground/60" />
-      <p className="text-sm font-mono text-foreground/60">{message ?? 'Cargando…'}</p>
+      <p className="text-sm font-sans text-foreground/60">{message ?? 'Cargando…'}</p>
     </div>
   );
 }
@@ -73,7 +73,7 @@ export function ErrorState({
         <AlertTriangle className="h-5 w-5 text-destructive" />
       </div>
       <p className="text-lg font-heading">No se pudo cargar</p>
-      <p className="max-w-sm text-sm font-mono text-foreground/60">
+      <p className="max-w-sm text-sm font-sans text-foreground/60">
         {message ?? 'Ocurrió un error al consultar el servidor.'}
       </p>
       {onRetry ? (

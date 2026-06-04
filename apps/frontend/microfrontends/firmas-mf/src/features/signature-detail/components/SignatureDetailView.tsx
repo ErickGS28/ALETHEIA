@@ -61,7 +61,7 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
         {loading ? (
           <Card>
             <CardContent className="p-6">
-              <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+              <p className="font-sans text-sm text-foreground/50">Cargando…</p>
             </CardContent>
           </Card>
         ) : errorContract || !contract ? (
@@ -130,13 +130,13 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
                         <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
                           Apoderado
                         </dt>
-                        <dd className="font-mono text-sm">{attorney?.name ?? '—'}</dd>
+                        <dd className="font-sans text-sm">{attorney?.name ?? '—'}</dd>
                       </div>
                       <div className="space-y-1">
                         <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
                           Poder legal
                         </dt>
-                        <dd className="font-mono text-sm text-foreground/70">
+                        <dd className="font-sans text-sm text-foreground/70">
                           {attorney?.legalPower ?? '—'}
                         </dd>
                       </div>
@@ -144,13 +144,13 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
                         <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
                           Firmado por (id)
                         </dt>
-                        <dd className="font-mono text-sm">{sig.signedById}</dd>
+                        <dd className="font-sans text-sm">{sig.signedById}</dd>
                       </div>
                       <div className="space-y-1">
                         <dt className="text-xs font-heading uppercase tracking-widest text-foreground/70">
                           Fecha
                         </dt>
-                        <dd className="font-mono text-sm">{formatDate(sig.signedAt)}</dd>
+                        <dd className="font-sans text-sm">{formatDate(sig.signedAt)}</dd>
                       </div>
                     </dl>
                   </div>

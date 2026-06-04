@@ -139,25 +139,25 @@ export function ExpiryAlertsView() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-base border-2 border-border bg-background p-3 shadow-shadow">
-              <div className="flex items-center gap-2 font-mono text-xs text-foreground/60">
+              <div className="flex items-center gap-2 font-sans text-xs text-foreground/60">
                 <AlertIcon className="h-4 w-4" />
                 Vencidos
               </div>
               <div className="mt-1 font-heading text-2xl">{counts.VENCIDO}</div>
             </div>
             <div className="rounded-base border-2 border-border bg-background p-3 shadow-shadow">
-              <div className="flex items-center gap-2 font-mono text-xs text-foreground/60">
+              <div className="flex items-center gap-2 font-sans text-xs text-foreground/60">
                 <ClockIcon className="h-4 w-4" />
                 Próximos
               </div>
               <div className="mt-1 font-heading text-2xl">{counts.PROXIMO}</div>
             </div>
             <div className="rounded-base border-2 border-border bg-background p-3 shadow-shadow">
-              <div className="font-mono text-xs text-foreground/60">Vigentes</div>
+              <div className="font-sans text-xs text-foreground/60">Vigentes</div>
               <div className="mt-1 font-heading text-2xl">{counts.VIGENTE}</div>
             </div>
             <div className="rounded-base border-2 border-border bg-background p-3 shadow-shadow">
-              <div className="font-mono text-xs text-foreground/60">Sin vigencia</div>
+              <div className="font-sans text-xs text-foreground/60">Sin vigencia</div>
               <div className="mt-1 font-heading text-2xl">{counts.SIN_VIGENCIA}</div>
             </div>
           </div>
@@ -165,7 +165,7 @@ export function ExpiryAlertsView() {
           <div className="max-w-xs space-y-1.5">
             <label
               htmlFor="expiry-filter"
-              className="font-mono text-xs uppercase tracking-wide text-foreground/60"
+              className="font-sans text-xs uppercase tracking-wide text-foreground/60"
             >
               Filtrar por estado
             </label>
@@ -187,7 +187,7 @@ export function ExpiryAlertsView() {
       <Card>
         <CardContent className="pt-6">
           {isError ? (
-            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
               <AlertIcon className="h-6 w-6 text-red-700" />
               <span>No se pudieron cargar los contratos.</span>
               <Button variant="neutral" size="sm" onClick={() => refetch()}>
@@ -195,9 +195,9 @@ export function ExpiryAlertsView() {
               </Button>
             </div>
           ) : !ready ? (
-            <p className="font-mono text-sm text-foreground/50">Cargando documentos…</p>
+            <p className="font-sans text-sm text-foreground/50">Cargando documentos…</p>
           ) : filtered.length === 0 ? (
-            <p className="py-8 text-center font-mono text-sm text-foreground/50">
+            <p className="py-8 text-center font-sans text-sm text-foreground/50">
               No hay documentos con este estado de vigencia.
             </p>
           ) : (

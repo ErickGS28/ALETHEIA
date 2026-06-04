@@ -21,12 +21,12 @@ export function PageShell({ children }: { children: ReactNode }) {
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-heading">Documentos</h1>
-            <p className="font-mono text-xs text-foreground/50">
+            <p className="font-sans text-xs text-foreground/50">
               Gestión documental del proveedor &middot; CLM ALETHEIA
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2 font-mono text-xs text-foreground/70">
+            <span className="inline-flex items-center gap-2 font-sans text-xs text-foreground/70">
               <span className="inline-flex items-center gap-1">
                 <CheckIcon className="h-3.5 w-3.5" />
                 {privileges.length} privilegios

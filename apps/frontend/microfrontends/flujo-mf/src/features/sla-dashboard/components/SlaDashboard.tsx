@@ -106,7 +106,7 @@ export function SlaDashboard() {
             </CardContent>
           </Card>
 
-          <p className="font-mono text-xs text-foreground/50">
+          <p className="font-sans text-xs text-foreground/50">
             Verde: menos del 60% del SLA consumido · Amarillo: entre 60% y 100% · Rojo: SLA superado
             (100% o más). El color lo calcula el servicio de flujo según el tiempo en la etapa
             actual.

@@ -85,7 +85,7 @@ export function ReviewPanel() {
       <ReviewerNotifications />
 
       {actionError ? (
-        <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-mono text-sm text-[#991b1b]">
+        <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-sans text-sm text-[#991b1b]">
           {actionError}
         </div>
       ) : null}
@@ -118,7 +118,7 @@ export function ReviewPanel() {
         />
       ) : (
         <>
-          <div className="flex items-center gap-2 font-mono text-sm text-foreground/60">
+          <div className="flex items-center gap-2 font-sans text-sm text-foreground/60">
             <Badge variant="default">{queue.length}</Badge>
             <span>contrato{queue.length === 1 ? '' : 's'} en tu cola</span>
           </div>

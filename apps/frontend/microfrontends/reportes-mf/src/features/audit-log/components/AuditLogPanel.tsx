@@ -71,7 +71,7 @@ export function AuditLogPanel() {
         </label>
 
         {contractsError && (
-          <div className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-mono text-sm text-destructive">
+          <div className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-sans text-sm text-destructive">
             <AlertTriangle className="h-4 w-4" /> No se pudieron cargar los contratos.
           </div>
         )}
@@ -79,22 +79,22 @@ export function AuditLogPanel() {
         {contract && (
           <div className="flex flex-wrap items-center gap-3 rounded-base border-2 border-border bg-secondary-background/40 p-4">
             <span className="font-heading text-lg">{contract.folio}</span>
-            <span className="font-mono text-sm text-foreground/70">{contract.title}</span>
+            <span className="font-sans text-sm text-foreground/70">{contract.title}</span>
             <Badge variant={statusMeta(contract.status).variant}>
               {statusMeta(contract.status).label}
             </Badge>
-            <span className="ml-auto font-mono text-xs text-foreground/50">
+            <span className="ml-auto font-sans text-xs text-foreground/50">
               {entries.length} {entries.length === 1 ? 'acción' : 'acciones'}
             </span>
           </div>
         )}
 
         {!contractId ? (
-          <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+          <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
             Selecciona un contrato para consultar su bitácora.
           </div>
         ) : entriesError ? (
-          <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+          <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
             <AlertTriangle className="h-6 w-6 text-destructive" />
             <span>No se pudo cargar la bitácora.</span>
             <Button variant="neutral" size="sm" onClick={() => refetch()}>
@@ -102,7 +102,7 @@ export function AuditLogPanel() {
             </Button>
           </div>
         ) : entriesLoading ? (
-          <div className="flex items-center justify-center gap-2 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 font-mono text-sm text-foreground/60">
+          <div className="flex items-center justify-center gap-2 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 font-sans text-sm text-foreground/60">
             <Loader2 className="h-4 w-4 animate-spin" /> Cargando bitácora…
           </div>
         ) : (

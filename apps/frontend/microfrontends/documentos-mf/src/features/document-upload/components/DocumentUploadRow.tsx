@@ -51,7 +51,7 @@ export function DocumentUploadRow({
           </span>
           <div>
             <div className="font-heading text-base">{requirement.label}</div>
-            <div className="font-mono text-xs text-foreground/50">
+            <div className="font-sans text-xs text-foreground/50">
               {requirement.tracksExpiry ? 'Requiere fecha de vigencia' : 'Sin vigencia'}
             </div>
           </div>
@@ -68,7 +68,7 @@ export function DocumentUploadRow({
       </div>
 
       {isUploaded && active ? (
-        <div className="mt-3 grid grid-cols-2 gap-2 rounded-base border-2 border-border bg-secondary-background/40 p-3 font-mono text-xs text-foreground/70 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-2 rounded-base border-2 border-border bg-secondary-background/40 p-3 font-sans text-xs text-foreground/70 sm:grid-cols-4">
           <span className="truncate" title={active.fileName}>
             {active.fileName}
           </span>
@@ -86,7 +86,7 @@ export function DocumentUploadRow({
           <div className="flex-1 space-y-1.5">
             <label
               htmlFor={`file-${requirement.key}`}
-              className="font-mono text-xs uppercase tracking-wide text-foreground/60"
+              className="font-sans text-xs uppercase tracking-wide text-foreground/60"
             >
               Archivo
             </label>
@@ -103,7 +103,7 @@ export function DocumentUploadRow({
             <div className="space-y-1.5 sm:w-44">
               <label
                 htmlFor={`exp-${requirement.key}`}
-                className="font-mono text-xs uppercase tracking-wide text-foreground/60"
+                className="font-sans text-xs uppercase tracking-wide text-foreground/60"
               >
                 Vigencia (opcional)
               </label>
@@ -124,7 +124,7 @@ export function DocumentUploadRow({
       )}
 
       {pendingFile && !isUploaded ? (
-        <div className="mt-2 font-mono text-xs text-foreground/50">
+        <div className="mt-2 font-sans text-xs text-foreground/50">
           Seleccionado: {pendingFile.name} &middot; {formatBytes(pendingFile.size)}
         </div>
       ) : null}

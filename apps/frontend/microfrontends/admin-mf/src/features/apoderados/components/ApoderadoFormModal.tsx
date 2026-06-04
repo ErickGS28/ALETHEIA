@@ -86,7 +86,7 @@ export function ApoderadoFormModal({
             onChange={(e) => setLegalPower(e.target.value)}
             rows={3}
             placeholder="Ej. Poder general para actos de administración y dominio."
-            className="flex w-full rounded-base border-2 border-border bg-background px-3 py-2 text-sm font-mono shadow-shadow transition-all placeholder:font-mono placeholder:text-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
+            className="flex w-full rounded-base border-2 border-border bg-background px-3 py-2 text-sm font-sans shadow-shadow transition-all placeholder:font-sans placeholder:text-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
           />
         </div>
 

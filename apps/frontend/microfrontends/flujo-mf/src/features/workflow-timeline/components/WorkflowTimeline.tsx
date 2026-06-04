@@ -91,8 +91,8 @@ export function WorkflowTimeline() {
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="space-y-1">
                     <CardTitle className="text-xl">{contract.folio}</CardTitle>
-                    <p className="font-mono text-sm text-foreground/80">{contract.provider}</p>
-                    <p className="font-mono text-xs text-foreground/50">
+                    <p className="font-sans text-sm text-foreground/80">{contract.provider}</p>
+                    <p className="font-sans text-xs text-foreground/50">
                       {contract.society} · {contract.area} ·{' '}
                       {providerTypeLabel(contract.providerType)}
                     </p>
@@ -104,16 +104,16 @@ export function WorkflowTimeline() {
               </CardHeader>
               <CardContent>
                 {detail.isLoading ? (
-                  <p className="font-mono text-sm text-foreground/50">Cargando transiciones…</p>
+                  <p className="font-sans text-sm text-foreground/50">Cargando transiciones…</p>
                 ) : detail.isError ? (
-                  <p className="font-mono text-sm text-[#dc2626]">{errorMessage(detail.error)}</p>
+                  <p className="font-sans text-sm text-[#dc2626]">{errorMessage(detail.error)}</p>
                 ) : transitions.length === 0 ? (
-                  <p className="font-mono text-sm text-foreground/50">
+                  <p className="font-sans text-sm text-foreground/50">
                     Este contrato aún no tiene transiciones registradas.
                   </p>
                 ) : (
                   <>
-                    <p className="mb-6 font-mono text-xs text-foreground/50">
+                    <p className="mb-6 font-sans text-xs text-foreground/50">
                       {transitions.length} transicion{transitions.length === 1 ? '' : 'es'} · orden
                       cronológico (más antigua arriba)
                     </p>

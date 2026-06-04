@@ -161,7 +161,7 @@ const columns: ColumnDef<Contract>[] = [
     accessorKey: 'id',
     header: 'ID Contrato',
     cell: ({ row }) => (
-      <span className="font-mono text-xs text-foreground/60">{row.getValue('id')}</span>
+      <span className="font-sans text-xs text-foreground/60">{row.getValue('id')}</span>
     ),
   },
   {
@@ -181,13 +181,13 @@ const columns: ColumnDef<Contract>[] = [
   {
     accessorKey: 'area',
     header: 'Área',
-    cell: ({ row }) => <span className="font-mono text-sm">{row.getValue('area')}</span>,
+    cell: ({ row }) => <span className="font-sans text-sm">{row.getValue('area')}</span>,
   },
   {
     accessorKey: 'tipo',
     header: 'Tipo',
     cell: ({ row }) => (
-      <span className="font-mono text-xs text-foreground/60">{row.getValue('tipo')}</span>
+      <span className="font-sans text-xs text-foreground/60">{row.getValue('tipo')}</span>
     ),
   },
   {
@@ -205,7 +205,7 @@ const columns: ColumnDef<Contract>[] = [
         style: 'currency',
         currency: 'MXN',
       }).format(row.getValue('monto'));
-      return <div className="text-right font-mono text-sm">{formatted}</div>;
+      return <div className="text-right font-sans text-sm">{formatted}</div>;
     },
   },
   {
@@ -325,7 +325,7 @@ export default function ContractDataTable() {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center font-mono text-foreground/40"
+                  className="h-24 text-center font-sans text-foreground/40"
                 >
                   Sin resultados.
                 </TableCell>
@@ -337,7 +337,7 @@ export default function ContractDataTable() {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-4">
-        <span className="text-xs font-mono text-foreground/40">
+        <span className="text-xs font-sans text-foreground/40">
           {table.getFilteredSelectedRowModel().rows.length} de{' '}
           {table.getFilteredRowModel().rows.length} fila(s) seleccionadas.
         </span>

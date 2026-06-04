@@ -109,7 +109,7 @@ export function ContractListView() {
         />
 
         {viewAreaOnly && (
-          <div className="rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-mono text-xs text-foreground/70">
+          <div className="rounded-base border-2 border-border bg-secondary-background px-4 py-2 font-sans text-xs text-foreground/70">
             Vista limitada a los contratos de tu área.
           </div>
         )}
@@ -194,14 +194,14 @@ export function ContractListView() {
                     <TableRow>
                       <TableCell
                         colSpan={7}
-                        className="h-24 text-center font-mono text-foreground/40"
+                        className="h-24 text-center font-sans text-foreground/40"
                       >
                         Cargando…
                       </TableCell>
                     </TableRow>
                   ) : isError ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center font-mono text-red-600">
+                      <TableCell colSpan={7} className="h-24 text-center font-sans text-red-600">
                         <span className="block">No se pudieron cargar los contratos.</span>
                         <Button
                           variant="neutral"
@@ -217,7 +217,7 @@ export function ContractListView() {
                     <TableRow>
                       <TableCell
                         colSpan={7}
-                        className="h-24 text-center font-mono text-foreground/40"
+                        className="h-24 text-center font-sans text-foreground/40"
                       >
                         No tienes privilegios para ver contratos.
                       </TableCell>
@@ -226,7 +226,7 @@ export function ContractListView() {
                     <TableRow>
                       <TableCell
                         colSpan={7}
-                        className="h-24 text-center font-mono text-foreground/40"
+                        className="h-24 text-center font-sans text-foreground/40"
                       >
                         Sin resultados.
                       </TableCell>
@@ -275,7 +275,7 @@ export function ContractListView() {
               </Table>
             </div>
 
-            <p className="font-mono text-xs text-foreground/40">{rows.length} contrato(s)</p>
+            <p className="font-sans text-xs text-foreground/40">{rows.length} contrato(s)</p>
           </CardContent>
         </Card>
       </div>

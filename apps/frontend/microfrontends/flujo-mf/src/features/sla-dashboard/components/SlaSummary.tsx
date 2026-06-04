@@ -26,8 +26,8 @@ export function SlaSummary({ counts }: SlaSummaryProps) {
             />
             <div>
               <p className="font-heading text-2xl leading-none">{counts[c.level] ?? 0}</p>
-              <p className="font-mono text-sm text-foreground/80">{c.label}</p>
-              <p className="font-mono text-xs text-foreground/50">{c.help}</p>
+              <p className="font-sans text-sm text-foreground/80">{c.label}</p>
+              <p className="font-sans text-xs text-foreground/50">{c.help}</p>
             </div>
           </CardContent>
         </Card>

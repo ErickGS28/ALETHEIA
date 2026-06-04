@@ -73,7 +73,7 @@ export function DocumentPreview({
     return (
       <div
         className={cn(
-          'rounded-base border-2 border-border bg-secondary-background p-6 text-center font-mono text-xs text-foreground/50',
+          'rounded-base border-2 border-border bg-secondary-background p-6 text-center font-sans text-xs text-foreground/50',
           className,
         )}
       >

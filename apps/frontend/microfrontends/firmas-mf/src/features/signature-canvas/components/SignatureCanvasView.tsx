@@ -91,7 +91,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
           {loadingContract ? (
             <Card>
               <CardContent className="p-6">
-                <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+                <p className="font-sans text-sm text-foreground/50">Cargando…</p>
               </CardContent>
             </Card>
           ) : errorContract || !contract ? (
@@ -144,7 +144,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                     ))}
                   </Select>
                   {selectedApoderado ? (
-                    <p className="font-mono text-xs text-foreground/50">
+                    <p className="font-sans text-xs text-foreground/50">
                       Poder legal: {selectedApoderado.legalPower}
                     </p>
                   ) : null}
@@ -156,7 +156,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 </div>
 
                 {error ? (
-                  <div className="rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-mono text-xs text-foreground">
+                  <div className="rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans text-xs text-foreground">
                     {error}
                   </div>
                 ) : null}

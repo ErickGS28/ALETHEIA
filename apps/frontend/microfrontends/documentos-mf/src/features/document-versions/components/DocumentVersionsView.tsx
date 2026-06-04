@@ -83,7 +83,7 @@ export function DocumentVersionsView() {
         </CardHeader>
         <CardContent>
           {contractsError ? (
-            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
               <AlertIcon className="h-6 w-6 text-red-700" />
               <span>No se pudieron cargar los contratos.</span>
               <Button variant="neutral" size="sm" onClick={() => refetchContracts()}>
@@ -106,15 +106,15 @@ export function DocumentVersionsView() {
       {versionError ? (
         <div className="flex items-start gap-3 rounded-base border-2 border-border bg-red-100 px-4 py-3 shadow-shadow">
           <AlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />
-          <p className="flex-1 font-mono text-sm text-red-700">{versionError}</p>
+          <p className="flex-1 font-sans text-sm text-red-700">{versionError}</p>
         </div>
       ) : null}
 
       {contractsError ? null : !ready ? (
-        <p className="font-mono text-sm text-foreground/50">Cargando documentos…</p>
+        <p className="font-sans text-sm text-foreground/50">Cargando documentos…</p>
       ) : docs.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center font-mono text-sm text-foreground/50">
+          <CardContent className="py-10 text-center font-sans text-sm text-foreground/50">
             Este contrato aún no tiene documentos cargados.
           </CardContent>
         </Card>

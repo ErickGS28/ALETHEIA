@@ -42,7 +42,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      <p className="text-sm font-mono text-foreground/70">
+      <p className="text-sm font-sans text-foreground/70">
         Esta acción se aplicará en el servidor y no se puede deshacer.
       </p>
     </Modal>

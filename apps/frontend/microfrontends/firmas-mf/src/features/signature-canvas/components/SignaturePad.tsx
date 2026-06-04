@@ -160,7 +160,7 @@ export function SignaturePad({ onDirtyChange, padRef }: SignaturePadProps) {
         />
       </div>
       <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-foreground/50">
+        <span className="font-sans text-xs text-foreground/50">
           {hasDrawing ? 'Trazo capturado' : 'Dibuja tu firma en el recuadro'}
         </span>
         <Button type="button" variant="outline" size="sm" onClick={clear} disabled={!hasDrawing}>

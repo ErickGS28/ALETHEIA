@@ -58,7 +58,7 @@ export function RadioCards<T extends string>({
               {opt.hint && (
                 <span
                   className={cn(
-                    'block font-mono text-[11px]',
+                    'block font-sans text-[11px]',
                     selected ? 'text-main-foreground/80' : 'text-foreground/50',
                   )}
                 >

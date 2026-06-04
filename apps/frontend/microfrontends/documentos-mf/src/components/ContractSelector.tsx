@@ -21,7 +21,7 @@ export function ContractSelector({
 }: ContractSelectorProps) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="font-mono text-xs uppercase tracking-wide text-foreground/60">
+      <label htmlFor={id} className="font-sans text-xs uppercase tracking-wide text-foreground/60">
         Contrato
       </label>
       <Select

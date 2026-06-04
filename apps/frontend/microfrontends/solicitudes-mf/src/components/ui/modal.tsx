@@ -57,7 +57,7 @@ export function Modal({
         <div className="flex items-start justify-between border-b-2 border-border p-4">
           <div className="space-y-1">
             <h2 className="font-heading text-xl leading-none">{title}</h2>
-            {description && <p className="font-mono text-xs text-foreground/60">{description}</p>}
+            {description && <p className="font-sans text-xs text-foreground/60">{description}</p>}
           </div>
           <button
             type="button"

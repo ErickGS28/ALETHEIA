@@ -118,7 +118,7 @@ function TemplateForm(props: TemplateFormProps) {
             />
           </div>
           {error ? (
-            <p className="font-mono text-xs text-red-600" role="alert">
+            <p className="font-sans text-xs text-red-600" role="alert">
               {error}
             </p>
           ) : null}
@@ -130,7 +130,7 @@ function TemplateForm(props: TemplateFormProps) {
           <CardTitle>Diseño de página</CardTitle>
           <CardDescription>
             Tamaño, márgenes, encabezado y pie. El pie admite el token{' '}
-            <code className="font-mono">{'{{page}}'}</code> para el número de página al imprimir.
+            <code className="font-sans">{'{{page}}'}</code> para el número de página al imprimir.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -178,7 +178,7 @@ function TemplateForm(props: TemplateFormProps) {
               {showPreview ? 'Ocultar vista previa' : 'Ver documento'}
             </Button>
             {savedAt ? (
-              <span className="font-mono text-xs text-foreground/50">Guardado a las {savedAt}</span>
+              <span className="font-sans text-xs text-foreground/50">Guardado a las {savedAt}</span>
             ) : null}
           </div>
         </CardContent>
@@ -308,19 +308,19 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
 
         {isLoadingTemplate ? (
           <Card>
-            <CardContent className="py-12 text-center font-mono text-foreground/60">
+            <CardContent className="py-12 text-center font-sans text-foreground/60">
               Cargando plantilla…
             </CardContent>
           </Card>
         ) : notFound ? (
           <Card>
-            <CardContent className="py-12 text-center font-mono text-foreground/60">
+            <CardContent className="py-12 text-center font-sans text-foreground/60">
               La plantilla solicitada no existe.
             </CardContent>
           </Card>
         ) : loadFailed ? (
           <Card>
-            <CardContent className="py-12 text-center font-mono text-foreground/60">
+            <CardContent className="py-12 text-center font-sans text-foreground/60">
               No se pudo cargar la plantilla. Verifica tu conexión o tus permisos e intenta de
               nuevo.
             </CardContent>

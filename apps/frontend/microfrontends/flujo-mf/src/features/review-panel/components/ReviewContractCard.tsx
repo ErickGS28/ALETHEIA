@@ -57,11 +57,11 @@ export function ReviewContractCard({
             {STATUS_LABELS[contract.status]}
           </Badge>
         </div>
-        <p className="font-mono text-sm text-foreground/80">{contract.provider}</p>
+        <p className="font-sans text-sm text-foreground/80">{contract.provider}</p>
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col gap-4">
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 font-mono text-xs text-foreground/70">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 font-sans text-xs text-foreground/70">
           <div>
             <dt className="text-foreground/40">Sociedad</dt>
             <dd>{contract.society}</dd>
@@ -85,7 +85,7 @@ export function ReviewContractCard({
         ) : slaError ? (
           <Badge variant="destructive">SLA no disponible</Badge>
         ) : (
-          <p className="font-mono text-xs text-foreground/40">Calculando SLA…</p>
+          <p className="font-sans text-xs text-foreground/40">Calculando SLA…</p>
         )}
 
         <div className="mt-auto flex flex-wrap items-center gap-2 border-t-2 border-border pt-4">

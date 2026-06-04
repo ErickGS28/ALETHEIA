@@ -499,7 +499,7 @@ export function RichTextEditor({
           spellCheck={false}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'w-full resize-y bg-background p-4 font-mono text-xs outline-none',
+            'w-full resize-y bg-background p-4 font-sans text-xs outline-none',
             compact ? 'min-h-[120px]' : 'min-h-[260px]',
           )}
         />

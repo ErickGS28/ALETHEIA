@@ -34,7 +34,7 @@ export function ContratosView() {
             <CardTitle>Microfrontend · Contratos (CLM)</CardTitle>
             <CardDescription>Gestión de plantillas y elaboración de documentos.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2 font-mono text-sm text-foreground/70">
+          <CardContent className="flex flex-wrap items-center gap-2 font-sans text-sm text-foreground/70">
             <span>Rol actual:</span>
             <Badge variant="default">{role ?? 'sin sesión'}</Badge>
             <span className="text-foreground/40">· {privileges.length} privilegios activos</span>

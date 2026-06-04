@@ -52,7 +52,7 @@ export function ReviewerNotifications() {
       </CardHeader>
       <CardContent className="space-y-2">
         {actionError ? (
-          <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-mono text-sm text-[#991b1b]">
+          <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-sans text-sm text-[#991b1b]">
             {actionError}
           </div>
         ) : null}
@@ -70,8 +70,8 @@ export function ReviewerNotifications() {
                   aria-hidden
                 />
                 <div>
-                  <p className="font-mono text-sm text-foreground/90">{n.message}</p>
-                  <p className="font-mono text-xs text-foreground/50">
+                  <p className="font-sans text-sm text-foreground/90">{n.message}</p>
+                  <p className="font-sans text-xs text-foreground/50">
                     {formatDateTime(n.createdAt)}
                   </p>
                 </div>

@@ -143,7 +143,7 @@ export default function HomePage() {
         {/* Left — text */}
         <div className="bg-grid flex flex-col justify-center px-8 lg:px-16 py-16 gap-8 relative z-10">
           <div className="space-y-6">
-            <p className="text-xs font-mono text-foreground/40 tracking-widest uppercase">
+            <p className="text-xs font-sans text-foreground/40 tracking-widest uppercase">
               Gestión Contractual Enterprise
             </p>
 
@@ -171,7 +171,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm font-mono text-foreground/40">
+          <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm font-sans text-foreground/40">
             {[
               '5 roles con privilegios',
               'JWT + RBAC',
@@ -203,7 +203,7 @@ export default function HomePage() {
               <p className="font-heading text-5xl tracking-widest uppercase text-foreground/10">
                 ALETHEIA
               </p>
-              <p className="font-mono text-sm text-foreground/40 tracking-widest mt-1">ἀλήθεια</p>
+              <p className="font-sans text-sm text-foreground/40 tracking-widest mt-1">ἀλήθεια</p>
             </div>
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function HomePage() {
       <section className="py-24 border-b-2 border-border bg-grid">
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-14">
-            <p className="text-xs font-mono text-foreground/40 tracking-widest mb-4">
+            <p className="text-xs font-sans text-foreground/40 tracking-widest mb-4">
               // EL PROBLEMA
             </p>
             <h2 className={H2}>
@@ -233,7 +233,7 @@ export default function HomePage() {
                   <div className="w-10 h-10 border-2 border-border rounded-base flex items-center justify-center bg-secondary-background flex-shrink-0">
                     <p.icon className="w-5 h-5 text-foreground/60" />
                   </div>
-                  <span className="font-mono text-xs text-foreground/30 tracking-widest">
+                  <span className="font-sans text-xs text-foreground/30 tracking-widest">
                     0{i + 1}
                   </span>
                 </div>
@@ -252,7 +252,7 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-14">
-            <p className="text-xs font-mono text-main-foreground/50 tracking-widest mb-4">
+            <p className="text-xs font-sans text-main-foreground/50 tracking-widest mb-4">
               // LA SOLUCIÓN
             </p>
             <h2 className={`${H2} text-main-foreground`}>
@@ -297,7 +297,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto px-6">
-          <p className="text-xs font-mono text-background/40 tracking-widest mb-8">
+          <p className="text-xs font-sans text-background/40 tracking-widest mb-8">
             // FILOSOFÍA · POR QUÉ UNA ORCA
           </p>
 
@@ -354,7 +354,7 @@ export default function HomePage() {
       <section id="roles" className="py-24 border-b-2 border-border bg-grid">
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-14">
-            <p className="text-xs font-mono text-foreground/40 tracking-widest mb-4">
+            <p className="text-xs font-sans text-foreground/40 tracking-widest mb-4">
               // ESTRUCTURA DE ROLES
             </p>
             <h2 className={H2}>
@@ -372,7 +372,7 @@ export default function HomePage() {
               >
                 <div className="flex items-center justify-between mb-5">
                   <role.icon className="w-5 h-5" />
-                  <span className="font-mono text-xs opacity-30 font-heading">0{i + 1}</span>
+                  <span className="font-sans text-xs opacity-30 font-heading">0{i + 1}</span>
                 </div>
                 <h3 className="font-heading text-base uppercase tracking-wide mb-3">{role.name}</h3>
                 <p className="text-base opacity-65 leading-relaxed">{role.desc}</p>
@@ -417,7 +417,7 @@ export default function HomePage() {
             </Button>
             <Link
               href="/componentes"
-              className="border-2 border-background/25 text-background/70 px-6 py-3 rounded-base text-sm font-mono hover:text-background hover:border-background/50 transition-colors inline-flex items-center gap-2"
+              className="border-2 border-background/25 text-background/70 px-6 py-3 rounded-base text-sm font-sans hover:text-background hover:border-background/50 transition-colors inline-flex items-center gap-2"
             >
               Ver sistema de diseño <ExternalLink className="w-4 h-4" />
             </Link>
@@ -441,7 +441,7 @@ export default function HomePage() {
               <p className="text-sm text-foreground/40">Contract Lifecycle Management</p>
             </div>
           </div>
-          <nav className="flex items-center gap-6 text-sm font-mono text-foreground/40">
+          <nav className="flex items-center gap-6 text-sm font-sans text-foreground/40">
             <a href="#capabilities" className="hover:text-foreground transition-colors">
               Solución
             </a>

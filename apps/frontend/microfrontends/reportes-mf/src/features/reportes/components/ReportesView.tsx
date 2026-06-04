@@ -29,7 +29,7 @@ function NoPermission({ role }: { role: string | null }) {
           <Lock className="h-5 w-5" /> Sin permiso
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 font-mono text-sm text-foreground/70">
+      <CardContent className="space-y-3 font-sans text-sm text-foreground/70">
         <div className="flex flex-wrap items-center gap-x-1 gap-y-2">
           <span>Tu rol actual</span>
           <Badge variant="secondary">{role ?? 'sin sesión'}</Badge>
@@ -58,7 +58,7 @@ export function ReportesView() {
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-heading">Reportes</h1>
-            <p className="mt-1 font-mono text-sm text-foreground/60">
+            <p className="mt-1 font-sans text-sm text-foreground/60">
               Reportes de contratos e historial de auditoría
             </p>
           </div>

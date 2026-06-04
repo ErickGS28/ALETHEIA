@@ -26,8 +26,8 @@ export function Field({ label, htmlFor, hint, error, required, children, classNa
         {required && <span className="ml-1 text-red-600">*</span>}
       </label>
       {children}
-      {hint && !error && <p className="font-mono text-xs text-foreground/50">{hint}</p>}
-      {error && <p className="font-mono text-xs text-red-600">{error}</p>}
+      {hint && !error && <p className="font-sans text-xs text-foreground/50">{hint}</p>}
+      {error && <p className="font-sans text-xs text-red-600">{error}</p>}
     </div>
   );
 }

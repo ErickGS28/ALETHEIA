@@ -64,7 +64,7 @@ export function Modal({
           <div className="space-y-1">
             <h2 className="text-2xl font-heading leading-none tracking-tight">{title}</h2>
             {description ? (
-              <p className="text-sm font-mono text-foreground/60">{description}</p>
+              <p className="text-sm font-sans text-foreground/60">{description}</p>
             ) : null}
           </div>
           <Button variant="neutral" size="icon" onClick={onClose} aria-label="Cerrar">

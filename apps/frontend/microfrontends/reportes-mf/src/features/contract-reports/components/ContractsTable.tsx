@@ -25,7 +25,7 @@ const PROVIDER_LABELS: Record<Contract['providerType'], string> = {
 export function ContractsTable({ contracts }: ContractsTableProps) {
   if (contracts.length === 0) {
     return (
-      <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+      <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
         No hay contratos que coincidan con los filtros seleccionados.
       </div>
     );

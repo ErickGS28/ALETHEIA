@@ -20,7 +20,7 @@ export function SlaIndicator({
       <span
         className={cn('inline-block h-2.5 w-2.5 rounded-full border border-border', meta.dot)}
       />
-      {showLabel && <span className={cn('font-mono text-xs', meta.text)}>{meta.label}</span>}
+      {showLabel && <span className={cn('font-sans text-xs', meta.text)}>{meta.label}</span>}
     </span>
   );
 }

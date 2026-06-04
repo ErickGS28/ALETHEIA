@@ -51,7 +51,7 @@ export function SignatureListView() {
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-heading">Firmas</h1>
-            <p className="mt-1 font-mono text-xs text-foreground/50">
+            <p className="mt-1 font-sans text-xs text-foreground/50">
               {role ?? 'sin sesión'} &middot; {privileges.length} privilegios
             </p>
           </div>
@@ -70,11 +70,11 @@ export function SignatureListView() {
           </CardHeader>
           <CardContent>
             {loadingToSign ? (
-              <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+              <p className="font-sans text-sm text-foreground/50">Cargando…</p>
             ) : errorToSign ? (
               <Badge variant="destructive">No se pudieron cargar los contratos por firmar.</Badge>
             ) : listToSign.length === 0 ? (
-              <p className="font-mono text-sm text-foreground/50">
+              <p className="font-sans text-sm text-foreground/50">
                 No hay contratos pendientes de firma.
               </p>
             ) : (
@@ -119,11 +119,11 @@ export function SignatureListView() {
           </CardHeader>
           <CardContent>
             {loadingSigned ? (
-              <p className="font-mono text-sm text-foreground/50">Cargando…</p>
+              <p className="font-sans text-sm text-foreground/50">Cargando…</p>
             ) : errorSigned ? (
               <Badge variant="destructive">No se pudieron cargar los contratos firmados.</Badge>
             ) : listSigned.length === 0 ? (
-              <p className="font-mono text-sm text-foreground/50">Aún no hay firmas registradas.</p>
+              <p className="font-sans text-sm text-foreground/50">Aún no hay firmas registradas.</p>
             ) : (
               <Table>
                 <TableHeader>

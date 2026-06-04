@@ -12,7 +12,7 @@ interface AuditTimelineProps {
 export function AuditTimeline({ entries }: AuditTimelineProps) {
   if (entries.length === 0) {
     return (
-      <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-mono text-sm text-foreground/60">
+      <div className="rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-foreground/60">
         Este contrato no tiene acciones registradas en la bitácora.
       </div>
     );
@@ -28,15 +28,15 @@ export function AuditTimeline({ entries }: AuditTimelineProps) {
               <Badge variant="neutral" className="font-heading">
                 {auditActionLabel(entry.action)}
               </Badge>
-              <time className="font-mono text-xs text-foreground/60">
+              <time className="font-sans text-xs text-foreground/60">
                 {formatDateTime(entry.createdAt)}
               </time>
             </div>
-            <div className="mt-2 font-mono text-sm text-foreground/70">
+            <div className="mt-2 font-sans text-sm text-foreground/70">
               Por Usuario #{entry.userId}
             </div>
             {entry.detail && (
-              <div className="mt-2 rounded-base border-2 border-border bg-secondary-background px-2 py-1 font-mono text-xs text-foreground/70">
+              <div className="mt-2 rounded-base border-2 border-border bg-secondary-background px-2 py-1 font-sans text-xs text-foreground/70">
                 {entry.detail}
               </div>
             )}
