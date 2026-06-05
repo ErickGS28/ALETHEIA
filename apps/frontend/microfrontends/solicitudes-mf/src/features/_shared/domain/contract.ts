@@ -72,17 +72,17 @@ export const STATUS_LABEL: Record<ContractStatus, string> = {
   REJECTED: 'Rechazada',
 };
 
-/** Tailwind classes for the status pill (neobrutalism palette). */
+/** Tailwind classes for the status pill (tokens del design system, sin hex). */
 export const STATUS_COLOR: Record<ContractStatus, string> = {
-  DRAFT: 'bg-secondary-background text-foreground',
+  DRAFT: 'bg-secondary-background text-muted-foreground',
   SUBMITTED: 'bg-main text-main-foreground',
-  ADMIN_REVIEW: 'bg-yellow-400 text-black',
-  LAWYER_REVIEW: 'bg-orange-400 text-black',
-  APPROVAL_PENDING: 'bg-blue-400 text-black',
-  SIGNING: 'bg-purple-400 text-black',
-  SIGNED: 'bg-green-500 text-white',
-  CANCELLED: 'bg-zinc-400 text-black',
-  REJECTED: 'bg-red-500 text-white',
+  ADMIN_REVIEW: 'bg-warning/20 text-foreground',
+  LAWYER_REVIEW: 'bg-warning/30 text-foreground',
+  APPROVAL_PENDING: 'bg-warning/40 text-foreground',
+  SIGNING: 'bg-main/25 text-foreground',
+  SIGNED: 'bg-success/20 text-foreground',
+  CANCELLED: 'bg-foreground/10 text-muted-foreground',
+  REJECTED: 'bg-destructive/15 text-destructive',
 };
 
 export const STATUS_ORDER: ContractStatus[] = [
@@ -98,12 +98,6 @@ export const STATUS_ORDER: ContractStatus[] = [
 /* ─── SLA semaphore ──────────────────────────────────────────────────── */
 
 export type SlaLevel = 'green' | 'yellow' | 'red';
-
-export const SLA_META: Record<SlaLevel, { label: string; dot: string; text: string }> = {
-  green: { label: 'En tiempo', dot: 'bg-green-500', text: 'text-green-700' },
-  yellow: { label: 'Por vencer', dot: 'bg-yellow-400', text: 'text-yellow-700' },
-  red: { label: 'Vencido', dot: 'bg-red-500', text: 'text-red-700' },
-};
 
 /** Maps the backend workflow SLA color → UI SlaLevel. */
 export function slaFromColor(color: 'GREEN' | 'YELLOW' | 'RED'): SlaLevel {

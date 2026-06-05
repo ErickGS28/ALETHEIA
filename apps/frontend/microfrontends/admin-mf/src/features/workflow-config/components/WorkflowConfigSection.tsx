@@ -18,6 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { ArrowDown, ArrowUp, Clock, Pencil, Plus, Workflow } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -33,6 +34,7 @@ import { StageFormModal, type StageFormValues } from './StageFormModal';
 const roleLabel = (id: string) => ROLES.find((r) => r.id === id)?.label ?? id;
 
 export function WorkflowConfigSection() {
+  const toast = useToast();
   const { data: rawStages = [], isLoading, isError, refetch } = useListStagesQuery();
   const [createStage, createState] = useCreateStageMutation();
   const [updateStage, updateState] = useUpdateStageMutation();
@@ -64,8 +66,16 @@ export function WorkflowConfigSection() {
         await createStage(values).unwrap();
       }
       setModalOpen(false);
+      toast.success(
+        editing ? 'Etapa actualizada' : 'Etapa creada',
+        editing
+          ? 'Los cambios de la etapa se guardaron correctamente.'
+          : 'La nueva etapa del flujo se creó correctamente.',
+      );
     } catch (err) {
-      setFormError(apiErrorMessage(err, 'No se pudo guardar la etapa.'));
+      const message = apiErrorMessage(err, 'No se pudo guardar la etapa.');
+      setFormError(message);
+      toast.error('No se pudo guardar la etapa', message);
     }
   };
 
@@ -81,8 +91,14 @@ export function WorkflowConfigSection() {
         updateStage({ id: a.id, body: { order: b.order } }).unwrap(),
         updateStage({ id: b.id, body: { order: a.order } }).unwrap(),
       ]);
+      toast.success(
+        'Orden actualizado',
+        `"${a.name}" se movió hacia ${direction === 'up' ? 'arriba' : 'abajo'}.`,
+      );
     } catch (err) {
-      setActionError(apiErrorMessage(err, 'No se pudo reordenar la etapa.'));
+      const message = apiErrorMessage(err, 'No se pudo reordenar la etapa.');
+      setActionError(message);
+      toast.error('No se pudo reordenar la etapa', message);
     }
   };
 
@@ -125,7 +141,7 @@ export function WorkflowConfigSection() {
             }
           />
         ) : (
-          <Table className="min-w-[640px]">
+          <Table className="sm:min-w-[640px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-16">Orden</TableHead>

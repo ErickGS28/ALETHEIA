@@ -1,3 +1,4 @@
+import { LoadingState } from '@aletheia/frontend-commons';
 import { Suspense } from 'react';
 import { CreateContractView } from '../../features/create-contract/components/CreateContractView';
 
@@ -5,7 +6,13 @@ import { CreateContractView } from '../../features/create-contract/components/Cr
 export default function Page() {
   return (
     <Suspense
-      fallback={<div className="bg-grid min-h-screen p-4 sm:p-6 font-sans text-sm">Cargando…</div>}
+      fallback={
+        <main className="bg-grid min-h-screen p-4 sm:p-6">
+          <div className="mx-auto max-w-3xl">
+            <LoadingState message="Cargando formulario…" />
+          </div>
+        </main>
+      }
     >
       <CreateContractView />
     </Suspense>

@@ -52,7 +52,10 @@ export function ReviewerNotifications() {
       </CardHeader>
       <CardContent className="space-y-2">
         {actionError ? (
-          <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-sans text-sm text-[#991b1b]">
+          <div
+            role="alert"
+            className="rounded-base border-2 border-border bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
+          >
             {actionError}
           </div>
         ) : null}

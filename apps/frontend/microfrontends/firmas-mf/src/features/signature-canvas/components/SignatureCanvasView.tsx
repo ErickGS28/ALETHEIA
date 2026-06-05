@@ -11,7 +11,9 @@ import {
   CardTitle,
   CookiePrivilegeGuard,
   Label,
+  LoadingState,
   Select,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -28,6 +30,7 @@ interface SignatureCanvasViewProps {
 
 export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
   const router = useRouter();
+  const toast = useToast();
 
   const {
     data: contract,
@@ -63,9 +66,12 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
         signatureData: image,
         apoderadoId: apoderadoId ? Number(apoderadoId) : undefined,
       }).unwrap();
+      toast.success('Firma registrada', 'La firma se guardó correctamente.');
       router.push(`/detalle/${contractId}`);
     } catch {
-      setError('No se pudo registrar la firma. Verifica tus permisos e intenta de nuevo.');
+      const message = 'No se pudo registrar la firma. Verifica tus permisos e intenta de nuevo.';
+      setError(message);
+      toast.error('No se pudo firmar', message);
     }
   };
 
@@ -90,7 +96,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
           {loadingContract ? (
             <Card>
               <CardContent className="p-6">
-                <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+                <LoadingState message="Cargando contrato…" />
               </CardContent>
             </Card>
           ) : errorContract || !contract ? (
@@ -155,8 +161,20 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 </div>
 
                 {error ? (
-                  <div className="rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans text-xs text-foreground">
-                    {error}
+                  <div className="flex flex-col gap-3 rounded-base border-2 border-destructive bg-destructive/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="destructive">Error</Badge>
+                      <span className="font-sans text-xs text-foreground">{error}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="neutral"
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={!hasDrawing || saving}
+                    >
+                      {saving ? 'Guardando…' : 'Reintentar'}
+                    </Button>
                   </div>
                 ) : null}
 

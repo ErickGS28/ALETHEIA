@@ -1,5 +1,5 @@
 import { ContractDataTable } from '@aletheia/frontend-commons';
-import { Badge } from '@aletheia/frontend-commons';
+import { Badge, StatusBadge } from '@aletheia/frontend-commons';
 import { Button } from '@aletheia/frontend-commons';
 import { Input } from '@aletheia/frontend-commons';
 import {
@@ -17,15 +17,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const statuses = [
-  { label: 'DRAFT', color: 'bg-secondary-background text-foreground border-border' },
-  { label: 'SUBMITTED', color: 'bg-main text-main-foreground border-border' },
-  { label: 'ADMIN_REVIEW', color: 'bg-yellow-400 text-black border-border' },
-  { label: 'LAWYER_REVIEW', color: 'bg-orange-400 text-black border-border' },
-  { label: 'APPROVAL_PENDING', color: 'bg-blue-400 text-black border-border' },
-  { label: 'SIGNING', color: 'bg-purple-400 text-black border-border' },
-  { label: 'SIGNED', color: 'bg-green-500 text-white border-border' },
-  { label: 'REJECTED', color: 'bg-red-500 text-white border-border' },
-  { label: 'CANCELLED', color: 'bg-foreground text-background border-border' },
+  'DRAFT',
+  'SUBMITTED',
+  'ADMIN_REVIEW',
+  'LAWYER_REVIEW',
+  'APPROVAL_PENDING',
+  'SIGNING',
+  'SIGNED',
+  'REJECTED',
+  'CANCELLED',
 ];
 
 const roles = [
@@ -73,13 +73,12 @@ export default function ComponentesPage() {
       <header className="sticky top-0 z-50 border-b-2 border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-foreground/50 hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm font-sans">Inicio</span>
-            </Link>
+            <Button variant="neutral" size="sm" asChild>
+              <Link href="/" aria-label="Volver al inicio">
+                <ArrowLeft className="w-4 h-4" />
+                <span className="font-sans">Volver</span>
+              </Link>
+            </Button>
             <div className="h-4 w-[2px] bg-border" />
             <div className="flex items-center gap-2">
               <Image
@@ -154,12 +153,7 @@ export default function ComponentesPage() {
             </p>
             <div className="flex flex-wrap gap-2">
               {statuses.map((s) => (
-                <span
-                  key={s.label}
-                  className={`border-2 ${s.color} px-2.5 py-1 rounded-base text-[10px] font-heading tracking-widest shadow-[2px_2px_0px_0px_#000]`}
-                >
-                  {s.label}
-                </span>
+                <StatusBadge key={s} status={s} />
               ))}
             </div>
           </div>
@@ -206,9 +200,9 @@ export default function ComponentesPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: 'Contratos activos', value: '12', bar: 'bg-main', pct: '60%' },
-                { label: 'SLA vencidos', value: '3', bar: 'bg-red-500', pct: '15%' },
-                { label: 'Firmados este mes', value: '8', bar: 'bg-green-500', pct: '80%' },
-                { label: 'Pendientes de firma', value: '4', bar: 'bg-purple-400', pct: '40%' },
+                { label: 'SLA vencidos', value: '3', bar: 'bg-destructive', pct: '15%' },
+                { label: 'Firmados este mes', value: '8', bar: 'bg-success', pct: '80%' },
+                { label: 'Pendientes de firma', value: '4', bar: 'bg-accent', pct: '40%' },
               ].map((c) => (
                 <div
                   key={c.label}

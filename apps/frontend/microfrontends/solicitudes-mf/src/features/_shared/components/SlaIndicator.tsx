@@ -1,9 +1,11 @@
 'use client';
 
-import { cn } from '@aletheia/frontend-commons';
-import { SLA_META, type SlaLevel } from '../domain/contract';
+import { SlaIndicator as CommonsSlaIndicator } from '@aletheia/frontend-commons';
+import type { SlaLevel } from '../domain/contract';
 
-// SLA semaphore (simulated). Inline span + dot, safe inside <p>.
+// SLA semaphore. Delega en el indicador canónico de commons (punto de color +
+// TEXTO accesible, colores tokenizados). El `SlaLevel` del dominio coincide con
+// el `SlaColor` de commons ('green' | 'yellow' | 'red').
 
 export function SlaIndicator({
   level,
@@ -14,13 +16,5 @@ export function SlaIndicator({
   showLabel?: boolean;
   className?: string;
 }) {
-  const meta = SLA_META[level];
-  return (
-    <span className={cn('inline-flex items-center gap-1.5', className)} title={meta.label}>
-      <span
-        className={cn('inline-block h-2.5 w-2.5 rounded-full border border-border', meta.dot)}
-      />
-      {showLabel && <span className={cn('font-sans text-xs', meta.text)}>{meta.label}</span>}
-    </span>
-  );
+  return <CommonsSlaIndicator color={level} showLabel={showLabel} className={className} />;
 }

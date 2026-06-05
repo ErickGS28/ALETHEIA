@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Badge,
+  StatusBadge,
   Table,
   TableBody,
   TableCell,
@@ -9,7 +9,6 @@ import {
   TableHeader,
   TableRow,
 } from '@aletheia/frontend-commons';
-import { statusMeta } from '../../../lib/contract-meta';
 import { formatDate } from '../../../lib/format';
 import type { Contract } from '../api/reportsApi';
 
@@ -46,26 +45,33 @@ export function ContractsTable({ contracts }: ContractsTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {contracts.map((c) => {
-            const meta = statusMeta(c.status);
-            return (
-              <TableRow key={c.id}>
-                <TableCell className="font-heading">{c.folio}</TableCell>
-                <TableCell className="max-w-[16rem] truncate">{c.title}</TableCell>
-                <TableCell className="text-foreground/70">{c.vendorName}</TableCell>
-                <TableCell>
-                  <Badge variant={meta.variant}>{meta.label}</Badge>
-                </TableCell>
-                <TableCell>{c.area?.name ?? `Área #${c.areaId}`}</TableCell>
-                <TableCell className="text-foreground/70">
-                  {PROVIDER_LABELS[c.providerType]}
-                </TableCell>
-                <TableCell className="whitespace-nowrap text-foreground/70">
-                  {formatDate(c.createdAt)}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+          {contracts.map((c) => (
+            <TableRow key={c.id}>
+              <TableCell className="font-heading">
+                {/* Enlace cross-zone al detalle de la solicitud (recarga completa por diseño). */}
+                <a
+                  href={`/solicitudes/${c.id}`}
+                  className="rounded-base text-main underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
+                >
+                  {c.folio}
+                </a>
+              </TableCell>
+              <TableCell className="max-w-[16rem] truncate">{c.title}</TableCell>
+              <TableCell className="text-foreground/70">{c.vendorName}</TableCell>
+              <TableCell>
+                <StatusBadge status={c.status} />
+              </TableCell>
+              <TableCell>
+                {c.area?.name ?? <span className="text-muted-foreground">(Sin área)</span>}
+              </TableCell>
+              <TableCell className="text-foreground/70">
+                {PROVIDER_LABELS[c.providerType]}
+              </TableCell>
+              <TableCell className="whitespace-nowrap text-foreground/70">
+                {formatDate(c.createdAt)}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>

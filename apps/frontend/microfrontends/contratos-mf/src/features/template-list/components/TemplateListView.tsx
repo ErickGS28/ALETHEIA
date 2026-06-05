@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
   useRole,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Pencil, Plus, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
@@ -81,6 +82,7 @@ function EmptyRow({ message }: { message: string }) {
 export function TemplateListView() {
   const { can } = useRole();
   const canManage = can('TEMPLATES_MANAGE');
+  const toast = useToast();
   const { data, isLoading, isError } = useListTemplatesQuery(undefined, { skip: !canManage });
   const [updateTemplate, { isLoading: isToggling }] = useUpdateTemplateMutation();
   const [search, setSearch] = useState('');
@@ -96,16 +98,22 @@ export function TemplateListView() {
 
   const handleToggle = async (template: Template) => {
     setToggleError(null);
+    const next = !template.active;
     try {
       await updateTemplate({
         id: Number(template.id),
-        body: { isActive: !template.active },
+        body: { isActive: next },
       }).unwrap();
+      toast.success(
+        next ? 'Plantilla activada' : 'Plantilla desactivada',
+        `«${template.name}» ${next ? 'ya está disponible' : 'dejó de estar disponible'} para elaborar documentos.`,
+      );
     } catch (err) {
       const message =
         (err as { data?: { message?: string } })?.data?.message ??
         'No se pudo cambiar el estado de la plantilla. Intenta de nuevo.';
       setToggleError(message);
+      toast.error('No se pudo cambiar el estado', message);
     }
   };
 
@@ -128,14 +136,14 @@ export function TemplateListView() {
         />
 
         {toggleError ? (
-          <p className="font-sans text-xs text-red-600" role="alert">
+          <p className="font-sans text-xs text-destructive" role="alert">
             {toggleError}
           </p>
         ) : null}
 
         <Card>
           <CardContent className="p-0">
-            <div className="flex items-center gap-4 border-b-2 border-border px-4 py-3">
+            <div className="flex flex-col gap-3 border-b-2 border-border px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
               <span className="font-sans text-xs text-muted-foreground uppercase tracking-widest">
                 Buscar por nombre
               </span>
@@ -144,9 +152,9 @@ export function TemplateListView() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Nombre de la plantilla…"
                 aria-label="Buscar plantillas por nombre"
-                className="w-72"
+                className="w-full sm:w-72"
               />
-              <span className="ml-auto font-sans text-xs text-muted-foreground">
+              <span className="font-sans text-xs text-muted-foreground sm:ml-auto">
                 {filtered.length} plantilla(s)
               </span>
             </div>

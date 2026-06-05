@@ -8,9 +8,9 @@ interface SlaSummaryProps {
 }
 
 const CARDS: { level: Exclude<SlaLevel, 'none'>; label: string; dot: string; help: string }[] = [
-  { level: 'green', label: 'En tiempo', dot: 'bg-[#16a34a]', help: 'Menos del 60% del SLA' },
-  { level: 'yellow', label: 'Por vencer', dot: 'bg-[#eab308]', help: 'Entre 60% y 100% del SLA' },
-  { level: 'red', label: 'SLA superado', dot: 'bg-[#dc2626]', help: '100% o más del SLA' },
+  { level: 'green', label: 'En tiempo', dot: 'bg-success', help: 'Menos del 60% del SLA' },
+  { level: 'yellow', label: 'Por vencer', dot: 'bg-warning', help: 'Entre 60% y 100% del SLA' },
+  { level: 'red', label: 'SLA superado', dot: 'bg-destructive', help: '100% o más del SLA' },
 ];
 
 /** Three-color summary of the SLA semaphore (HU-12). */

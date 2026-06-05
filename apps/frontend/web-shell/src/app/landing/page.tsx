@@ -129,11 +129,20 @@ export default function HomePage() {
               Roles
             </a>
             <Link
+              href="/como-funciona"
+              className="text-foreground/60 hover:text-foreground transition-colors"
+            >
+              Cómo funciona
+            </Link>
+            <Link
               href="/componentes"
               className="text-foreground/40 hover:text-foreground transition-colors flex items-center gap-1"
             >
               Componentes <ExternalLink className="w-3 h-3" />
             </Link>
+            <Button size="sm" asChild>
+              <Link href="/">Iniciar sesión</Link>
+            </Button>
           </nav>
         </div>
       </header>
@@ -162,11 +171,13 @@ export default function HomePage() {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button size="lg">
-                Solicitar demo <ArrowRight />
+              <Button size="lg" asChild>
+                <Link href="/">
+                  Solicitar demo <ArrowRight />
+                </Link>
               </Button>
-              <Button size="lg" variant="neutral">
-                Conocer el sistema
+              <Button size="lg" variant="neutral" asChild>
+                <Link href="/como-funciona">Conocer el sistema</Link>
               </Button>
             </div>
           </div>
@@ -412,14 +423,16 @@ export default function HomePage() {
             precisión, responsabilidad y total trazabilidad.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button variant="reverse" size="lg">
-              Solicitar demo <ArrowRight />
+            <Button variant="reverse" size="lg" asChild>
+              <Link href="/">
+                Solicitar demo <ArrowRight />
+              </Link>
             </Button>
             <Link
-              href="/componentes"
+              href="/como-funciona"
               className="border-2 border-background/25 text-background/70 px-6 py-3 rounded-base text-sm font-sans hover:text-background hover:border-background/50 transition-colors inline-flex items-center gap-2"
             >
-              Ver sistema de diseño <ExternalLink className="w-4 h-4" />
+              Cómo funciona <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -451,6 +464,9 @@ export default function HomePage() {
             <a href="#roles" className="hover:text-foreground transition-colors">
               Roles
             </a>
+            <Link href="/como-funciona" className="hover:text-foreground transition-colors">
+              Cómo funciona
+            </Link>
             <Link href="/componentes" className="hover:text-foreground transition-colors">
               Componentes
             </Link>

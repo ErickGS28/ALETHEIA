@@ -17,6 +17,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Building2, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -31,6 +32,7 @@ import { apiErrorMessage } from '../../admin/error';
 import { AreaFormModal, type AreaFormValues } from './AreaFormModal';
 
 export function AreasSection() {
+  const toast = useToast();
   const { data: areas = [], isLoading, isError, refetch } = useListAreasQuery();
   const [createArea, createState] = useCreateAreaMutation();
   const [updateArea, updateState] = useUpdateAreaMutation();
@@ -60,8 +62,16 @@ export function AreasSection() {
         await createArea({ name: values.name }).unwrap();
       }
       setModalOpen(false);
+      toast.success(
+        editing ? 'Área actualizada' : 'Área creada',
+        editing
+          ? 'Los cambios del área se guardaron correctamente.'
+          : 'La nueva área se registró correctamente.',
+      );
     } catch (err) {
-      setFormError(apiErrorMessage(err, 'No se pudo guardar el área.'));
+      const message = apiErrorMessage(err, 'No se pudo guardar el área.');
+      setFormError(message);
+      toast.error('No se pudo guardar el área', message);
     }
   };
 
@@ -69,8 +79,14 @@ export function AreasSection() {
     setActionError(null);
     try {
       await updateArea({ id: area.id, body: { isActive: !area.isActive } }).unwrap();
+      toast.success(
+        area.isActive ? 'Área desactivada' : 'Área activada',
+        `"${area.name}" ahora está ${area.isActive ? 'inactiva' : 'activa'}.`,
+      );
     } catch (err) {
-      setActionError(apiErrorMessage(err, 'No se pudo cambiar el estado del área.'));
+      const message = apiErrorMessage(err, 'No se pudo cambiar el estado del área.');
+      setActionError(message);
+      toast.error('No se pudo cambiar el estado', message);
     }
   };
 

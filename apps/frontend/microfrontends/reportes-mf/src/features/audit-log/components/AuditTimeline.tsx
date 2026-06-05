@@ -33,7 +33,7 @@ export function AuditTimeline({ entries }: AuditTimelineProps) {
               </time>
             </div>
             <div className="mt-2 font-sans text-sm text-foreground/70">
-              Por Usuario #{entry.userId}
+              Por {entry.userName ?? entry.userEmail ?? `Usuario #${entry.userId}`}
             </div>
             {entry.detail && (
               <div className="mt-2 rounded-base border-2 border-border bg-secondary-background px-2 py-1 font-sans text-xs text-foreground/70">

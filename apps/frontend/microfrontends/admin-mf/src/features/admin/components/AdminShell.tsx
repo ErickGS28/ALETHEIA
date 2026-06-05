@@ -60,7 +60,7 @@ export function AdminShell() {
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-5xl space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
+        <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div>
             <h1 className="text-4xl font-heading">Administración</h1>
             <p className="font-sans text-sm text-muted-foreground">

@@ -19,6 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Pencil, Plus, Trash2, Users as UsersIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -36,6 +37,7 @@ import { UserFormModal, type UserFormValues } from './UserFormModal';
 const roleLabel = (id: string) => ROLES.find((r) => r.id === id)?.label ?? id;
 
 export function UsersSection() {
+  const toast = useToast();
   const { data: users = [], isLoading, isError, refetch } = useListUsersQuery();
   const { data: areas = [] } = useListAreasQuery();
   const [createUser, createState] = useCreateUserMutation();
@@ -89,21 +91,33 @@ export function UsersSection() {
         }).unwrap();
       }
       setModalOpen(false);
+      toast.success(
+        editing ? 'Usuario actualizado' : 'Usuario creado',
+        editing
+          ? 'Los cambios del usuario se guardaron correctamente.'
+          : 'El nuevo usuario se registró correctamente.',
+      );
     } catch (err) {
-      setFormError(apiErrorMessage(err, 'No se pudo guardar el usuario.'));
+      const message = apiErrorMessage(err, 'No se pudo guardar el usuario.');
+      setFormError(message);
+      toast.error('No se pudo guardar el usuario', message);
     }
   };
 
   const handleDelete = async () => {
     if (!toDelete) return;
     setActionError(null);
+    const target = toDelete;
     try {
-      await deleteUser(toDelete.id).unwrap();
+      await deleteUser(target.id).unwrap();
       setToDelete(null);
       refetch();
+      toast.success('Usuario eliminado', `Se eliminó a "${target.name} ${target.lastName}".`);
     } catch (err) {
       setToDelete(null);
-      setActionError(apiErrorMessage(err, 'No se pudo eliminar el usuario.'));
+      const message = apiErrorMessage(err, 'No se pudo eliminar el usuario.');
+      setActionError(message);
+      toast.error('No se pudo eliminar el usuario', message);
     }
   };
 
@@ -142,7 +156,7 @@ export function UsersSection() {
             }
           />
         ) : (
-          <Table className="min-w-[640px]">
+          <Table className="sm:min-w-[640px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>

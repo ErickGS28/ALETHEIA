@@ -27,6 +27,7 @@ export function CancelContractModal({ contract, onClose, onConfirm }: CancelCont
     <Modal
       open={contract !== null}
       onClose={onClose}
+      allowBackdropClose={false}
       title="Cancelar solicitud"
       description={contract ? `${contract.folio} · ${contract.title}` : undefined}
       footer={
@@ -43,7 +44,7 @@ export function CancelContractModal({ contract, onClose, onConfirm }: CancelCont
               setReason('');
             }}
           >
-            Cancelar solicitud
+            Confirmar cancelación
           </Button>
         </>
       }

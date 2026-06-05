@@ -23,11 +23,19 @@ export function Field({ label, htmlFor, hint, error, required, children, classNa
         className="block font-heading text-xs tracking-widest uppercase text-foreground/70"
       >
         {label}
-        {required && <span className="ml-1 text-red-600">*</span>}
+        {required && (
+          <span className="ml-1 text-destructive" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
       {children}
       {hint && !error && <p className="font-sans text-xs text-muted-foreground">{hint}</p>}
-      {error && <p className="font-sans text-xs text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="font-sans text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

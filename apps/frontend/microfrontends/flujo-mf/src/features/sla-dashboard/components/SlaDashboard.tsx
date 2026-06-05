@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
   EmptyState,
+  ErrorState,
+  LoadingState,
   Table,
   TableBody,
   TableHead,
@@ -63,17 +65,13 @@ export function SlaDashboard() {
       {!wf.hydrated ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState title="Cargando indicadores…" />
+            <LoadingState message="Cargando indicadores…" />
           </CardContent>
         </Card>
       ) : wf.isError ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState
-              icon={<GaugeIcon className="h-10 w-10" />}
-              title="No se pudieron cargar los indicadores"
-              description={errorMessage(wf.error)}
-            />
+            <ErrorState message={errorMessage(wf.error)} onRetry={() => wf.refetch()} />
           </CardContent>
         </Card>
       ) : rows.length === 0 ? (
@@ -98,23 +96,25 @@ export function SlaDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Table className="min-w-[640px]">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Folio</TableHead>
-                    <TableHead>Etapa</TableHead>
-                    <TableHead>Transcurrido</TableHead>
-                    <TableHead>SLA</TableHead>
-                    <TableHead>Consumo</TableHead>
-                    <TableHead className="text-right">Indicador</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.map((contract) => (
-                    <SlaRow key={contract.id} contract={contract} onLevel={onLevel} />
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="overflow-x-auto">
+                <Table className="min-w-[640px]">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Folio</TableHead>
+                      <TableHead>Etapa</TableHead>
+                      <TableHead>Transcurrido</TableHead>
+                      <TableHead>SLA</TableHead>
+                      <TableHead>Consumo</TableHead>
+                      <TableHead className="text-right">Indicador</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rows.map((contract) => (
+                      <SlaRow key={contract.id} contract={contract} onLevel={onLevel} />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
 

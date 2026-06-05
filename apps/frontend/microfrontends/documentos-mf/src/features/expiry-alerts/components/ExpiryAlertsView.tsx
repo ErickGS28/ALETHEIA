@@ -2,12 +2,14 @@
 
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  EmptyState,
+  ErrorState,
+  LoadingState,
   Select,
   Table,
   TableBody,
@@ -187,48 +189,46 @@ export function ExpiryAlertsView() {
       <Card>
         <CardContent className="pt-6">
           {isError ? (
-            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-muted-foreground">
-              <AlertIcon className="h-6 w-6 text-red-700" />
-              <span>No se pudieron cargar los contratos.</span>
-              <Button variant="neutral" size="sm" onClick={() => refetch()}>
-                Reintentar
-              </Button>
-            </div>
+            <ErrorState message="No se pudieron cargar los contratos." onRetry={() => refetch()} />
           ) : !ready ? (
-            <p className="font-sans text-sm text-muted-foreground">Cargando documentos…</p>
+            <LoadingState message="Cargando documentos…" />
           ) : filtered.length === 0 ? (
-            <p className="py-8 text-center font-sans text-sm text-muted-foreground">
-              No hay documentos con este estado de vigencia.
-            </p>
+            <EmptyState
+              icon={<ClockIcon className="h-5 w-5" />}
+              title="Sin documentos"
+              description="No hay documentos con este estado de vigencia."
+            />
           ) : (
-            <Table className="min-w-[640px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Documento</TableHead>
-                  <TableHead>Contrato</TableHead>
-                  <TableHead>Proveedor</TableHead>
-                  <TableHead>Vigencia</TableHead>
-                  <TableHead>Restante</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map(({ doc, status }) => (
-                  <TableRow key={doc.id}>
-                    <TableCell className="font-heading">{doc.label}</TableCell>
-                    <TableCell>{doc.contractFolio ?? doc.contractId}</TableCell>
-                    <TableCell>{PROVIDER_TYPE_LABELS[doc.providerType]}</TableCell>
-                    <TableCell>{formatDate(doc.expiryDate)}</TableCell>
-                    <TableCell>{remainingLabel(status, doc.expiryDate)}</TableCell>
-                    <TableCell>
-                      <Badge variant={EXPIRY_BADGE_VARIANT[status]}>
-                        {EXPIRY_STATUS_LABELS[status]}
-                      </Badge>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Documento</TableHead>
+                    <TableHead>Contrato</TableHead>
+                    <TableHead>Proveedor</TableHead>
+                    <TableHead>Vigencia</TableHead>
+                    <TableHead>Restante</TableHead>
+                    <TableHead>Estado</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(({ doc, status }) => (
+                    <TableRow key={doc.id}>
+                      <TableCell className="font-heading">{doc.label}</TableCell>
+                      <TableCell>{doc.contractFolio ?? doc.contractId}</TableCell>
+                      <TableCell>{PROVIDER_TYPE_LABELS[doc.providerType]}</TableCell>
+                      <TableCell>{formatDate(doc.expiryDate)}</TableCell>
+                      <TableCell>{remainingLabel(status, doc.expiryDate)}</TableCell>
+                      <TableCell>
+                        <Badge variant={EXPIRY_BADGE_VARIANT[status]}>
+                          {EXPIRY_STATUS_LABELS[status]}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

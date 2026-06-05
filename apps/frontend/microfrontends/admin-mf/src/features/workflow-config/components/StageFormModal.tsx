@@ -3,8 +3,8 @@
 import {
   Badge,
   Button,
+  FormField,
   Input,
-  Label,
   Modal,
   ROLES,
   type Role,
@@ -64,10 +64,20 @@ export function StageFormModal({
     onSubmit({ name: name.trim(), roleRequired, slaHours: sla, order: ord });
   };
 
+  const slaNum = Number(slaHours);
+  const orderNum = Number(order);
+  const isValid =
+    name.trim().length > 0 &&
+    Number.isFinite(slaNum) &&
+    slaNum > 0 &&
+    Number.isFinite(orderNum) &&
+    orderNum > 0;
+
   return (
     <Modal
       open={open}
       onClose={onClose}
+      allowBackdropClose={false}
       title={initial ? 'Editar etapa' : 'Nueva etapa'}
       description={initial ? 'Actualiza la etapa del flujo.' : 'Agrega una etapa al flujo.'}
       footer={
@@ -75,25 +85,23 @@ export function StageFormModal({
           <Button variant="neutral" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting || !isValid}>
             {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear etapa'}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="stage-name">Nombre</Label>
+        <FormField label="Nombre" htmlFor="stage-name" required>
           <Input
             id="stage-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej. Revisión Abogado"
           />
-        </div>
+        </FormField>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="stage-role">Rol asignado</Label>
+        <FormField label="Rol asignado" htmlFor="stage-role" required>
           <Select
             id="stage-role"
             value={roleRequired}
@@ -105,11 +113,10 @@ export function StageFormModal({
               </option>
             ))}
           </Select>
-        </div>
+        </FormField>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="stage-order">Orden</Label>
+          <FormField label="Orden" htmlFor="stage-order" required>
             <Input
               id="stage-order"
               type="number"
@@ -118,9 +125,8 @@ export function StageFormModal({
               onChange={(e) => setOrder(e.target.value)}
               placeholder="1"
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="stage-sla">SLA (horas)</Label>
+          </FormField>
+          <FormField label="SLA (horas)" htmlFor="stage-sla" required>
             <Input
               id="stage-sla"
               type="number"
@@ -129,7 +135,7 @@ export function StageFormModal({
               onChange={(e) => setSlaHours(e.target.value)}
               placeholder="24"
             />
-          </div>
+          </FormField>
         </div>
 
         {error || serverError ? (

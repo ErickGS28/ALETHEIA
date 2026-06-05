@@ -81,7 +81,7 @@ export function ContractRowActions({
         {canCancel && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600" onClick={() => onCancel(contract)}>
+            <DropdownMenuItem variant="destructive" onClick={() => onCancel(contract)}>
               <XCircle className="mr-2 h-4 w-4" /> Cancelar
             </DropdownMenuItem>
           </>

@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  ConfirmDialog,
   DEFAULT_PAGE_SETUP,
   DocumentPreview,
   PageHeader,
@@ -16,6 +17,7 @@ import {
   RichTextEditor,
   Select,
   useRole,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Eye, EyeOff, FileText, Save } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,6 +29,7 @@ import { type Template, toUiTemplate } from '../../templates/types';
 
 export function ContractEditorView() {
   const { can } = useRole();
+  const toast = useToast();
   const {
     data: contractsData,
     isLoading: isLoadingContracts,
@@ -53,6 +56,8 @@ export function ContractEditorView() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  // Plantilla pendiente de confirmar cuando reemplazaría contenido sin guardar.
+  const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
 
   // Selecciona el primer contrato disponible una vez que se cargan.
   useEffect(() => {
@@ -81,6 +86,7 @@ export function ContractEditorView() {
     setDirty(false);
     setSavedAt(null);
     setShowPreview(false);
+    setPendingTemplateId(null);
   }, [contractId]);
 
   const canAccess = can('TEMPLATES_MANAGE') || can('CONTRACT_EDIT');
@@ -88,29 +94,50 @@ export function ContractEditorView() {
     return <NoAccess title="Elaborar documento" />;
   }
 
-  const applyTemplate = (templateId: string) => {
-    setSelectedTemplateId(templateId);
+  const loadTemplate = (templateId: string) => {
     const tpl = eligibleTemplates.find((t) => t.id === templateId);
     if (!tpl) return;
-    if (body && dirty) {
-      const ok = window.confirm('Esto reemplazará el contenido actual del documento. ¿Continuar?');
-      if (!ok) {
-        setSelectedTemplateId('');
-        return;
-      }
-    }
+    setSelectedTemplateId(templateId);
     setBody(tpl.content);
     setHeader(tpl.header);
     setFooter(tpl.footer);
     setPageSetup(tpl.pageSetup);
     setDirty(true);
+    toast.success('Plantilla aplicada', `Se cargó el contenido de «${tpl.name}».`);
+  };
+
+  const applyTemplate = (templateId: string) => {
+    const tpl = eligibleTemplates.find((t) => t.id === templateId);
+    if (!tpl) return;
+    // Si hay contenido sin guardar, pide confirmación antes de reemplazarlo.
+    if (body && dirty) {
+      setPendingTemplateId(templateId);
+      return;
+    }
+    loadTemplate(templateId);
+  };
+
+  const confirmApplyTemplate = () => {
+    if (!pendingTemplateId) return;
+    loadTemplate(pendingTemplateId);
+    setPendingTemplateId(null);
+  };
+
+  const cancelApplyTemplate = () => {
+    setPendingTemplateId(null);
+    setSelectedTemplateId('');
   };
 
   const handleSave = () => {
     if (!contractId) return;
-    writeContractDoc(contractId, { body, header, footer, pageSetup });
-    setSavedAt(new Date().toLocaleTimeString('es-MX'));
-    setDirty(false);
+    try {
+      writeContractDoc(contractId, { body, header, footer, pageSetup });
+      setSavedAt(new Date().toLocaleTimeString('es-MX'));
+      setDirty(false);
+      toast.success('Borrador guardado', 'El documento se guardó localmente en este navegador.');
+    } catch {
+      toast.error('No se pudo guardar', 'Ocurrió un error al guardar el borrador local.');
+    }
   };
 
   const contractsReady = !isLoadingContracts;
@@ -160,7 +187,7 @@ export function ContractEditorView() {
                 <Label htmlFor="template-select">Plantilla</Label>
                 <Select
                   id="template-select"
-                  value={selectedTemplateId}
+                  value={pendingTemplateId ?? selectedTemplateId}
                   onChange={(e) => applyTemplate(e.target.value)}
                   disabled={
                     !contractId ||
@@ -319,6 +346,17 @@ export function ContractEditorView() {
           </Card>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingTemplateId !== null}
+        title="Reemplazar contenido del documento"
+        body="Esto reemplazará el contenido actual del documento, incluido el borrador sin guardar. ¿Deseas continuar?"
+        confirmLabel="Reemplazar"
+        cancelLabel="Cancelar"
+        destructive
+        onConfirm={confirmApplyTemplate}
+        onCancel={cancelApplyTemplate}
+      />
     </main>
   );
 }

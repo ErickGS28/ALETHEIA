@@ -1,17 +1,20 @@
 'use client';
 
 import {
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { useEffect, useMemo, useState } from 'react';
 import { useAddVersionMutation, useListDocumentsQuery } from '../../../api/documentsApi';
 import { ContractSelector } from '../../../components/ContractSelector';
-import { AlertIcon } from '../../../components/ui/icons';
+import { FileIcon } from '../../../components/ui/icons';
 import { adaptDocument } from '../../../lib/adapter';
 import { getApiErrorMessage } from '../../../lib/error';
 import { fileNameFromUrl } from '../../../lib/format';
@@ -27,7 +30,7 @@ export function DocumentVersionsView() {
     refetch: refetchContracts,
   } = useContractOptions();
   const [contractId, setContractId] = useState<number | ''>('');
-  const [versionError, setVersionError] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     if (contractId === '' && options.length > 0) setContractId(options[0].id);
@@ -63,10 +66,13 @@ export function DocumentVersionsView() {
           mimeType: file.type || 'application/octet-stream',
         },
       }).unwrap();
-      setVersionError(null);
+      toast.success('Nueva versión subida', `Se agregó "${file.name}" como versión activa.`);
       return true;
     } catch (error) {
-      setVersionError(getApiErrorMessage(error, 'No se pudo subir la nueva versión.'));
+      toast.error(
+        'No se pudo subir la versión',
+        getApiErrorMessage(error, 'No se pudo subir la nueva versión.'),
+      );
       return false;
     }
   }
@@ -83,13 +89,10 @@ export function DocumentVersionsView() {
         </CardHeader>
         <CardContent>
           {contractsError ? (
-            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-muted-foreground">
-              <AlertIcon className="h-6 w-6 text-red-700" />
-              <span>No se pudieron cargar los contratos.</span>
-              <Button variant="neutral" size="sm" onClick={() => refetchContracts()}>
-                Reintentar
-              </Button>
-            </div>
+            <ErrorState
+              message="No se pudieron cargar los contratos."
+              onRetry={() => refetchContracts()}
+            />
           ) : (
             <div className="max-w-md">
               <ContractSelector
@@ -103,19 +106,20 @@ export function DocumentVersionsView() {
         </CardContent>
       </Card>
 
-      {versionError ? (
-        <div className="flex items-start gap-3 rounded-base border-2 border-border bg-red-100 px-4 py-3 shadow-shadow">
-          <AlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />
-          <p className="flex-1 font-sans text-sm text-red-700">{versionError}</p>
-        </div>
-      ) : null}
-
       {contractsError ? null : !ready ? (
-        <p className="font-sans text-sm text-muted-foreground">Cargando documentos…</p>
+        <Card>
+          <CardContent className="pt-6">
+            <LoadingState message="Cargando documentos…" />
+          </CardContent>
+        </Card>
       ) : docs.length === 0 ? (
         <Card>
-          <CardContent className="py-10 text-center font-sans text-sm text-muted-foreground">
-            Este contrato aún no tiene documentos cargados.
+          <CardContent className="pt-6">
+            <EmptyState
+              icon={<FileIcon className="h-5 w-5" />}
+              title="Sin documentos cargados"
+              description="Este contrato aún no tiene documentos cargados."
+            />
           </CardContent>
         </Card>
       ) : (

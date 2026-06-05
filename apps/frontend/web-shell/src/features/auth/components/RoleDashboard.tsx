@@ -1,7 +1,7 @@
 'use client';
 
 import { AppSidebar } from '@/components/AppSidebar';
-import { Badge } from '@aletheia/frontend-commons';
+import { Badge, Skeleton } from '@aletheia/frontend-commons';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
 import { ROLES } from '../data/roles';
@@ -62,11 +62,12 @@ const MODULES = [
 ] as const;
 
 /* ─── Stats ──────────────────────────────────────────────────────────── */
+/* Sin backend conectado las métricas se presentan como placeholders (Skeleton). */
 const STATS = [
-  { label: 'Contratos activos', value: '—' },
-  { label: 'Pendientes de acción', value: '—' },
-  { label: 'Completados este mes', value: '—' },
-  { label: 'Solicitudes nuevas', value: '—' },
+  { label: 'Contratos activos' },
+  { label: 'Pendientes de acción' },
+  { label: 'Completados este mes' },
+  { label: 'Solicitudes nuevas' },
 ] as const;
 
 /* ─── Component ──────────────────────────────────────────────────────── */
@@ -121,7 +122,7 @@ export function RoleDashboard() {
             {/* Welcome */}
             <div className="border-b-2 border-border pb-6">
               <h2 className="font-heading text-3xl leading-tight sm:text-4xl">
-                Bienvenido, <span style={{ color: '#15a8b5' }}>{roleName}</span>
+                Bienvenido, <span className="text-main">{roleName}</span>
               </h2>
               {email && <p className="mt-1.5 font-sans text-sm text-muted-foreground">{email}</p>}
             </div>
@@ -137,9 +138,8 @@ export function RoleDashboard() {
                     key={stat.label}
                     className="border-2 border-border bg-background rounded-base p-5 shadow-shadow"
                   >
-                    <p className="mb-2 font-heading text-4xl leading-none text-foreground/25">
-                      {stat.value}
-                    </p>
+                    {/* Métrica aún sin datos: placeholder intencional hasta conectar el backend. */}
+                    <Skeleton className="mb-3 h-9 w-16" />
                     <p className="text-xs font-sans leading-snug text-muted-foreground">
                       {stat.label}
                     </p>
@@ -147,7 +147,7 @@ export function RoleDashboard() {
                 ))}
               </div>
               <p className="mt-2 font-sans text-xs text-muted-foreground">
-                Conecta el backend para ver estadísticas en tiempo real.
+                Las métricas se mostrarán aquí en cuanto se conecte el backend.
               </p>
             </div>
 
@@ -161,17 +161,18 @@ export function RoleDashboard() {
                   <a
                     key={mod.href}
                     href={mod.href}
+                    aria-label={`Ir al módulo ${mod.label}`}
                     className="group relative border-2 border-border bg-background rounded-base p-5 shadow-shadow transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none"
                   >
                     {/* Teal left accent bar */}
-                    <div
-                      className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full"
-                      style={{ background: '#15a8b5' }}
-                    />
+                    <div className="absolute left-0 top-4 bottom-4 w-[3px] rounded-full bg-main" />
 
                     <div className="mb-2 flex items-start justify-between pl-3">
                       <span className="font-heading text-lg leading-tight">{mod.label}</span>
-                      <span className="ml-2 text-lg leading-none text-foreground/30 transition-colors group-hover:text-accent">
+                      <span
+                        aria-hidden="true"
+                        className="ml-2 text-lg leading-none text-foreground/30 transition-colors group-hover:text-accent"
+                      >
                         →
                       </span>
                     </div>

@@ -148,6 +148,7 @@ export function SignaturePad({ onDirtyChange, padRef }: SignaturePadProps) {
       <div className="rounded-base border-2 border-border bg-background shadow-shadow overflow-hidden">
         <canvas
           ref={canvasRef}
+          aria-label="Área para dibujar tu firma"
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           onPointerDown={handlePointerDown}

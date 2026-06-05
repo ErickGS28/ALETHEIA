@@ -13,6 +13,8 @@ interface ReviewActionModalProps {
   contract: WorkflowContract | null;
   /** True while the underlying mutation is in flight. */
   busy?: boolean;
+  /** Mensaje de error de la última acción; se muestra DENTRO del modal. */
+  error?: string | null;
   onClose: () => void;
   /** Called with the (trimmed) comment; empty string when not required. */
   onConfirm: (comment: string) => void;
@@ -53,6 +55,7 @@ export function ReviewActionModal({
   kind,
   contract,
   busy,
+  error,
   onClose,
   onConfirm,
 }: ReviewActionModalProps) {
@@ -92,6 +95,7 @@ export function ReviewActionModal({
     <Modal
       open={open}
       onClose={onClose}
+      allowBackdropClose={false}
       title={meta.title}
       description={`${contract.folio} · ${contract.provider}`}
       footer={
@@ -141,6 +145,15 @@ export function ReviewActionModal({
         ) : (
           <p className="font-sans text-xs text-muted-foreground">{meta.hint}</p>
         )}
+
+        {error ? (
+          <div
+            role="alert"
+            className="rounded-base border-2 border-border bg-destructive/10 px-4 py-3 font-sans text-sm text-destructive"
+          >
+            {error}
+          </div>
+        ) : null}
       </div>
     </Modal>
   );

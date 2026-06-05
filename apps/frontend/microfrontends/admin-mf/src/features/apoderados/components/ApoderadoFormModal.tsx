@@ -1,6 +1,15 @@
 'use client';
 
-import { Badge, Button, Checkbox, Input, Label, Modal, Textarea } from '@aletheia/frontend-commons';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  FormField,
+  Input,
+  Label,
+  Modal,
+  Textarea,
+} from '@aletheia/frontend-commons';
 import { useEffect, useState } from 'react';
 import type { Apoderado } from '../../admin/admin.api';
 
@@ -46,10 +55,13 @@ export function ApoderadoFormModal({
     onSubmit({ name: name.trim(), legalPower: legalPower.trim(), isActive });
   };
 
+  const isValid = name.trim().length > 0 && legalPower.trim().length > 0;
+
   return (
     <Modal
       open={open}
       onClose={onClose}
+      allowBackdropClose={false}
       title={initial ? 'Editar apoderado' : 'Nuevo apoderado'}
       description={
         initial ? 'Actualiza los datos del apoderado.' : 'Registra un nuevo apoderado legal.'
@@ -59,25 +71,23 @@ export function ApoderadoFormModal({
           <Button variant="neutral" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting || !isValid}>
             {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear apoderado'}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="apo-name">Nombre</Label>
+        <FormField label="Nombre" htmlFor="apo-name" required>
           <Input
             id="apo-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nombre completo"
           />
-        </div>
+        </FormField>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="apo-power">Descripción del poder legal</Label>
+        <FormField label="Descripción del poder legal" htmlFor="apo-power" required>
           <Textarea
             id="apo-power"
             value={legalPower}
@@ -85,7 +95,7 @@ export function ApoderadoFormModal({
             rows={3}
             placeholder="Ej. Poder general para actos de administración y dominio."
           />
-        </div>
+        </FormField>
 
         {initial ? (
           <div className="flex items-center gap-3">

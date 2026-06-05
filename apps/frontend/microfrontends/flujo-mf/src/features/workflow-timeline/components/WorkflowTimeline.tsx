@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
   EmptyState,
+  ErrorState,
+  LoadingState,
 } from '@aletheia/frontend-commons';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -49,17 +51,13 @@ export function WorkflowTimeline() {
       {!wf.hydrated ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState title="Cargando historial…" />
+            <LoadingState message="Cargando historial…" />
           </CardContent>
         </Card>
       ) : wf.isError ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState
-              icon={<TimelineIcon className="h-10 w-10" />}
-              title="No se pudieron cargar los contratos"
-              description={errorMessage(wf.error)}
-            />
+            <ErrorState message={errorMessage(wf.error)} onRetry={() => wf.refetch()} />
           </CardContent>
         </Card>
       ) : wf.contracts.length === 0 ? (
@@ -116,9 +114,9 @@ export function WorkflowTimeline() {
               </CardHeader>
               <CardContent>
                 {detail.isLoading ? (
-                  <p className="font-sans text-sm text-muted-foreground">Cargando transiciones…</p>
+                  <LoadingState message="Cargando transiciones…" />
                 ) : detail.isError ? (
-                  <p className="font-sans text-sm text-destructive">{errorMessage(detail.error)}</p>
+                  <ErrorState message={errorMessage(detail.error)} />
                 ) : transitions.length === 0 ? (
                   <p className="font-sans text-sm text-muted-foreground">
                     Este contrato aún no tiene transiciones registradas.

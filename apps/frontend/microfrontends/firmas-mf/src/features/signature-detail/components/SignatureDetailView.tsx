@@ -2,16 +2,22 @@
 
 import {
   BackButton,
-  Badge,
   Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  StatusBadge,
+  contractStatusLabel,
 } from '@aletheia/frontend-commons';
+import { PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
+  type SignatureMethod,
   useGetContractQuery,
   useListApoderadosQuery,
   useListSignaturesQuery,
@@ -19,6 +25,15 @@ import {
 
 interface SignatureDetailViewProps {
   contractId: string;
+}
+
+const METHOD_LABELS: Record<SignatureMethod, string> = {
+  CANVAS: 'Dibujada',
+  ELECTRONIC: 'Electrónica',
+};
+
+function methodLabel(method: SignatureMethod): string {
+  return METHOD_LABELS[method] ?? method;
 }
 
 function formatDate(iso: string): string {
@@ -35,11 +50,13 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
     data: contract,
     isLoading: loadingContract,
     isError: errorContract,
+    refetch: refetchContract,
   } = useGetContractQuery(contractId);
   const {
     data: signatures,
     isLoading: loadingSignatures,
     isError: errorSignatures,
+    refetch: refetchSignatures,
   } = useListSignaturesQuery(contractId);
   const { data: apoderados } = useListApoderadosQuery();
 
@@ -60,14 +77,17 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
         {loading ? (
           <Card>
             <CardContent className="p-6">
-              <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+              <LoadingState message="Cargando detalle de firma…" />
             </CardContent>
           </Card>
         ) : errorContract || !contract ? (
           <Card>
-            <CardContent className="space-y-4 p-6">
-              <Badge variant="secondary">Contrato no encontrado</Badge>
-              <div>
+            <CardContent className="p-6">
+              <ErrorState
+                message="No se pudo cargar el contrato. Verifica tu conexión e intenta de nuevo."
+                onRetry={refetchContract}
+              />
+              <div className="mt-4 flex justify-center">
                 <Button variant="neutral" size="sm" onClick={() => router.push('/')}>
                   Ir a firmas
                 </Button>
@@ -77,20 +97,31 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
         ) : errorSignatures ? (
           <Card>
             <CardContent className="p-6">
-              <Badge variant="destructive">No se pudieron cargar las firmas.</Badge>
+              <ErrorState
+                message="No se pudieron cargar las firmas de este contrato."
+                onRetry={refetchSignatures}
+              />
             </CardContent>
           </Card>
         ) : list.length === 0 ? (
           <Card>
-            <CardContent className="space-y-4 p-6">
-              <Badge variant="secondary">Este contrato aún no ha sido firmado</Badge>
-              {contract.status === 'SIGNING' ? (
-                <div>
-                  <Button size="sm" onClick={() => router.push(`/firmar/${contract.id}`)}>
-                    Firmar ahora
-                  </Button>
-                </div>
-              ) : null}
+            <CardContent className="p-6">
+              <EmptyState
+                icon={<PenLine className="h-5 w-5" />}
+                title="Este contrato aún no ha sido firmado"
+                description={
+                  contract.status === 'SIGNING'
+                    ? 'El contrato está disponible para firma. Captura la firma para registrarla.'
+                    : 'Cuando se registre una firma aparecerá aquí con sus metadatos.'
+                }
+                action={
+                  contract.status === 'SIGNING' ? (
+                    <Button size="sm" onClick={() => router.push(`/firmar/${contract.id}`)}>
+                      Firmar ahora
+                    </Button>
+                  ) : undefined
+                }
+              />
             </CardContent>
           </Card>
         ) : (
@@ -98,7 +129,7 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{contract.folio}</CardTitle>
-                <Badge variant="default">{contract.status}</Badge>
+                <StatusBadge status={contract.status} />
               </div>
               <CardDescription>
                 {contract.vendorName} &middot; {contract.society?.name ?? '—'}
@@ -112,7 +143,7 @@ export function SignatureDetailView({ contractId }: SignatureDetailViewProps) {
                     {/* Imagen de la firma (base64) */}
                     <div className="space-y-2">
                       <span className="text-xs font-heading uppercase tracking-widest text-foreground/70">
-                        Firma · {sig.method}
+                        Firma · {methodLabel(sig.method)}
                       </span>
                       <div className="rounded-base border-2 border-border bg-background p-4 shadow-shadow">
                         <img

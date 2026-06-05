@@ -13,6 +13,8 @@ export interface ModalProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  /** Permite cerrar al hacer clic en el fondo (default true). Ponlo en false para formularios críticos. */
+  allowBackdropClose?: boolean;
 }
 
 const FOCUSABLE =
@@ -31,6 +33,7 @@ export function Modal({
   children,
   footer,
   className,
+  allowBackdropClose = true,
 }: ModalProps) {
   const panelRef = React.useRef<HTMLDivElement>(null);
   const titleId = React.useId();
@@ -82,7 +85,7 @@ export function Modal({
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-foreground/40 p-4 py-10 backdrop-blur-[2px]"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (allowBackdropClose && e.target === e.currentTarget) onClose();
       }}
     >
       <div

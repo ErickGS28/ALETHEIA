@@ -3,6 +3,7 @@
 import { Badge, Button, Input } from '@aletheia/frontend-commons';
 import { useRef, useState } from 'react';
 import { CheckIcon, FileIcon, UploadIcon } from '../../../components/ui/icons';
+import { validateDocumentFile } from '../../../lib/fileValidation';
 import { formatBytes, formatDate, formatMimeType } from '../../../lib/format';
 import type { DocumentRecord, RequiredDocument } from '../../../lib/types';
 
@@ -15,6 +16,36 @@ interface DocumentUploadRowProps {
   disabled?: boolean;
 }
 
+/** Inline feedback for the picker: validation error (token) or selected-file badge. */
+function FileSelectionFeedback({
+  errorId,
+  fileError,
+  pendingFile,
+}: {
+  errorId: string;
+  fileError: string | null;
+  pendingFile: File | null;
+}) {
+  if (fileError) {
+    return (
+      <p id={errorId} className="mt-2 font-sans text-xs text-destructive">
+        {fileError}
+      </p>
+    );
+  }
+  if (pendingFile) {
+    return (
+      <div className="mt-2">
+        <Badge variant="secondary" className="gap-1.5 font-normal">
+          <FileIcon className="h-3.5 w-3.5" />
+          {pendingFile.name} &middot; {formatBytes(pendingFile.size)}
+        </Badge>
+      </div>
+    );
+  }
+  return null;
+}
+
 /** A single required-document slot: pendiente / cargado + file picker. */
 export function DocumentUploadRow({
   requirement,
@@ -24,10 +55,22 @@ export function DocumentUploadRow({
 }: DocumentUploadRowProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [expiryDate, setExpiryDate] = useState('');
 
   const isUploaded = Boolean(document);
   const active = document?.versions[document.versions.length - 1];
+
+  function handleSelect(file: File | null) {
+    if (!file) {
+      setPendingFile(null);
+      setFileError(null);
+      return;
+    }
+    const error = validateDocumentFile(file);
+    setFileError(error);
+    setPendingFile(error ? null : file);
+  }
 
   async function handleConfirm() {
     if (!pendingFile) return;
@@ -38,6 +81,7 @@ export function DocumentUploadRow({
     // Keep the selected file when the upload failed so the user can retry.
     if (result === false) return;
     setPendingFile(null);
+    setFileError(null);
     setExpiryDate('');
     if (inputRef.current) inputRef.current.value = '';
   }
@@ -52,7 +96,9 @@ export function DocumentUploadRow({
           <div>
             <div className="font-heading text-base">{requirement.label}</div>
             <div className="font-sans text-xs text-muted-foreground">
-              {requirement.tracksExpiry ? 'Requiere fecha de vigencia' : 'Sin vigencia'}
+              {requirement.tracksExpiry
+                ? 'Acepta fecha de vigencia (opcional)'
+                : 'Sin fecha de vigencia'}
             </div>
           </div>
         </div>
@@ -95,7 +141,9 @@ export function DocumentUploadRow({
               ref={inputRef}
               type="file"
               accept=".pdf,.png,.jpg,.jpeg"
-              onChange={(e) => setPendingFile(e.target.files?.[0] ?? null)}
+              aria-invalid={fileError ? true : undefined}
+              aria-describedby={fileError ? `file-error-${requirement.key}` : undefined}
+              onChange={(e) => handleSelect(e.target.files?.[0] ?? null)}
             />
           </div>
 
@@ -103,9 +151,12 @@ export function DocumentUploadRow({
             <div className="space-y-1.5 sm:w-44">
               <label
                 htmlFor={`exp-${requirement.key}`}
-                className="font-sans text-xs uppercase tracking-wide text-muted-foreground"
+                className="flex items-center gap-1 font-sans text-xs uppercase tracking-wide text-muted-foreground"
               >
-                Vigencia (opcional)
+                Vigencia
+                <span className="font-sans text-[10px] normal-case tracking-normal text-foreground/50">
+                  (opcional)
+                </span>
               </label>
               <Input
                 id={`exp-${requirement.key}`}
@@ -116,18 +167,24 @@ export function DocumentUploadRow({
             </div>
           ) : null}
 
-          <Button onClick={handleConfirm} disabled={!pendingFile || disabled}>
+          <Button
+            onClick={handleConfirm}
+            disabled={!pendingFile || disabled}
+            aria-label={`Cargar ${requirement.label}`}
+          >
             <UploadIcon className="h-4 w-4" />
             Cargar
           </Button>
         </div>
       )}
 
-      {pendingFile && !isUploaded ? (
-        <div className="mt-2 font-sans text-xs text-muted-foreground">
-          Seleccionado: {pendingFile.name} &middot; {formatBytes(pendingFile.size)}
-        </div>
-      ) : null}
+      {isUploaded ? null : (
+        <FileSelectionFeedback
+          errorId={`file-error-${requirement.key}`}
+          fileError={fileError}
+          pendingFile={pendingFile}
+        />
+      )}
     </div>
   );
 }

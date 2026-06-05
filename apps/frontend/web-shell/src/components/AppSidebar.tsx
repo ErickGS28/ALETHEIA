@@ -172,10 +172,7 @@ export function AppSidebar({
         {/* User */}
         <div className="border-b-2 border-border px-3 py-3">
           <div className="flex items-center gap-3 rounded-base border-2 border-border bg-secondary-background px-3 py-2 shadow-sm">
-            <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border-2 border-border font-heading text-sm"
-              style={{ background: '#15a8b5', color: '#fff' }}
-            >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-base border-2 border-border bg-main font-heading text-sm text-main-foreground">
               {initial}
             </div>
             <div className="min-w-0">

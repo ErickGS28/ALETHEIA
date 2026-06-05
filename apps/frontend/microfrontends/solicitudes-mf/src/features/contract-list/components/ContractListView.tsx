@@ -7,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
+  EmptyState,
+  ErrorState,
   Input,
+  LoadingState,
   Select,
   Table,
   TableBody,
@@ -15,8 +18,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from '@aletheia/frontend-commons';
-import { Plus } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { adaptContracts } from '../../_shared/api/adapters';
@@ -45,6 +49,7 @@ import { ContractRowActions } from './ContractRowActions';
 
 export function ContractListView() {
   const router = useRouter();
+  const toast = useToast();
 
   const { data, isLoading, isError, refetch } = useListContractsQuery(undefined);
   const { data: areas } = useListAreasQuery();
@@ -67,10 +72,14 @@ export function ContractListView() {
     setActionError(null);
     try {
       await submitContract(c.numericId).unwrap();
+      toast.success('Solicitud enviada a revisión', `${c.folio} pasó a revisión.`);
     } catch (error) {
-      setActionError(
-        getErrorMessage(error, `No se pudo enviar a revisión la solicitud ${c.folio}.`),
+      const message = getErrorMessage(
+        error,
+        `No se pudo enviar a revisión la solicitud ${c.folio}.`,
       );
+      setActionError(message);
+      toast.error('No se pudo enviar', message);
     }
   };
 
@@ -78,8 +87,11 @@ export function ContractListView() {
     setActionError(null);
     try {
       await recoverContract(c.numericId).unwrap();
+      toast.success('Solicitud recuperada', `${c.folio} volvió a Borrador.`);
     } catch (error) {
-      setActionError(getErrorMessage(error, `No se pudo recuperar la solicitud ${c.folio}.`));
+      const message = getErrorMessage(error, `No se pudo recuperar la solicitud ${c.folio}.`);
+      setActionError(message);
+      toast.error('No se pudo recuperar', message);
     }
   };
 
@@ -88,8 +100,11 @@ export function ContractListView() {
     try {
       await cancelContract({ id: target.numericId, reason }).unwrap();
       setCancelTarget(null);
+      toast.success('Solicitud cancelada', `${target.folio} se canceló correctamente.`);
     } catch (error) {
-      setActionError(getErrorMessage(error, `No se pudo cancelar la solicitud ${target.folio}.`));
+      const message = getErrorMessage(error, `No se pudo cancelar la solicitud ${target.folio}.`);
+      setActionError(message);
+      toast.error('No se pudo cancelar', message);
     }
   };
 
@@ -192,51 +207,54 @@ export function ContractListView() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="h-24 text-center font-sans text-muted-foreground"
-                      >
-                        Cargando…
+                      <TableCell colSpan={7} className="h-24 p-0">
+                        <LoadingState message="Cargando contratos…" />
                       </TableCell>
                     </TableRow>
                   ) : isError ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center font-sans text-red-600">
-                        <span className="block">No se pudieron cargar los contratos.</span>
-                        <Button
-                          variant="neutral"
-                          size="sm"
-                          className="mt-2"
-                          onClick={() => refetch()}
-                        >
-                          Reintentar
-                        </Button>
+                      <TableCell colSpan={7} className="h-24 p-0">
+                        <ErrorState
+                          message="No se pudieron cargar los contratos."
+                          onRetry={() => refetch()}
+                        />
                       </TableCell>
                     </TableRow>
                   ) : noAccess ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="h-24 text-center font-sans text-muted-foreground"
-                      >
-                        No tienes privilegios para ver contratos.
+                      <TableCell colSpan={7} className="h-24 p-0">
+                        <EmptyState
+                          icon={<FileText className="h-5 w-5 text-muted-foreground" />}
+                          title="Sin acceso"
+                          description="No tienes privilegios para ver contratos."
+                        />
                       </TableCell>
                     </TableRow>
                   ) : rows.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        className="h-24 text-center font-sans text-muted-foreground"
-                      >
-                        Sin resultados.
+                      <TableCell colSpan={7} className="h-24 p-0">
+                        <EmptyState
+                          icon={<FileText className="h-5 w-5 text-muted-foreground" />}
+                          title="Sin resultados"
+                          description="Ajusta los filtros o crea una nueva solicitud."
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (
                     rows.map(({ contract, sla }) => (
                       <TableRow
                         key={contract.id}
-                        className="cursor-pointer"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Ver solicitud ${contract.folio}: ${contract.title}`}
+                        className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground"
                         onClick={() => goDetail(contract)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            goDetail(contract);
+                          }
+                        }}
                       >
                         <TableCell className="text-xs text-muted-foreground">
                           {contract.folio}

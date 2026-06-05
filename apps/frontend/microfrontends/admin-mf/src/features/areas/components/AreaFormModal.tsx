@@ -1,6 +1,14 @@
 'use client';
 
-import { Badge, Button, Checkbox, Input, Label, Modal } from '@aletheia/frontend-commons';
+import {
+  Badge,
+  Button,
+  Checkbox,
+  FormField,
+  Input,
+  Label,
+  Modal,
+} from '@aletheia/frontend-commons';
 import { useEffect, useState } from 'react';
 import type { Area } from '../../admin/admin.api';
 
@@ -42,10 +50,13 @@ export function AreaFormModal({
     onSubmit({ name: name.trim(), isActive });
   };
 
+  const isValid = name.trim().length > 0;
+
   return (
     <Modal
       open={open}
       onClose={onClose}
+      allowBackdropClose={false}
       title={initial ? 'Editar área' : 'Nueva área'}
       description={initial ? 'Actualiza el área.' : 'Registra una nueva área.'}
       footer={
@@ -53,22 +64,21 @@ export function AreaFormModal({
           <Button variant="neutral" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting || !isValid}>
             {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear área'}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="area-name">Nombre</Label>
+        <FormField label="Nombre" htmlFor="area-name" required>
           <Input
             id="area-name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Ej. Compras"
           />
-        </div>
+        </FormField>
 
         {initial ? (
           <>

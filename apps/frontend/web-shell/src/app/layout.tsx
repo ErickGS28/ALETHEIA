@@ -1,4 +1,5 @@
 import { StoreProvider } from '@/features/auth';
+import { ToastProvider } from '@aletheia/frontend-commons';
 import type { Metadata } from 'next';
 import { Anton } from 'next/font/google';
 import localFont from 'next/font/local';
@@ -36,7 +37,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${dmSans.variable} ${anton.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </StoreProvider>
       </body>
     </html>
   );

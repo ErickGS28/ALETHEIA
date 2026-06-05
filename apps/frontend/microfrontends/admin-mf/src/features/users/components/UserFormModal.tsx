@@ -4,6 +4,7 @@ import {
   Badge,
   Button,
   Checkbox,
+  FormField,
   Input,
   Label,
   Modal,
@@ -90,6 +91,13 @@ export function UserFormModal({
     });
   };
 
+  const isValid =
+    name.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    EMAIL_RE.test(email.trim()) &&
+    (initial ? true : password.trim().length >= 6) &&
+    roles.length > 0;
+
   // El usuario editado puede tener un área que ya está inactiva: la incluimos.
   const selectableAreas = useMemo(() => {
     if (initial?.areaId != null && !activeAreas.some((a) => a.id === initial.areaId)) {
@@ -103,6 +111,7 @@ export function UserFormModal({
     <Modal
       open={open}
       onClose={onClose}
+      allowBackdropClose={false}
       title={initial ? 'Editar usuario' : 'Nuevo usuario'}
       description={initial ? 'Actualiza los datos del usuario.' : 'Registra un nuevo usuario.'}
       footer={
@@ -110,7 +119,7 @@ export function UserFormModal({
           <Button variant="neutral" onClick={onClose} disabled={submitting}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={submitting}>
+          <Button onClick={handleSubmit} disabled={submitting || !isValid}>
             {submitting ? 'Guardando…' : initial ? 'Guardar cambios' : 'Crear usuario'}
           </Button>
         </>
@@ -118,28 +127,30 @@ export function UserFormModal({
     >
       <div className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="user-name">Nombre</Label>
+          <FormField label="Nombre" htmlFor="user-name" required>
             <Input
               id="user-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nombre"
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="user-lastname">Apellido</Label>
+          </FormField>
+          <FormField label="Apellido" htmlFor="user-lastname" required>
             <Input
               id="user-lastname"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Apellido"
             />
-          </div>
+          </FormField>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="user-email">Email</Label>
+        <FormField
+          label="Email"
+          htmlFor="user-email"
+          required={!initial}
+          hint={initial ? 'El correo no se puede modificar.' : undefined}
+        >
           <Input
             id="user-email"
             type="email"
@@ -150,16 +161,10 @@ export function UserFormModal({
             readOnly={Boolean(initial)}
             disabled={Boolean(initial)}
           />
-          {initial ? (
-            <p className="font-sans text-xs text-muted-foreground">
-              El correo no se puede modificar.
-            </p>
-          ) : null}
-        </div>
+        </FormField>
 
         {!initial ? (
-          <div className="space-y-1.5">
-            <Label htmlFor="user-password">Contraseña</Label>
+          <FormField label="Contraseña" htmlFor="user-password" required>
             <Input
               id="user-password"
               type="password"
@@ -167,7 +172,7 @@ export function UserFormModal({
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
             />
-          </div>
+          </FormField>
         ) : null}
 
         <div className="space-y-1.5">
@@ -190,7 +195,12 @@ export function UserFormModal({
         </div>
 
         <div className="space-y-2">
-          <Label>Roles</Label>
+          <Label>
+            Roles
+            <span className="ml-0.5 text-destructive" aria-hidden="true">
+              *
+            </span>
+          </Label>
           <div className="grid gap-2">
             {ROLES.map((r) => (
               <label

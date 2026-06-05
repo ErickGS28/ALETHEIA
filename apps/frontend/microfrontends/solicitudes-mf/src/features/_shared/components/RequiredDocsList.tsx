@@ -21,7 +21,9 @@ export function RequiredDocsList({ providerType }: { providerType: ProviderType 
       {isLoading ? (
         <p className="font-sans text-xs text-muted-foreground">Cargando documentos…</p>
       ) : isError ? (
-        <p className="font-sans text-xs text-red-600">No se pudo cargar la lista de documentos.</p>
+        <p className="font-sans text-xs text-destructive">
+          No se pudo cargar la lista de documentos.
+        </p>
       ) : !data || data.length === 0 ? (
         <p className="font-sans text-xs text-muted-foreground">Sin documentos requeridos.</p>
       ) : (

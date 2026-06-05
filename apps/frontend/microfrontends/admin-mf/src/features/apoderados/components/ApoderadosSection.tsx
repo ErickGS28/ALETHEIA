@@ -17,6 +17,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Pencil, Plus, Scale } from 'lucide-react';
 import { useState } from 'react';
@@ -31,6 +32,7 @@ import { apiErrorMessage } from '../../admin/error';
 import { ApoderadoFormModal, type ApoderadoFormValues } from './ApoderadoFormModal';
 
 export function ApoderadosSection() {
+  const toast = useToast();
   const { data: apoderados = [], isLoading, isError, refetch } = useListApoderadosQuery();
   const [createApoderado, createState] = useCreateApoderadoMutation();
   const [updateApoderado, updateState] = useUpdateApoderadoMutation();
@@ -60,8 +62,16 @@ export function ApoderadosSection() {
         await createApoderado({ name: values.name, legalPower: values.legalPower }).unwrap();
       }
       setModalOpen(false);
+      toast.success(
+        editing ? 'Apoderado actualizado' : 'Apoderado creado',
+        editing
+          ? 'Los cambios del apoderado se guardaron correctamente.'
+          : 'El nuevo apoderado se registró correctamente.',
+      );
     } catch (err) {
-      setFormError(apiErrorMessage(err, 'No se pudo guardar el apoderado.'));
+      const message = apiErrorMessage(err, 'No se pudo guardar el apoderado.');
+      setFormError(message);
+      toast.error('No se pudo guardar el apoderado', message);
     }
   };
 
@@ -69,8 +79,14 @@ export function ApoderadosSection() {
     setActionError(null);
     try {
       await updateApoderado({ id: apoderado.id, body: { isActive: !apoderado.isActive } }).unwrap();
+      toast.success(
+        apoderado.isActive ? 'Apoderado desactivado' : 'Apoderado activado',
+        `"${apoderado.name}" ahora está ${apoderado.isActive ? 'inactivo' : 'activo'}.`,
+      );
     } catch (err) {
-      setActionError(apiErrorMessage(err, 'No se pudo cambiar el estado del apoderado.'));
+      const message = apiErrorMessage(err, 'No se pudo cambiar el estado del apoderado.');
+      setActionError(message);
+      toast.error('No se pudo cambiar el estado', message);
     }
   };
 

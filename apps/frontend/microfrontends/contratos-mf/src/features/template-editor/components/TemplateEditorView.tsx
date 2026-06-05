@@ -16,6 +16,7 @@ import {
   PageSetupControl,
   RichTextEditor,
   useRole,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Eye, EyeOff, Power, PowerOff, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -109,16 +110,20 @@ function TemplateForm(props: TemplateFormProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="tpl-name">Nombre</Label>
+            <Label htmlFor="tpl-name">
+              Nombre <span className="text-destructive">*</span>
+            </Label>
             <Input
               id="tpl-name"
               placeholder="Ej. Contrato de Prestación de Servicios"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
+              required
+              aria-invalid={Boolean(error)}
             />
           </div>
           {error ? (
-            <p className="font-sans text-xs text-red-600" role="alert">
+            <p className="font-sans text-xs text-destructive" role="alert">
               {error}
             </p>
           ) : null}
@@ -169,7 +174,7 @@ function TemplateForm(props: TemplateFormProps) {
             ariaLabel="Contenido de la plantilla"
           />
           <div className="flex flex-wrap items-center gap-3">
-            <Button onClick={onSave} disabled={saving}>
+            <Button onClick={onSave} disabled={saving || !name.trim()}>
               <Save className="h-4 w-4" />{' '}
               {saving ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear plantilla'}
             </Button>
@@ -210,6 +215,7 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
   const { can } = useRole();
   const canManage = can('TEMPLATES_MANAGE');
   const router = useRouter();
+  const toast = useToast();
 
   const isEdit = Boolean(templateId);
   const numericId = templateId ? Number(templateId) : Number.NaN;
@@ -269,12 +275,18 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
           body: { name: name.trim(), content, isActive: active },
         }).unwrap();
         setSavedAt(new Date().toLocaleTimeString('es-MX'));
+        toast.success('Plantilla guardada', 'Los cambios se guardaron correctamente.');
       } else {
         const created = await createTemplate({ name: name.trim(), content }).unwrap();
+        toast.success('Plantilla creada', `«${name.trim()}» se creó correctamente.`);
         router.push(`/plantillas/${created.id}`);
       }
     } catch {
       setError('No se pudo guardar la plantilla. Intenta de nuevo.');
+      toast.error(
+        'No se pudo guardar',
+        'Ocurrió un error al guardar la plantilla. Intenta de nuevo.',
+      );
     }
   };
 
@@ -285,8 +297,15 @@ export function TemplateEditorView({ templateId }: TemplateEditorViewProps) {
       await updateTemplate({ id: numericId, body: { isActive: next } }).unwrap();
       setActive(next);
       setSavedAt(new Date().toLocaleTimeString('es-MX'));
+      toast.success(
+        next ? 'Plantilla activada' : 'Plantilla desactivada',
+        next
+          ? 'La plantilla ya está disponible para elaborar documentos.'
+          : 'La plantilla dejó de estar disponible para elaborar documentos.',
+      );
     } catch {
       setError('No se pudo cambiar el estado de la plantilla.');
+      toast.error('No se pudo cambiar el estado', 'Ocurrió un error al actualizar la plantilla.');
     }
   };
 

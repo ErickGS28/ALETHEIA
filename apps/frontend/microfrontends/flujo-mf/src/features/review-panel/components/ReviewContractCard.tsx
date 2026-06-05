@@ -93,7 +93,12 @@ export function ReviewContractCard({
             privilege={privilege}
             fallback={<Badge variant="secondary">Sin permiso para revisar esta etapa</Badge>}
           >
-            <Button size="sm" disabled={disabled} onClick={() => onAction('approve', contract)}>
+            <Button
+              size="sm"
+              disabled={disabled}
+              onClick={() => onAction('approve', contract)}
+              aria-label={`${approveLabel(contract.status)} — contrato ${contract.folio}`}
+            >
               <CheckIcon />
               {approveLabel(contract.status)}
             </Button>
@@ -102,6 +107,7 @@ export function ReviewContractCard({
               size="sm"
               disabled={disabled}
               onClick={() => onAction('return', contract)}
+              aria-label={`Devolver al solicitante — contrato ${contract.folio}`}
             >
               <ReturnIcon />
               Devolver
@@ -112,6 +118,7 @@ export function ReviewContractCard({
                 size="sm"
                 disabled={disabled}
                 onClick={() => onAction('reject', contract)}
+                aria-label={`Rechazar definitivamente — contrato ${contract.folio}`}
               >
                 <RejectIcon />
                 Rechazar

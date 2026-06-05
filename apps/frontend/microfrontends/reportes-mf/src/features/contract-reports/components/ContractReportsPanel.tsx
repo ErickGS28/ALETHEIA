@@ -7,6 +7,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  ErrorState,
+  LoadingState,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { AlertTriangle, Download, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -31,6 +34,7 @@ export function ContractReportsPanel() {
     refetch,
   } = useReports();
 
+  const toast = useToast();
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
@@ -39,8 +43,11 @@ export function ContractReportsPanel() {
     setExportError(null);
     try {
       await exportContractsCsv();
+      toast.success('Reporte exportado', 'El archivo CSV se descargó correctamente.');
     } catch {
-      setExportError('No se pudo exportar el CSV. Inténtalo de nuevo.');
+      const message = 'No se pudo exportar el CSV. Inténtalo de nuevo.';
+      setExportError(message);
+      toast.error('Error al exportar', message);
     } finally {
       setExporting(false);
     }
@@ -48,7 +55,7 @@ export function ContractReportsPanel() {
 
   return (
     <div className="space-y-6">
-      <ReportKpis total={total} kpis={kpis} />
+      <ReportKpis total={total} kpis={kpis} isLoading={isLoading} />
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
@@ -64,7 +71,11 @@ export function ContractReportsPanel() {
         </CardHeader>
         <CardContent className="space-y-6">
           {exportError && (
-            <div className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-sans text-sm text-destructive">
+            <div
+              role="alert"
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-base border-2 border-border bg-destructive/10 p-3 font-sans text-sm text-destructive"
+            >
               <AlertTriangle className="h-4 w-4" /> {exportError}
             </div>
           )}
@@ -78,17 +89,9 @@ export function ContractReportsPanel() {
           />
 
           {isError ? (
-            <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-muted-foreground">
-              <AlertTriangle className="h-6 w-6 text-destructive" />
-              <span>No se pudieron cargar los reportes.</span>
-              <Button variant="neutral" size="sm" onClick={() => refetch()}>
-                Reintentar
-              </Button>
-            </div>
+            <ErrorState message="No se pudieron cargar los reportes." onRetry={() => refetch()} />
           ) : isLoading ? (
-            <div className="flex items-center justify-center gap-2 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 font-sans text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Cargando reportes…
-            </div>
+            <LoadingState message="Cargando reportes…" />
           ) : (
             <ContractsTable contracts={contracts} />
           )}

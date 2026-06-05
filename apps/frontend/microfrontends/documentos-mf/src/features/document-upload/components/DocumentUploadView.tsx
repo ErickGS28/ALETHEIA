@@ -2,13 +2,15 @@
 
 import {
   Badge,
-  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
+  ErrorState,
+  LoadingState,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -17,7 +19,6 @@ import {
   useUploadDocumentMutation,
 } from '../../../api/documentsApi';
 import { ContractSelector } from '../../../components/ContractSelector';
-import { AlertIcon } from '../../../components/ui/icons';
 import {
   PROVIDER_TYPE_LABELS,
   adaptDocument,
@@ -38,7 +39,7 @@ export function DocumentUploadView() {
     refetch: refetchContracts,
   } = useContractOptions();
   const [contractId, setContractId] = useState<number | ''>('');
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const toast = useToast();
 
   // Default to the first contract once loaded.
   useEffect(() => {
@@ -106,10 +107,13 @@ export function DocumentUploadView() {
           expiresAt: expiryDate ? new Date(expiryDate).toISOString() : undefined,
         },
       }).unwrap();
-      setUploadError(null);
+      toast.success('Documento cargado', `"${file.name}" se cargó correctamente.`);
       return true;
     } catch (error) {
-      setUploadError(getApiErrorMessage(error, 'No se pudo cargar el documento.'));
+      toast.error(
+        'No se pudo cargar',
+        getApiErrorMessage(error, 'No se pudo cargar el documento.'),
+      );
       return false;
     }
   }
@@ -142,13 +146,10 @@ export function DocumentUploadView() {
           </CardHeader>
           <CardContent className="space-y-4">
             {contractsError ? (
-              <div className="flex flex-col items-center gap-3 rounded-base border-2 border-dashed border-border bg-secondary-background/40 p-10 text-center font-sans text-sm text-muted-foreground">
-                <AlertIcon className="h-6 w-6 text-red-700" />
-                <span>No se pudieron cargar los contratos.</span>
-                <Button variant="neutral" size="sm" onClick={() => refetchContracts()}>
-                  Reintentar
-                </Button>
-              </div>
+              <ErrorState
+                message="No se pudieron cargar los contratos."
+                onRetry={() => refetchContracts()}
+              />
             ) : (
               <>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -181,15 +182,12 @@ export function DocumentUploadView() {
           </CardContent>
         </Card>
 
-        {uploadError ? (
-          <div className="flex items-start gap-3 rounded-base border-2 border-border bg-red-100 px-4 py-3 shadow-shadow">
-            <AlertIcon className="mt-0.5 h-4 w-4 shrink-0 text-red-700" />
-            <p className="flex-1 font-sans text-sm text-red-700">{uploadError}</p>
-          </div>
-        ) : null}
-
         {contractsError ? null : !ready ? (
-          <p className="font-sans text-sm text-muted-foreground">Cargando documentos…</p>
+          <Card>
+            <CardContent className="pt-6">
+              <LoadingState message="Cargando documentos…" />
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
             {requirements.map((req) => {

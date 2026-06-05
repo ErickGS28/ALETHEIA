@@ -10,6 +10,9 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
+  EmptyState,
+  ErrorState,
+  LoadingState,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +21,7 @@ import {
   TableRow,
   useRole,
 } from '@aletheia/frontend-commons';
+import { FileSignature, PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useListContractsQuery } from '../../signatures/api/signaturesApi';
 
@@ -36,11 +40,13 @@ export function SignatureListView() {
     data: toSign,
     isLoading: loadingToSign,
     isError: errorToSign,
+    refetch: refetchToSign,
   } = useListContractsQuery({ status: 'SIGNING' });
   const {
     data: signed,
     isLoading: loadingSigned,
     isError: errorSigned,
+    refetch: refetchSigned,
   } = useListContractsQuery({ status: 'SIGNED' });
 
   const listToSign = toSign ?? [];
@@ -67,16 +73,21 @@ export function SignatureListView() {
           </CardHeader>
           <CardContent>
             {loadingToSign ? (
-              <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+              <LoadingState message="Cargando contratos por firmar…" />
             ) : errorToSign ? (
-              <Badge variant="destructive">No se pudieron cargar los contratos por firmar.</Badge>
+              <ErrorState
+                message="No se pudieron cargar los contratos por firmar."
+                onRetry={refetchToSign}
+              />
             ) : listToSign.length === 0 ? (
-              <p className="font-sans text-sm text-muted-foreground">
-                No hay contratos pendientes de firma.
-              </p>
+              <EmptyState
+                icon={<PenLine className="h-5 w-5" />}
+                title="No hay contratos pendientes de firma"
+                description="Cuando un contrato pase a estado En firma aparecerá aquí."
+              />
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Folio</TableHead>
@@ -120,13 +131,18 @@ export function SignatureListView() {
           </CardHeader>
           <CardContent>
             {loadingSigned ? (
-              <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+              <LoadingState message="Cargando contratos firmados…" />
             ) : errorSigned ? (
-              <Badge variant="destructive">No se pudieron cargar los contratos firmados.</Badge>
+              <ErrorState
+                message="No se pudieron cargar los contratos firmados."
+                onRetry={refetchSigned}
+              />
             ) : listSigned.length === 0 ? (
-              <p className="font-sans text-sm text-muted-foreground">
-                Aún no hay firmas registradas.
-              </p>
+              <EmptyState
+                icon={<FileSignature className="h-5 w-5" />}
+                title="Aún no hay firmas registradas"
+                description="El historial de contratos firmados aparecerá aquí."
+              />
             ) : (
               <div className="overflow-x-auto">
                 <Table className="min-w-[640px]">

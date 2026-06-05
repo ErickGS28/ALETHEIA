@@ -8,7 +8,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  ErrorState,
+  LoadingState,
   useRole,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { Pencil, RotateCcw, Send, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -53,6 +56,7 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
 export function ContractDetailView({ contractId }: { contractId: string }) {
   const router = useRouter();
   const { can } = useRole();
+  const toast = useToast();
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [actionError, setActionError] = React.useState<string | null>(null);
 
@@ -84,8 +88,11 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     setActionError(null);
     try {
       await submitContract(id).unwrap();
+      toast.success('Solicitud enviada a revisión', 'La solicitud pasó a revisión.');
     } catch (error) {
-      setActionError(getErrorMessage(error, 'No se pudo enviar la solicitud a revisión.'));
+      const message = getErrorMessage(error, 'No se pudo enviar la solicitud a revisión.');
+      setActionError(message);
+      toast.error('No se pudo enviar', message);
     }
   };
 
@@ -93,8 +100,11 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     setActionError(null);
     try {
       await recoverContract(id).unwrap();
+      toast.success('Solicitud recuperada', 'La solicitud volvió a Borrador.');
     } catch (error) {
-      setActionError(getErrorMessage(error, 'No se pudo recuperar la solicitud.'));
+      const message = getErrorMessage(error, 'No se pudo recuperar la solicitud.');
+      setActionError(message);
+      toast.error('No se pudo recuperar', message);
     }
   };
 
@@ -103,8 +113,11 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     try {
       await cancelContract({ id, reason }).unwrap();
       setCancelOpen(false);
+      toast.success('Solicitud cancelada', 'La solicitud se canceló correctamente.');
     } catch (error) {
-      setActionError(getErrorMessage(error, 'No se pudo cancelar la solicitud.'));
+      const message = getErrorMessage(error, 'No se pudo cancelar la solicitud.');
+      setActionError(message);
+      toast.error('No se pudo cancelar', message);
     }
   };
 
@@ -115,15 +128,11 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
           <PageHeader title="Solicitud" />
           <Card>
             <CardContent className="space-y-4 p-6">
-              <p className="font-sans text-sm text-foreground/70">
-                {validId ? 'No se pudo cargar la solicitud.' : 'Solicitud no encontrada.'}
-              </p>
-              <div className="flex gap-2">
-                {validId && (
-                  <Button variant="neutral" size="sm" onClick={() => refetch()}>
-                    Reintentar
-                  </Button>
-                )}
+              <ErrorState
+                message={validId ? 'No se pudo cargar la solicitud.' : 'Solicitud no encontrada.'}
+                onRetry={validId ? () => refetch() : undefined}
+              />
+              <div className="flex justify-center">
                 <BackButton href="/" label="Volver al listado" />
               </div>
             </CardContent>
@@ -137,7 +146,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     return (
       <main className="bg-grid min-h-screen p-4 sm:p-6">
         <div className="mx-auto max-w-4xl">
-          <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+          <LoadingState message="Cargando solicitud…" />
         </div>
       </main>
     );

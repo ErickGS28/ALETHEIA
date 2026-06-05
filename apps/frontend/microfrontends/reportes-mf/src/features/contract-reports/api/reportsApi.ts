@@ -45,6 +45,10 @@ export interface AuditLog {
   id: number;
   contractId: number;
   userId: number;
+  /** Nombre legible del usuario que ejecutó la acción (si el backend lo resuelve). */
+  userName?: string;
+  /** Correo del usuario, usado como respaldo cuando no hay nombre. */
+  userEmail?: string;
   action: string;
   detail?: string;
   createdAt: string;

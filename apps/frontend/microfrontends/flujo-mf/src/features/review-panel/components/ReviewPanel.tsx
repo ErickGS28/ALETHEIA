@@ -1,6 +1,15 @@
 'use client';
 
-import { Badge, Button, Card, CardContent, EmptyState, useRole } from '@aletheia/frontend-commons';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  EmptyState,
+  LoadingState,
+  useRole,
+  useToast,
+} from '@aletheia/frontend-commons';
 import { useMemo, useState } from 'react';
 import { PageShell } from '../../../components/PageShell';
 import { InboxIcon } from '../../../components/ui/icons';
@@ -16,9 +25,25 @@ import { type ReviewActionKind, ReviewActionModal } from './ReviewActionModal';
 import { ReviewContractCard } from './ReviewContractCard';
 import { ReviewerNotifications } from './ReviewerNotifications';
 
+const ACTION_SUCCESS: Record<ReviewActionKind, { title: string; description: string }> = {
+  approve: {
+    title: 'Contrato aprobado',
+    description: 'El contrato avanzó a la siguiente etapa del flujo.',
+  },
+  return: {
+    title: 'Contrato devuelto',
+    description: 'El contrato regresó a Borrador para que el solicitante lo corrija.',
+  },
+  reject: {
+    title: 'Contrato rechazado',
+    description: 'El contrato quedó en estado Rechazado de forma definitiva.',
+  },
+};
+
 export function ReviewPanel() {
   const { role, can } = useRole();
   const wf = useWorkflow();
+  const toast = useToast();
 
   const [modalKind, setModalKind] = useState<ReviewActionKind | null>(null);
   const [target, setTarget] = useState<WorkflowContract | null>(null);
@@ -43,20 +68,25 @@ export function ReviewPanel() {
   const closeModal = () => {
     setModalKind(null);
     setTarget(null);
+    setActionError(null);
   };
 
   const handleConfirm = async (comment: string) => {
     if (!target || !modalKind) return;
     setActionError(null);
+    const kind = modalKind;
     try {
-      if (modalKind === 'approve') await wf.approve(target.id, { comment });
-      else if (modalKind === 'return') await wf.returnToDraft(target.id, { comment });
-      else if (modalKind === 'reject') await wf.reject(target.id, { comment });
+      if (kind === 'approve') await wf.approve(target.id, { comment });
+      else if (kind === 'return') await wf.returnToDraft(target.id, { comment });
+      else if (kind === 'reject') await wf.reject(target.id, { comment });
+      // Solo en éxito: cierra el modal y notifica.
       closeModal();
+      const ok = ACTION_SUCCESS[kind];
+      toast.success(ok.title, ok.description);
     } catch (err) {
-      // 403 (privilege not granted) or any validation error from the gateway.
+      // 403 (privilege not granted) o cualquier error de validación del gateway.
+      // Mantén el modal ABIERTO y muestra el error DENTRO para que el usuario lo vea.
       setActionError(errorMessage(err));
-      closeModal();
     }
   };
 
@@ -83,16 +113,10 @@ export function ReviewPanel() {
     >
       <ReviewerNotifications />
 
-      {actionError ? (
-        <div className="rounded-base border-2 border-border bg-[#fee2e2] px-4 py-3 font-sans text-sm text-[#991b1b]">
-          {actionError}
-        </div>
-      ) : null}
-
       {!wf.hydrated ? (
         <Card>
           <CardContent className="pt-6">
-            <EmptyState title="Cargando contratos…" />
+            <LoadingState message="Cargando contratos…" />
           </CardContent>
         </Card>
       ) : wf.isError ? (
@@ -160,6 +184,7 @@ export function ReviewPanel() {
         kind={modalKind}
         contract={target}
         busy={wf.mutating}
+        error={actionError}
         onClose={closeModal}
         onConfirm={handleConfirm}
       />

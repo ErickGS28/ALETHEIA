@@ -42,6 +42,7 @@
   --shadow-shadow: 4px 4px 0px 0px var(--color-shadow); /* sombra dura clásica */
   --shadow-sm: 2px 2px 0px 0px var(--color-shadow); /* elementos pequeños */
   --shadow-lg: 6px 6px 0px 0px var(--color-shadow); /* énfasis (modales/hero) */
+  --shadow-reverse: 4px 4px 0px 0px rgba(255, 255, 255, 0.4); /* botón sobre superficie oscura */
 
   /* ─── Font Weights ──────────────────────────────────── */
   --font-weight-base: 500;

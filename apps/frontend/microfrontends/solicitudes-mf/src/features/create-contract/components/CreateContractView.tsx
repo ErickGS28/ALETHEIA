@@ -9,9 +9,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  FormField,
   Input,
+  LoadingState,
   Select,
   useRole,
+  useToast,
 } from '@aletheia/frontend-commons';
 import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
@@ -25,6 +28,7 @@ import {
   useUpdateContractMutation,
 } from '../../_shared/api/contracts-api';
 import { toBackendProviderType } from '../../_shared/api/types';
+import { ErrorBanner } from '../../_shared/components/ErrorBanner';
 import { PageHeader } from '../../_shared/components/PageHeader';
 import { RequiredDocsList } from '../../_shared/components/RequiredDocsList';
 import { PROVIDER_TYPE_LABEL, type ProviderType } from '../../_shared/domain/contract';
@@ -71,6 +75,7 @@ export function CreateContractView() {
   const isEdit = editId != null && !Number.isNaN(editId);
 
   const { can } = useRole();
+  const toast = useToast();
 
   const { data: societies } = useListSocietiesQuery();
   const { data: areas } = useListAreasQuery();
@@ -107,6 +112,8 @@ export function CreateContractView() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const submitting = creating || updating;
+  // Validez en vivo para deshabilitar el submit cuando el formulario es inválido.
+  const hasErrors = Object.keys(validate(form)).length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,13 +134,17 @@ export function CreateContractView() {
     try {
       if (isEdit && existing) {
         await updateContract({ id: existing.id, body }).unwrap();
+        toast.success('Solicitud actualizada', `Se guardaron los cambios de ${existing.folio}.`);
         router.push(`/${existing.id}`);
       } else {
         const created = await createContract(body).unwrap();
+        toast.success('Solicitud creada', 'La solicitud se registró en estado Borrador.');
         router.push(`/${created.id}`);
       }
     } catch {
-      setSubmitError('No se pudo guardar la solicitud. Intenta de nuevo.');
+      const message = 'No se pudo guardar la solicitud. Intenta de nuevo.';
+      setSubmitError(message);
+      toast.error('Error al guardar', message);
     }
   };
 
@@ -157,7 +168,7 @@ export function CreateContractView() {
     return (
       <main className="bg-grid min-h-screen p-4 sm:p-6">
         <div className="mx-auto max-w-2xl">
-          <p className="font-sans text-sm text-muted-foreground">Cargando…</p>
+          <LoadingState message="Cargando solicitud…" />
         </div>
       </main>
     );
@@ -170,11 +181,13 @@ export function CreateContractView() {
           <PageHeader title="Editar solicitud" />
           <Card>
             <CardContent className="space-y-4 p-6">
-              <p className="font-sans text-sm text-foreground/70">
-                {existing && existing.status !== 'DRAFT'
-                  ? 'Solo las solicitudes en estado Borrador pueden editarse.'
-                  : 'Solicitud no encontrada.'}
-              </p>
+              <ErrorBanner
+                message={
+                  existing && existing.status !== 'DRAFT'
+                    ? 'Solo las solicitudes en estado Borrador pueden editarse.'
+                    : 'Solicitud no encontrada.'
+                }
+              />
               <BackButton href="/" label="Volver al listado" />
             </CardContent>
           </Card>
@@ -204,16 +217,16 @@ export function CreateContractView() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
-              <Field label="Título del contrato" htmlFor="title" required error={errors.title}>
+              <FormField label="Título del contrato" htmlFor="title" required error={errors.title}>
                 <Input
                   id="title"
                   placeholder="Ej. Suministro de equipo de cómputo"
                   value={form.title}
                   onChange={(e) => set('title', e.target.value)}
                 />
-              </Field>
+              </FormField>
 
-              <Field label="Sociedad" htmlFor="society" required error={errors.societyId}>
+              <FormField label="Sociedad" htmlFor="society" required error={errors.societyId}>
                 <Select
                   id="society"
                   value={form.societyId === '' ? '' : String(form.societyId)}
@@ -228,10 +241,10 @@ export function CreateContractView() {
                     </option>
                   ))}
                 </Select>
-              </Field>
+              </FormField>
 
               <div className="grid gap-5 sm:grid-cols-2">
-                <Field
+                <FormField
                   label="Nombre del proveedor"
                   htmlFor="providerName"
                   required
@@ -243,9 +256,9 @@ export function CreateContractView() {
                     value={form.providerName}
                     onChange={(e) => set('providerName', e.target.value)}
                   />
-                </Field>
+                </FormField>
 
-                <Field
+                <FormField
                   label="Email del proveedor"
                   htmlFor="providerEmail"
                   required
@@ -258,7 +271,7 @@ export function CreateContractView() {
                     value={form.providerEmail}
                     onChange={(e) => set('providerEmail', e.target.value)}
                   />
-                </Field>
+                </FormField>
               </div>
 
               <Field label="Tipo de proveedor" required>
@@ -281,7 +294,7 @@ export function CreateContractView() {
                 />
               </Field>
 
-              <Field label="Área requirente" htmlFor="area" required error={errors.areaId}>
+              <FormField label="Área requirente" htmlFor="area" required error={errors.areaId}>
                 <Select
                   id="area"
                   value={form.areaId === '' ? '' : String(form.areaId)}
@@ -296,7 +309,7 @@ export function CreateContractView() {
                     </option>
                   ))}
                 </Select>
-              </Field>
+              </FormField>
             </CardContent>
           </Card>
 
@@ -313,16 +326,14 @@ export function CreateContractView() {
           </Card>
 
           {submitError && (
-            <p className="rounded-base border-2 border-border bg-red-100 px-3 py-2 font-sans text-sm text-red-700">
-              {submitError}
-            </p>
+            <ErrorBanner message={submitError} onDismiss={() => setSubmitError(null)} />
           )}
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="neutral" onClick={() => router.push('/')}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={submitting}>
+            <Button type="submit" disabled={submitting || hasErrors}>
               {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear solicitud'}
             </Button>
           </div>

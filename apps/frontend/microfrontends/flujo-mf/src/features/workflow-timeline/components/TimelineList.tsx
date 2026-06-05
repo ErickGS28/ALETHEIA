@@ -7,9 +7,9 @@ import { ACTION_LABELS, STATUS_LABELS, formatDateTime } from '../../_shared/work
 
 const ACTION_DOT: Record<TransitionAction, string> = {
   SUBMIT: 'bg-main',
-  APPROVE: 'bg-[#16a34a]',
-  RETURN: 'bg-[#eab308]',
-  REJECT: 'bg-[#dc2626]',
+  APPROVE: 'bg-success',
+  RETURN: 'bg-warning',
+  REJECT: 'bg-destructive',
   RECOVER: 'bg-foreground',
 };
 

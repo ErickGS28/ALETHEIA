@@ -8,28 +8,32 @@ import {
 } from '../../features/_shared/workflow-rules';
 
 const DOT_COLORS: Record<SlaLevel, string> = {
-  green: 'bg-[#16a34a]',
-  yellow: 'bg-[#eab308]',
-  red: 'bg-[#dc2626]',
+  green: 'bg-success',
+  yellow: 'bg-warning',
+  red: 'bg-destructive',
   none: 'bg-foreground/30',
 };
 
 const BAR_COLORS: Record<SlaLevel, string> = {
-  green: 'bg-[#16a34a]',
-  yellow: 'bg-[#eab308]',
-  red: 'bg-[#dc2626]',
+  green: 'bg-success',
+  yellow: 'bg-warning',
+  red: 'bg-destructive',
   none: 'bg-foreground/30',
 };
 
 /** Small colored dot + label representing the SLA semaphore (HU-12). */
 export function SlaDot({ sla, showLabel = true }: { sla: SlaResult; showLabel?: boolean }) {
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2" aria-label={`SLA: ${sla.label}`}>
       <span
         className={cn('h-3 w-3 rounded-full border-2 border-border', DOT_COLORS[sla.level])}
         aria-hidden
       />
-      {showLabel ? <span className="font-sans text-xs text-foreground/70">{sla.label}</span> : null}
+      {showLabel ? (
+        <span className="font-sans text-xs text-foreground/70">{sla.label}</span>
+      ) : (
+        <span className="sr-only">{sla.label}</span>
+      )}
     </span>
   );
 }
@@ -80,14 +84,18 @@ export function SlaBadge({ sla }: { sla: SlaResult }) {
   if (sla.level === 'none') {
     return <span className="font-sans text-xs text-muted-foreground">—</span>;
   }
+  const pct = sla.ratio != null ? `${Math.round(sla.ratio * 100)}%` : '';
   return (
-    <span className="inline-flex items-center gap-2">
+    <span
+      className="inline-flex items-center gap-2"
+      aria-label={`SLA: ${sla.label}${pct ? ` · ${pct} consumido` : ''}`}
+    >
       <span
         className={cn('h-3 w-3 rounded-full border-2 border-border', DOT_COLORS[sla.level])}
         aria-hidden
       />
-      <span className="font-sans text-xs text-foreground/70">
-        {sla.ratio != null ? `${Math.round(sla.ratio * 100)}%` : ''}
+      <span className="font-sans text-xs text-foreground/70" aria-hidden>
+        {pct}
       </span>
     </span>
   );
