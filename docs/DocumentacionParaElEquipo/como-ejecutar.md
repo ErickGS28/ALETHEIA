@@ -12,7 +12,7 @@ Instala estas herramientas antes de empezar:
 |---|---|---|
 | **Node.js** | 22 LTS | https://nodejs.org (usa `nvm` o `fnm` si manejas varias versiones) |
 | **pnpm** | 10.8.1 | `npm install -g pnpm@10.8.1` o `corepack enable && corepack prepare pnpm@10.8.1 --activate` |
-| **Docker Desktop** | reciente | https://www.docker.com/products/docker-desktop — solo necesario para el backend (PostgreSQL + Redis) |
+| **Docker Desktop** | reciente | https://www.docker.com/products/docker-desktop — necesario para el backend (PostgreSQL + Redis) |
 | **Git** | cualquiera | https://git-scm.com |
 
 Verifica con:
@@ -22,6 +22,8 @@ node --version   # >= 22.x
 pnpm --version   # 10.8.1
 docker --version # cualquier versión reciente
 ```
+
+> ⚠️ **Docker Desktop debe estar ABIERTO** (el daemon corriendo), no solo instalado. Si `docker ps` da un error de "cannot connect to the Docker daemon", abre la app Docker Desktop y espera a que diga *Running*.
 
 ---
 
@@ -33,7 +35,7 @@ cd ALETHEIA
 pnpm install
 ```
 
-`pnpm install` instala las dependencias de **todas** las apps del workspace de una sola pasada. Tarda ~1 minuto la primera vez.
+`pnpm install` instala las dependencias de **todas** las apps del workspace de una sola pasada.
 
 > **Importante:** ejecuta siempre los comandos desde la raíz `ALETHEIA/`, nunca desde una subcarpeta. Husky y Turborepo dependen de estar en la raíz.
 
@@ -41,38 +43,32 @@ pnpm install
 
 ## Paso 2 — Variables de entorno (solo para el backend)
 
-Si vas a levantar el backend, copia el archivo de ejemplo:
+Cada servicio backend (gateway + 4 microservicios) usa su propio archivo `.env`. Están en
+`.gitignore`, así que **un clon nuevo no los trae**. Genéralos de una vez desde los `.env.example`
+(ya traen los valores por defecto que coinciden con Docker):
 
 ```powershell
-Copy-Item .env.example .env
+pnpm setup:env
 ```
 
-Variables clave (los valores por defecto ya coinciden con el `docker-compose.dev.yml`):
+Esto crea 5 archivos `.env` (uno por servicio) sin sobrescribir los que ya existan. No necesitas
+editar nada para desarrollo local; los `JWT_SECRET` solo deben cambiarse si vas a exponer el backend.
 
-```env
-DATABASE_URL=postgresql://clm_user:clm_pass@localhost:5432/clm_dev
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=cambia-este-secreto
-JWT_REFRESH_SECRET=cambia-este-secreto-refresh
-```
-
-> Si solo vas a correr el **frontend (modo mock)**, puedes saltarte este paso.
+> Si solo vas a revisar el **frontend** (Opción A), puedes saltarte este paso.
 
 ---
 
 ## Paso 3 — Elegir qué levantar
 
-### Opción A — Solo el frontend (modo mock, sin Docker)
+### Opción A — Solo el frontend (sin Docker)
 
-**Recomendado para revisar la UI sin necesitar Docker.**
-
-El frontend funciona completamente en modo mock: login por roles, flujos completos de todos los módulos, design system Neobrutalism. No requiere backend activo.
+Útil para revisar la UI pública y el diseño rápidamente.
 
 ```powershell
 pnpm dev:fe
 ```
 
-Esto levanta 8 procesos Next.js en paralelo (Turborepo):
+Levanta 8 procesos Next.js en paralelo:
 
 | App | Puerto | Ruta de entrada |
 |---|---|---|
@@ -85,74 +81,86 @@ Esto levanta 8 procesos Next.js en paralelo (Turborepo):
 | `reportes-mf` | 4006 | http://localhost:4000/reportes |
 | `admin-mf` | 4007 | http://localhost:4000/admin |
 
-**Entra siempre por http://localhost:4000** — el host reescribe las rutas a cada microfrontend. Cada MF devuelve 404 en su raíz directa porque se monta bajo su `basePath`.
+**Entra siempre por http://localhost:4000** — el host reescribe las rutas a cada microfrontend.
+
+> ℹ️ Sin backend podrás ver las páginas **públicas** (`/landing`, `/como-funciona`, `/componentes`)
+> y la pantalla de login, pero **el login usa el backend real**: para iniciar sesión y recorrer los
+> módulos necesitas levantar el backend (Opción B o C).
 
 ---
 
-### Opción B — Core (frontend + backend mínimo)
+### Opción B — Core (frontend + backend mínimo) — recomendada en laptop
 
 Levanta gateway + `auth-service` + `contracts-service` + `workflow-service` + `web-shell` + `solicitudes-mf` + `flujo-mf`.
 
-Primero asegúrate de que Docker Desktop esté corriendo, luego:
+Con **Docker Desktop abierto**:
 
 ```powershell
-pnpm infra:up                       # arranca postgres:5432 + redis:6379
-pnpm --filter @aletheia/auth-service db:migrate
-pnpm --filter @aletheia/contracts-service db:migrate
-pnpm --filter @aletheia/workflow-service db:migrate
-pnpm db:seed                         # roles, privilegios y catálogos base
+pnpm infra:up     # arranca postgres:5432 + redis:6379
+pnpm db:migrate   # aplica las migraciones Prisma de los 4 servicios
+pnpm db:seed      # 5 usuarios, privilegios, catálogos y etapas del flujo
 pnpm dev:core
 ```
 
-Verifica la infraestructura:
-
-```powershell
-docker ps   # debe mostrar postgres y redis con estado "Up"
-```
+Verifica la infraestructura: `docker ps` debe mostrar `aletheia_postgres` y `aletheia_redis` como `Up (healthy)`.
 
 ---
 
 ### Opción C — Sistema completo
 
-Todos los servicios y microfrontends (~15 procesos). Requiere Docker y una laptop con buena memoria RAM.
+Todos los servicios y microfrontends (~15 procesos). Requiere Docker y una laptop con buena RAM.
 
 ```powershell
 pnpm infra:up
-# (migraciones igual que Opción B, pero también documents-service)
-pnpm --filter @aletheia/documents-service db:migrate
+pnpm db:migrate
 pnpm db:seed
 pnpm dev
 ```
+
+> `db:migrate` y `db:seed` recorren **todos** los servicios automáticamente, así que el comando es el
+> mismo para la Opción B y la C.
 
 ---
 
 ## Paso 4 — Verificar que todo funciona
 
-### Frontend (Opciones A/B/C)
+### Frontend
 
-1. Abre http://localhost:4000
-2. Verás la pantalla de login con 5 botones de rol
-3. Haz clic en cualquier rol (p. ej. **Administrador**)
-4. Deberías ver el dashboard con las acciones que corresponden a ese rol
+1. Abre http://localhost:4000 → pantalla de login.
+2. Página pública que explica el sistema: **http://localhost:4000/como-funciona** (flujo por rol + matriz de permisos).
+3. Inicia sesión con una cuenta demo (requiere backend, Opción B/C) y recorre el módulo de tu rol.
 
-### Backend (Opciones B/C)
+### Backend
 
 | Recurso | URL |
 |---|---|
-| Swagger (documentación API) | http://localhost:3000/api/docs |
-| Endpoint de health del gateway | http://localhost:3000 |
+| Swagger (documentación API) | **http://localhost:3001/api/docs** |
+| Gateway (API REST) | **http://localhost:3001** |
+
+> El gateway corre en el puerto **3001** (no 3000) a propósito, para no chocar con Grafana.
 
 Prueba el login real desde Swagger:
 
 ```
 POST /auth/login
-{
-  "email": "admin@aletheia.com",
-  "password": "password123"
-}
+{ "email": "admin@aletheia.com", "password": "password123" }
 ```
 
-Respuesta esperada: `{ accessToken, refreshToken, privileges[] }`
+Respuesta esperada: `{ data: { accessToken, refreshToken, privileges[] } }`.
+
+---
+
+## Cuentas demo (contraseña `password123`)
+
+| Email | Rol |
+|---|---|
+| `admin@aletheia.com` | Administrador |
+| `solicitante@aletheia.com` | Solicitante |
+| `abogado@aletheia.com` | Abogado |
+| `aprobador@aletheia.com` | Aprobador |
+| `firmante@aletheia.com` | Firmante |
+
+Recorrido sugerido: **Solicitante** crea y envía una solicitud → **Administrador** la revisa en *Flujo* → **Abogado** → **Aprobador** → **Firmante** la firma. Verás los toasts y los cambios de estado en vivo.
 
 ---
 
@@ -161,15 +169,15 @@ Respuesta esperada: `{ accessToken, refreshToken, privileges[] }`
 | Comando | Qué hace |
 |---|---|
 | `pnpm install` | Instala dependencias de todo el workspace |
+| `pnpm setup:env` | Crea los `.env` de los 5 servicios desde sus `.env.example` |
 | `pnpm dev:fe` | Solo los 8 frontends (host + 7 MFs) — sin Docker |
 | `pnpm dev:core` | Subset funcional: gateway + 3 servicios + 3 frontends |
 | `pnpm dev` | Todo el sistema (~15 procesos) |
-| `pnpm infra:up` | Levanta postgres + redis (Docker) |
-| `pnpm infra:down` | Apaga la infraestructura Docker |
+| `pnpm infra:up` / `pnpm infra:down` | Levanta / apaga postgres + redis (Docker) |
+| `pnpm db:migrate` | Migraciones Prisma de todos los servicios |
+| `pnpm db:seed` | Seed inicial (usuarios, privilegios, catálogos, etapas) |
 | `pnpm build` | Build de producción de todo el monorepo |
 | `pnpm lint` | Lint con Biome |
-| `pnpm db:migrate` | Migraciones Prisma de todos los servicios |
-| `pnpm db:seed` | Seed inicial (roles, privilegios, catálogos) |
 
 Para correr **una sola app**:
 
@@ -187,7 +195,7 @@ pnpm --filter @aletheia/gateway dev
 ALETHEIA/
 ├─ apps/
 │  ├─ backend/
-│  │  ├─ gateway/              # API Gateway: punto único HTTP/REST + Swagger + JWT
+│  │  ├─ gateway/              # API Gateway (:3001): punto único HTTP/REST + Swagger + JWT
 │  │  ├─ services/
 │  │  │  ├─ auth-service/      # Login, refresh token, roles y privilegios
 │  │  │  ├─ contracts-service/ # CRUD contratos, plantillas, folio
@@ -195,53 +203,43 @@ ALETHEIA/
 │  │  │  └─ documents-service/ # Carga, versionado y vigencia de documentos
 │  │  └─ commons/              # Guards JWT, filtros, patrones Redis compartidos
 │  └─ frontend/
-│     ├─ web-shell/            # Host Multi-Zones: login + dashboard RBAC
-│     ├─ microfrontends/
-│     │  ├─ solicitudes-mf/    # Crear y gestionar solicitudes de contrato
-│     │  ├─ contratos-mf/      # Plantillas y elaboración de contratos
-│     │  ├─ documentos-mf/     # Carga y control de documentos requeridos
-│     │  ├─ flujo-mf/          # Panel de revisión y aprobación por rol
-│     │  ├─ firmas-mf/         # Firma digital (canvas + apoderado)
-│     │  ├─ reportes-mf/       # KPIs, filtros y exportar CSV
-│     │  └─ admin-mf/          # CRUD usuarios, áreas, configuración de etapas
-│     └─ commons/              # Design system Neobrutalism + RBAC compartido
+│     ├─ web-shell/            # Host Multi-Zones (:4000): login + dashboard RBAC + /como-funciona
+│     ├─ microfrontends/       # solicitudes, contratos, documentos, flujo, firmas, reportes, admin
+│     └─ commons/              # Design system Neobrutalism + RBAC + toasts compartidos
 ├─ packages/shared-schemas/    # Tipos TypeScript compartidos front↔back
 ├─ infra/docker/compose/       # docker-compose.dev.yml (postgres + redis)
-└─ docs/                       # Documentación, ADRs, runbooks
+├─ scripts/                    # setup-env.mjs, seed-demo.mjs
+└─ docs/                       # Documentación, ADRs, runbooks, changelog
 ```
 
 ---
 
 ## Solución de problemas frecuentes
 
+**`docker ps` falla / `cannot connect to the Docker daemon`**
+Docker Desktop no está corriendo. Ábrelo y espera a que diga *Running*; luego repite `pnpm infra:up`.
+
 **`prepare: .git can't be found` al instalar**
 Ejecutas `pnpm install` desde una subcarpeta. Ve a la raíz `ALETHEIA/` y vuelve a intentarlo.
 
+**El login no funciona / "No se pudo conectar con el servidor"**
+Levantaste solo el frontend (Opción A) o el backend no está arriba. Usa la Opción B/C y confirma que
+el gateway responde en http://localhost:3001/api/docs.
+
 **Puerto ocupado (EADDRINUSE)**
-Verifica qué ocupa el puerto y mátalo:
 ```powershell
-netstat -ano | findstr :4000   # reemplaza 4000 por el puerto afectado
+netstat -ano | findstr :4000   # reemplaza 4000 por el puerto afectado (3001, 5432, 6379…)
 taskkill /PID <pid> /F
 ```
 
 **El gateway devuelve 503/504**
 Redis no está corriendo. Verifica con `docker ps` y si hace falta: `pnpm infra:up`.
 
-**Errores de Prisma / schema no existe**
+**Errores de Prisma / "schema no existe"**
 Corre `pnpm db:migrate` para que cada servicio cree su schema lógico en PostgreSQL.
 
 **Los MFs devuelven 404 en su puerto directo**
 Comportamiento esperado. Cada MF se monta bajo su `basePath` (p. ej. `/solicitudes`). Entra siempre por el host en http://localhost:4000.
 
 **`turbo` solo levanta `web-shell` y no los MFs (Windows)**
-No uses `--filter='*-mf'` en Windows — cmd.exe pasa las comillas simples literales. Usa el script `dev:fe` del `package.json` raíz que ya lista cada filtro explícitamente.
-
----
-
-## Credencial de prueba (backend activo)
-
-| Campo | Valor |
-|---|---|
-| Email | admin@aletheia.com |
-| Contraseña | password123 |
-| Rol | Administrador |
+No uses `--filter='*-mf'` en Windows. Usa el script `dev:fe` del `package.json` raíz que ya lista cada filtro explícitamente.
