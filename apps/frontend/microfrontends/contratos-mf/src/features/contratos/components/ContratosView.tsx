@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  BackButton,
   Badge,
   Button,
   Card,
@@ -10,33 +9,20 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
-  useRole,
 } from '@aletheia/frontend-commons';
 import { FileSignature, FileText, LayoutTemplate } from 'lucide-react';
 import Link from 'next/link';
 
 export function ContratosView() {
-  const { role, privileges } = useRole();
-
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-5xl space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-3">
+        <header>
           <h1 className="text-4xl font-heading">Contratos</h1>
-          <BackButton crossZone label="Inicio" />
+          <p className="mt-1 font-sans text-sm text-muted-foreground">
+            Gestión de plantillas y elaboración de documentos
+          </p>
         </header>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Microfrontend · Contratos (CLM)</CardTitle>
-            <CardDescription>Gestión de plantillas y elaboración de documentos.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2 font-sans text-sm text-foreground/70">
-            <span>Rol actual:</span>
-            <Badge variant="default">{role ?? 'sin sesión'}</Badge>
-            <span className="text-muted-foreground">· {privileges.length} privilegios activos</span>
-          </CardContent>
-        </Card>
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card>

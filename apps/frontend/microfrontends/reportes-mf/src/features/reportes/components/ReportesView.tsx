@@ -1,6 +1,6 @@
 'use client';
 
-import { BackButton, NoPermission, useRole } from '@aletheia/frontend-commons';
+import { NoPermission, useRole } from '@aletheia/frontend-commons';
 import { FileBarChart, History } from 'lucide-react';
 import { useState } from 'react';
 import { type TabItem, Tabs } from '../../../components/ui/tabs';
@@ -21,14 +21,11 @@ export function ReportesView() {
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
-        <header className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-heading">Reportes</h1>
-            <p className="mt-1 font-sans text-sm text-muted-foreground">
-              Reportes de contratos e historial de auditoría
-            </p>
-          </div>
-          <BackButton crossZone label="Inicio" />
+        <header>
+          <h1 className="text-4xl font-heading">Reportes</h1>
+          <p className="mt-1 font-sans text-sm text-muted-foreground">
+            Reportes de contratos e historial de auditoría
+          </p>
         </header>
 
         {!allowed ? (

@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  BackButton,
-  Badge,
-  NoPermission,
-  type Privilege,
-  cn,
-  useRole,
-} from '@aletheia/frontend-commons';
+import { Badge, NoPermission, type Privilege, cn, useRole } from '@aletheia/frontend-commons';
 import { Building2, Scale, Users, Workflow } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useState } from 'react';
@@ -50,7 +43,7 @@ const TABS: AdminTab[] = [
 ];
 
 export function AdminShell() {
-  const { role, privileges, can } = useRole();
+  const { can } = useRole();
   const [activeId, setActiveId] = useState<string>(TABS[0].id);
 
   const active = TABS.find((t) => t.id === activeId) ?? TABS[0];
@@ -60,22 +53,9 @@ export function AdminShell() {
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-5xl space-y-6">
-        <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-4xl font-heading">Administración</h1>
-            <p className="font-sans text-sm text-muted-foreground">
-              Configuración del sistema CLM (HU-20 a HU-23).
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-2 font-sans text-sm text-foreground/70">
-              <span>Rol:</span>
-              <Badge variant="default">{role ?? 'sin sesión'}</Badge>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-muted-foreground">{privileges.length} privilegios</span>
-            </span>
-            <BackButton crossZone label="Inicio" />
-          </div>
+        <header>
+          <h1 className="text-4xl font-heading">Administración</h1>
+          <p className="font-sans text-sm text-muted-foreground">Configuración del sistema CLM</p>
         </header>
 
         <nav className="flex flex-wrap gap-2" aria-label="Secciones de administración">
