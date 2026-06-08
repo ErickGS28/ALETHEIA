@@ -10,8 +10,10 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:be": "turbo dev --filter=@aletheia/gateway --filter=@aletheia/auth-service --filter=@aletheia/contracts-service --filter=@aletheia/workflow-service",
     "dev:fe": "turbo dev --filter=web-shell --filter=solicitudes-mf --filter=contratos-mf --filter=documentos-mf --filter=flujo-mf --filter=firmas-mf --filter=reportes-mf --filter=admin-mf --concurrency=20",
     "dev:core": "turbo dev --filter=@aletheia/gateway --filter=@aletheia/auth-service --filter=@aletheia/contracts-service --filter=@aletheia/workflow-service --filter=web-shell --filter=solicitudes-mf --filter=contratos-mf --filter=documentos-mf --filter=flujo-mf --filter=firmas-mf --filter=reportes-mf --filter=admin-mf --concurrency=20",
+    "dev:staged": "node scripts/dev-staged.mjs",
     "lint": "turbo lint",
     "test": "turbo test",
     "db:generate": "turbo db:generate",

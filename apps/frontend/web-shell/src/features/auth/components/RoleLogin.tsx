@@ -180,7 +180,7 @@ export function RoleLogin() {
                         setPassword(DEMO_PASSWORD);
                         submit(u.email, DEMO_PASSWORD);
                       }}
-                      className="rounded-base border-2 border-border bg-background px-3 py-1.5 text-xs font-sans shadow-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-secondary-background hover:shadow-none disabled:pointer-events-none disabled:opacity-40"
+                      className="cursor-pointer rounded-base border-2 border-border bg-background px-3 py-1.5 text-xs font-sans shadow-sm transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:bg-secondary-background hover:shadow-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       {u.label}
                     </button>
