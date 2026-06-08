@@ -14,8 +14,8 @@ export function PageHeader({
   subtitle?: string;
   actions?: React.ReactNode;
 }) {
-  const { role } = useRole();
-  const roleLabel = ROLES.find((r) => r.id === role)?.label ?? role ?? 'Sin sesión';
+  const { role, ready } = useRole();
+  const roleLabel = role ? (ROLES.find((r) => r.id === role)?.label ?? role) : null;
 
   return (
     <header className="flex flex-wrap items-start justify-between gap-3">
@@ -24,7 +24,7 @@ export function PageHeader({
         {subtitle && <p className="font-sans text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-2">
-        <Badge variant="secondary">{roleLabel}</Badge>
+        {ready && roleLabel && <Badge variant="secondary">{roleLabel}</Badge>}
         {actions}
       </div>
     </header>
