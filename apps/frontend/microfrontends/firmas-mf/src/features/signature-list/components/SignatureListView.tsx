@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  BackButton,
   Badge,
   Button,
   Card,
@@ -19,7 +18,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  useRole,
 } from '@aletheia/frontend-commons';
 import { FileSignature, PenLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -34,7 +32,6 @@ function formatDate(iso: string): string {
 
 export function SignatureListView() {
   const router = useRouter();
-  const { role, privileges } = useRole();
 
   const {
     data: toSign,
@@ -55,14 +52,11 @@ export function SignatureListView() {
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-4xl space-y-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-heading">Firmas</h1>
-            <p className="mt-1 font-sans text-xs text-muted-foreground">
-              {role ?? 'sin sesión'} &middot; {privileges.length} privilegios
-            </p>
-          </div>
-          <BackButton crossZone label="Inicio" />
+        <header>
+          <h1 className="text-4xl font-heading">Firmas</h1>
+          <p className="mt-1 font-sans text-xs text-muted-foreground">
+            Contratos pendientes de firma
+          </p>
         </header>
 
         {/* Contratos por firmar */}

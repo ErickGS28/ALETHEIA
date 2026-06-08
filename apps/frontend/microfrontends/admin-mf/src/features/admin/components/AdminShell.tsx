@@ -70,7 +70,7 @@ export function AdminShell() {
                 onClick={() => setActiveId(tab.id)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'inline-flex items-center gap-2 rounded-base border-2 border-border px-4 py-2 text-sm font-heading uppercase tracking-wide shadow-shadow transition-all',
+                  'inline-flex cursor-pointer items-center gap-2 rounded-base border-2 border-border px-4 py-2 text-sm font-heading uppercase tracking-wide shadow-shadow transition-all',
                   'hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2',
                   isActive ? 'bg-main text-main-foreground' : 'bg-background text-foreground',

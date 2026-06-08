@@ -1,23 +1,17 @@
 'use client';
 
-import { BackButton, Badge, useRole } from '@aletheia/frontend-commons';
 import type { ReactNode } from 'react';
 import { AppNav } from './AppNav';
 
 interface PageShellProps {
   title: string;
   subtitle?: string;
-  /** Active nav key for highlighting. */
   active: 'panel' | 'sla' | 'timeline';
-  /** Optional top-right action (e.g. reset demo). */
   actions?: ReactNode;
   children: ReactNode;
 }
 
-/** Shared layout for every flujo-mf page: grid background, header, nav. */
 export function PageShell({ title, subtitle, active, actions, children }: PageShellProps) {
-  const { role } = useRole();
-
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -28,14 +22,7 @@ export function PageShell({ title, subtitle, active, actions, children }: PageSh
               <p className="font-sans text-sm text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 font-sans text-xs text-muted-foreground">
-              <span>Rol:</span>
-              <Badge variant="default">{role ?? 'sin sesión'}</Badge>
-            </div>
-            {actions}
-            <BackButton crossZone label="Inicio" />
-          </div>
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
         </header>
 
         <AppNav active={active} />
