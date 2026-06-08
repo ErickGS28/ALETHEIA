@@ -54,7 +54,7 @@ export function RoleLogin() {
 
         {/* Logo grande de la orca como protagonista */}
         <div className="relative z-10">
-          <div className="inline-flex items-center justify-center rounded-full bg-main border-2 border-background/20 p-4 transition-transform duration-700 ease-in-out hover:rotate-[360deg] cursor-default shadow-[0_6px_24px_rgba(13,148,136,0.5)]">
+          <div className="inline-flex items-center justify-center rounded-full bg-main border-2 border-background/20 p-4 hover:[animation:spin-once_700ms_ease-in-out] cursor-default shadow-[0_6px_24px_rgba(21,168,181,0.5)]">
             <img
               src="/logo.png"
               alt="ALETHEIA"
@@ -98,7 +98,7 @@ export function RoleLogin() {
         <div className="w-full max-w-[400px]">
           {/* Marca en móvil */}
           <div className="mb-8 flex flex-col items-center gap-3 xl:hidden">
-            <div className="inline-flex items-center justify-center rounded-full bg-main border-2 border-main/30 p-3 transition-transform duration-700 ease-in-out hover:rotate-[360deg] cursor-default shadow-[0_4px_16px_rgba(13,148,136,0.35)]">
+            <div className="inline-flex items-center justify-center rounded-full bg-main border-2 border-main/30 p-3 hover:[animation:spin-once_700ms_ease-in-out] cursor-default shadow-[0_4px_16px_rgba(21,168,181,0.35)]">
               <Logo size={52} variant="mark" />
             </div>
             <span className="font-heading text-3xl tracking-tight">ALETHEIA</span>
