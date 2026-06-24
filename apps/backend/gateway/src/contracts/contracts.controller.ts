@@ -67,6 +67,7 @@ export class ContractsController {
   }
 
   @Get(':id/document')
+  @RequirePrivilege('CONTRACT_EDIT')
   @ApiOperation({ summary: 'Obtener el documento elaborado (HTML/diseño) de un contrato' })
   async getDocument(@Param('id', ParseIntPipe) id: number) {
     const raw = await this.storage.readText(contractDocumentKey(id));
