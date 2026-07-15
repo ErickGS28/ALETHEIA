@@ -2846,7 +2846,7 @@ const ErrorHandler = {
   },
 };
 
-exports.handler = Alexa.SkillBuilders.custom()
+const skill = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
     ResumenEjecutivoIntentHandler,
@@ -2859,8 +2859,12 @@ exports.handler = Alexa.SkillBuilders.custom()
     SessionEndedRequestHandler,
   )
   .addErrorHandlers(ErrorHandler)
-  .lambda();
+  .create();
+
+exports.handler = (event, context) => skill.invoke(event, context);
 ```
+
+> **Note (added after Task 15 was first attempted):** `ask-sdk-core@2.14.0`'s `.lambda()` builder returns a 3-argument callback-style function `(event, context, callback)` that returns `undefined` — it is not directly awaitable. Calling it with 2 args (as `index.test.js` below does) causes the internal promise to settle after the test already resolved to `undefined`, then throw an uncaught `TypeError: callback is not a function` when it tries to invoke the missing callback, crashing the process. `.create()` returns a `Skill` object whose `.invoke(event, context)` method returns a promise directly — wrapping it in a plain arrow function gives an `exports.handler` that is both a valid Node 18+ AWS Lambda async handler AND directly awaitable in tests. This is the standard pattern for testable `ask-sdk-core` skills on modern Lambda runtimes.
 
 - [ ] **Step 4: Run test to verify it passes**
 
