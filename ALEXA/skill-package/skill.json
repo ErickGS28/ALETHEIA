@@ -1,0 +1,32 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "es-MX": {
+          "name": "ALETHEIA CLM",
+          "summary": "Dashboard auditivo para gestión de contratos ALETHEIA CLM",
+          "description": "Consulta métricas ejecutivas de tu sistema CLM por voz: resumen del día, contratos por vencer, cuellos de botella en el flujo de revisión y métricas por estado y fecha.",
+          "examplePhrases": [
+            "Alexa, abre aletheia clm",
+            "Alexa, pregunta a aletheia clm mi resumen del día",
+            "Alexa, pregunta a aletheia clm qué contratos vencen este mes"
+          ],
+          "keywords": ["contratos", "clm", "aletheia", "reportes"]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "Usar la cuenta de sistema sembrada en prisma/seed.ts contra el backend desplegado.",
+      "category": "BUSINESS_AND_FINANCE",
+      "distributionCountries": ["MX"]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda"
+        },
+        "interfaces": []
+      }
+    },
+    "manifestVersion": "1.0"
+  }
+}
