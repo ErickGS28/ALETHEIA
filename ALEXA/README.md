@@ -6,7 +6,24 @@ Ver `ANALISIS_INTENTS.md` para el detalle de intents, slots y contratos de datos
 
 - `skill-package/skill.json` — manifest de la skill (es-MX).
 - `skill-package/interactionModels/custom/es-MX.json` — modelo de interacción (intents, slots, dialog).
-- `lambda/` — código del Lambda de la skill (Node.js 18+, `ask-sdk-core`).
+- `lambda/` — código del Lambda de la skill (Node.js 18+, `ask-sdk-core`):
+  - `index.js` — handlers de los 6 intents (Launch, ResumenEjecutivo, ConsultarMetricasPorFecha, ConsultarContratosPorExpirar, AlertaCuelloDeBotella, Help) + Cancel/Stop/Fallback.
+  - `apiClient.js` — cliente HTTP hacia el backend (login de sistema, cache de token, reintento en 401).
+  - `dateRange.js` — resuelve el valor de `AMAZON.DATE` a un rango de fechas y a texto hablado.
+  - `speechBuilders.js` — arma las respuestas en español a partir de los datos del backend.
+
+## Endpoints consumidos y su código en el backend
+
+Todos viven en `clm-system/apps/backend/src/`, protegidos por `JwtAuthGuard` + `PrivilegeGuard` + `REPORTS_VIEW`:
+
+| Endpoint | Llamado desde (Lambda) | Implementado en (backend) |
+|---|---|---|
+| `GET /reports/daily-summary` | `apiClient.getDailySummary()` | `reports/reports.controller.ts` → `reports.service.ts` → `reports.repository.ts` |
+| `GET /reports/bottlenecks` | `apiClient.getBottlenecks()` | `reports/reports.controller.ts` → `reports.service.ts` → `reports.repository.ts` |
+| `GET /contracts/expiring` | `apiClient.getExpiringContracts()` | `contracts/contracts.controller.ts` → `contracts.service.ts` → `contracts.repository.ts` |
+| `GET /contracts/metrics` | `apiClient.getContractsMetrics()` | `contracts/contracts.controller.ts` → `contracts.service.ts` → `contracts.repository.ts` |
+
+Ver `ANALISIS_INTENTS.md` para el detalle de forma de datos (request/response) de cada uno.
 
 ## Variables de entorno del Lambda
 
