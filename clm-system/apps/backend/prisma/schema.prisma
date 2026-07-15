@@ -106,6 +106,7 @@ model Contract {
   vendorName   String
   providerType ProviderType
   status       ContractStatus @default(DRAFT)
+  expiresAt    DateTime?
   areaId       Int
   societyId    Int
   templateId   Int?
@@ -126,7 +127,7 @@ model Contract {
 
 model WorkflowStage {
   id        Int    @id @default(autoincrement())
-  name      String
+  name      String @unique
   order     Int
   slaHours  Int    @default(48)
   roleRequired Role
