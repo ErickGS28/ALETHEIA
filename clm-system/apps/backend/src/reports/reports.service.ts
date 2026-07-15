@@ -46,7 +46,7 @@ export class ReportsService {
   }
 
   async getBottlenecks(): Promise<BottlenecksResult> {
-    const rows = await this.reportsRepository.findActiveWorkflowsWithStage();
+    const rows = await this.reportsRepository.findActiveWorkflowsWithStage(CLOSED_STATUSES);
     const now = Date.now();
 
     const overdueCountByStage = new Map<number, StageBottleneck>();

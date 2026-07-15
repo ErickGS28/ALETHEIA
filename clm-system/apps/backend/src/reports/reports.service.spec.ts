@@ -45,6 +45,11 @@ describe('ReportsService', () => {
       const result = await service.getBottlenecks();
 
       expect(result).toEqual({ etapas: [], peor: null });
+      expect(repo.findActiveWorkflowsWithStage).toHaveBeenCalledWith([
+        ContractStatus.SIGNED,
+        ContractStatus.REJECTED,
+        ContractStatus.CANCELLED,
+      ]);
     });
 
     it('agrupa por etapa y ordena descendente por cantidad vencida', async () => {
@@ -68,6 +73,11 @@ describe('ReportsService', () => {
         stageName: 'Revisión Legal',
         cantidadVencidos: 2,
       });
+      expect(repo.findActiveWorkflowsWithStage).toHaveBeenCalledWith([
+        ContractStatus.SIGNED,
+        ContractStatus.REJECTED,
+        ContractStatus.CANCELLED,
+      ]);
     });
   });
 });

@@ -25,6 +25,15 @@ function daysAgo(days: number): Date {
 }
 
 async function main() {
+  if (process.env.NODE_ENV === 'production' && process.env.SEED_DEMO_DATA !== 'true') {
+    console.log(
+      'Seed de demo omitido: NODE_ENV=production y SEED_DEMO_DATA no está en "true". ' +
+        'Este seed crea un usuario de sistema con contraseña fija y no debe correr en producción por accidente. ' +
+        'Si de verdad quieres forzarlo, define SEED_DEMO_DATA=true.',
+    );
+    return;
+  }
+
   const area = await prisma.area.upsert({
     where: { name: 'Legal' },
     update: {},

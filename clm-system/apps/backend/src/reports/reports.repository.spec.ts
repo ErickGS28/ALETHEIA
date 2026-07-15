@@ -21,7 +21,7 @@ describe('ReportsRepository', () => {
     });
   });
 
-  it('findActiveWorkflowsWithStage flattens the joined stage fields', async () => {
+  it('findActiveWorkflowsWithStage flattens the joined stage fields and excludes closed contracts', async () => {
     const prisma = buildPrismaMock();
     const enteredAt = new Date('2026-07-10T00:00:00.000Z');
     prisma.contractWorkflow.findMany.mockResolvedValue([
@@ -36,8 +36,12 @@ describe('ReportsRepository', () => {
     ]);
     const repo = new ReportsRepository(prisma as any);
 
-    const result = await repo.findActiveWorkflowsWithStage();
+    const result = await repo.findActiveWorkflowsWithStage(['SIGNED', 'REJECTED', 'CANCELLED'] as any);
 
     expect(result).toEqual([{ stageId: 2, stageName: 'Revisión Legal', slaHours: 24, enteredAt }]);
+    expect(prisma.contractWorkflow.findMany).toHaveBeenCalledWith({
+      where: { contract: { status: { notIn: ['SIGNED', 'REJECTED', 'CANCELLED'] } } },
+      include: { stage: true },
+    });
   });
 });
