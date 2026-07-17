@@ -1,5 +1,14 @@
 'use strict';
 
+const mockData = require('./mockData');
+
+// Modo demo: sin CLM_API_BASE_URL configurada (o con CLM_USE_MOCK=true) se responden
+// datos de mockData.js en lugar de llamar al backend. Es el modo por defecto en una
+// skill Alexa-hosted, donde no hay variables de entorno.
+function isMockMode() {
+  return process.env.CLM_USE_MOCK === 'true' || !process.env.CLM_API_BASE_URL;
+}
+
 // Cache en memoria del proceso Lambda — sobrevive entre invocaciones "warm".
 let session = { accessToken: null, refreshToken: null, expiresAt: 0 };
 
@@ -87,18 +96,22 @@ async function getWithAuth(path) {
 }
 
 function getDailySummary() {
+  if (isMockMode()) return Promise.resolve(mockData.getDailySummary());
   return getWithAuth('/reports/daily-summary');
 }
 
 function getBottlenecks() {
+  if (isMockMode()) return Promise.resolve(mockData.getBottlenecks());
   return getWithAuth('/reports/bottlenecks');
 }
 
 function getExpiringContracts(isoStart, isoEnd) {
+  if (isMockMode()) return Promise.resolve(mockData.getExpiringContracts(isoStart, isoEnd));
   return getWithAuth(`/contracts/expiring?startDate=${isoStart}&endDate=${isoEnd}`);
 }
 
 function getContractsMetrics(status, isoStart, isoEnd) {
+  if (isMockMode()) return Promise.resolve(mockData.getContractsMetrics(status, isoStart, isoEnd));
   return getWithAuth(`/contracts/metrics?status=${status}&startDate=${isoStart}&endDate=${isoEnd}`);
 }
 
