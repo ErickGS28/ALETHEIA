@@ -1,0 +1,6 @@
+lambda/node_modules
+**/*.test.js
+**/jest.config.js
+skill-package
+.ask
+**/*.pdf

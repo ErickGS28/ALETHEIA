@@ -11,18 +11,26 @@
             "Alexa, pregunta a aletheia clm mi resumen del día",
             "Alexa, pregunta a aletheia clm qué contratos vencen este mes"
           ],
-          "keywords": ["contratos", "clm", "aletheia", "reportes"]
+          "keywords": [
+            "contratos",
+            "clm",
+            "aletheia",
+            "reportes"
+          ]
         }
       },
       "isAvailableWorldwide": false,
       "testingInstructions": "Usar la cuenta de sistema sembrada en prisma/seed.ts contra el backend desplegado.",
       "category": "BUSINESS_AND_FINANCE",
-      "distributionCountries": ["MX"]
+      "distributionCountries": [
+        "MX"
+      ]
     },
     "apis": {
       "custom": {
         "endpoint": {
-          "sourceDir": "lambda"
+          "uri": "https://alexa-clm.levsek.com.mx",
+          "sslCertificateType": "Trusted"
         },
         "interfaces": []
       }

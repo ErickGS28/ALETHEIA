@@ -271,3 +271,4 @@ const skill = Alexa.SkillBuilders.custom()
   .create();
 
 exports.handler = (event, context) => skill.invoke(event, context);
+exports.skillInstance = skill;
