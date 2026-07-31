@@ -70,11 +70,16 @@ export function ContratosView() {
               <CardDescription>Genera el documento de un contrato (HU-19).</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href="/elaborar">
-                <Button variant="neutral" className="w-full">
-                  Elaborar contrato
-                </Button>
-              </Link>
+              <CookiePrivilegeGuard
+                privilege="TEMPLATES_MANAGE"
+                fallback={<Badge variant="secondary">Sin permiso (TEMPLATES_MANAGE)</Badge>}
+              >
+                <Link href="/elaborar">
+                  <Button variant="neutral" className="w-full">
+                    Elaborar contrato
+                  </Button>
+                </Link>
+              </CookiePrivilegeGuard>
             </CardContent>
           </Card>
         </div>

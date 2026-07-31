@@ -16,6 +16,7 @@ import {
   PageSetupControl,
   RichTextEditor,
   Select,
+  normalizePageSetup,
   useRole,
   useToast,
 } from '@aletheia/frontend-commons';
@@ -32,28 +33,8 @@ import {
 import { readContractDoc, writeContractDoc } from '../../catalogs/contract-drafts';
 import { type Template, toUiTemplate } from '../../templates/types';
 
-/**
- * Coerces an untrusted page-setup value (server document or stale local cache,
- * which may have a missing/partial/legacy shape) into a valid {@link PageSetup}.
- * Without this, a malformed `margins` crashes the whole editor in PageSetupControl.
- */
-function normalizePageSetup(raw: unknown): PageSetup {
-  const value = (raw ?? {}) as Partial<PageSetup>;
-  const margins = (value.margins ?? {}) as Partial<PageSetup['margins']>;
-  const fallback = DEFAULT_PAGE_SETUP;
-  return {
-    size: value.size === 'LETTER' || value.size === 'A4' ? value.size : fallback.size,
-    margins: {
-      top: typeof margins.top === 'number' ? margins.top : fallback.margins.top,
-      right: typeof margins.right === 'number' ? margins.right : fallback.margins.right,
-      bottom: typeof margins.bottom === 'number' ? margins.bottom : fallback.margins.bottom,
-      left: typeof margins.left === 'number' ? margins.left : fallback.margins.left,
-    },
-  };
-}
-
 export function ContractEditorView() {
-  const { role } = useRole();
+  const { role, ready } = useRole();
   const toast = useToast();
   const {
     data: contractsData,
@@ -67,7 +48,7 @@ export function ContractEditorView() {
   } = useListTemplatesQuery();
 
   const contracts = useMemo(
-    () => (contractsData ?? []).filter((c) => c.status === 'LAWYER_REVIEW'),
+    () => (contractsData ?? []).filter((c) => c.status === 'ADMIN_REVIEW'),
     [contractsData],
   );
   const templates = useMemo<Template[]>(
@@ -145,7 +126,7 @@ export function ContractEditorView() {
   }, [serverDoc, isFetchingDoc, contractId]);
 
   const canAccess = role === 'ABOGADO';
-  if (!canAccess) {
+  if (ready && !canAccess) {
     return <NoAccess title="Elaborar documento" />;
   }
 
@@ -195,10 +176,15 @@ export function ContractEditorView() {
       setSavedAt(new Date().toLocaleTimeString('es-MX'));
       setDirty(false);
       toast.success('Documento guardado', 'El documento se guardó en el servidor.');
-    } catch {
+    } catch (error) {
+      const e = error as { status?: number; data?: { message?: string | string[] } };
+      const raw = e.data?.message;
+      const detail = Array.isArray(raw) ? raw.join(' · ') : raw;
       toast.error(
         'No se pudo guardar',
-        'No se pudo guardar en el servidor; se conservó el borrador local.',
+        detail
+          ? `${detail} Se conservó el borrador local.`
+          : 'No se pudo guardar en el servidor; se conservó el borrador local.',
       );
     }
   };
