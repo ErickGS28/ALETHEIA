@@ -1,0 +1,106 @@
+// contracts-service — schema 'contracts' (schema-per-service)
+// Dueño de: contratos y catálogos (sociedades, áreas, apoderados, plantillas).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["contracts"]
+}
+
+enum ContractStatus {
+  DRAFT
+  SUBMITTED
+  ADMIN_REVIEW
+  LAWYER_REVIEW
+  APPROVAL_PENDING
+  SIGNING
+  SIGNED
+  REJECTED
+  CANCELLED
+
+  @@schema("contracts")
+}
+
+enum ProviderType {
+  FISICA
+  MORAL
+
+  @@schema("contracts")
+}
+
+model Society {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  contracts Contract[]
+
+  @@schema("contracts")
+}
+
+model Area {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  contracts Contract[]
+
+  @@schema("contracts")
+}
+
+// Apoderado legal (firmante con poder notarial). Las firmas viven en schema documents
+// y se referencian por apoderadoId String/Int (sin FK cross-schema).
+model Apoderado {
+  id         Int      @id @default(autoincrement())
+  name       String
+  legalPower String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@schema("contracts")
+}
+
+model Template {
+  id        Int      @id @default(autoincrement())
+  name      String
+  content   String // HTML del editor WYSIWYG
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contracts Contract[]
+
+  @@schema("contracts")
+}
+
+model Contract {
+  id           Int            @id @default(autoincrement())
+  folio        String         @unique // folio autogenerado, ej. CLM-2026-000123
+  title        String
+  vendorName   String
+  vendorEmail  String?
+  providerType ProviderType
+  status       ContractStatus @default(DRAFT) // espejo del estado autoritativo de workflow
+  areaId       Int
+  societyId    Int
+  templateId   Int?
+  createdById  Int // referencia lógica a auth.User (sin FK cross-schema)
+  submittedAt  DateTime?
+  cancelReason String?
+  cancelledAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  area     Area      @relation(fields: [areaId], references: [id])
+  society  Society   @relation(fields: [societyId], references: [id])
+  template Template? @relation(fields: [templateId], references: [id])
+
+  @@schema("contracts")
+}

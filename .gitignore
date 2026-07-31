@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Tooling artifacts
+.playwright-cli/
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+# Turbo cache
+.turbo/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/migrations/dev.db
+prisma/dev.db
+# Clientes Prisma generados (output por servicio)
+apps/backend/services/*/generated/
+
+# Uploaded document binaries (gateway local disk storage runtime dir).
+# Anchored to the gateway root so it never matches src/.../storage/ source folders.
+/apps/backend/gateway/storage/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Tests
+coverage/

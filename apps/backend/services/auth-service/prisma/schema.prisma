@@ -1,0 +1,53 @@
+// auth-service — schema 'auth' (schema-per-service)
+// Dueño de: usuarios, roles/privilegios y refresh tokens.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["auth"]
+}
+
+enum Role {
+  SOLICITANTE
+  ADMINISTRADOR
+  ABOGADO
+  APROBADOR
+  FIRMANTE
+
+  @@schema("auth")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  name       String
+  lastName   String
+  password   String
+  roles      Role[]
+  privileges String[]
+  isActive   Boolean  @default(true)
+  areaId     Int? // referencia lógica a contracts.Area (sin FK cross-schema)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+
+  @@schema("auth")
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@schema("auth")
+}

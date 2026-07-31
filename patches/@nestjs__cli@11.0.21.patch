@@ -1,0 +1,22 @@
+diff --git a/lib/utils/tree-kill.js b/lib/utils/tree-kill.js
+index 47f78a070523e7278c5137c584feed3689c62620..e8af3e9a6d1e7d79855ad58d9127ae2ae4f1aae6 100644
+--- a/lib/utils/tree-kill.js
++++ b/lib/utils/tree-kill.js
+@@ -4,7 +4,16 @@ exports.treeKillSync = treeKillSync;
+ const child_process_1 = require("child_process");
+ function treeKillSync(pid, signal) {
+     if (process.platform === 'win32') {
+-        (0, child_process_1.execSync)('taskkill /pid ' + pid + ' /T /F');
++        try {
++            (0, child_process_1.execSync)('taskkill /pid ' + pid + ' /T /F');
++        }
++        catch (err) {
++            // Windows taskkill exits 128 when the PID no longer exists (already dead) —
++            // equivalent to the ESRCH case already tolerated below on POSIX.
++            if (err.status !== 128) {
++                throw err;
++            }
++        }
+         return;
+     }
+     const childs = getAllChilds(pid);

@@ -1,0 +1,102 @@
+// workflow-service — schema 'workflow' (schema-per-service)
+// Dueño de: etapas, estado autoritativo del flujo, transiciones, notificaciones y bitácora.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["workflow"]
+}
+
+enum Role {
+  SOLICITANTE
+  ADMINISTRADOR
+  ABOGADO
+  APROBADOR
+  FIRMANTE
+
+  @@schema("workflow")
+}
+
+enum TransitionAction {
+  SUBMIT
+  APPROVE
+  REJECT
+  RETURN
+  CANCEL
+  RECOVER
+  SIGN
+
+  @@schema("workflow")
+}
+
+model WorkflowStage {
+  id           Int    @id @default(autoincrement())
+  name         String
+  order        Int
+  slaHours     Int    @default(48)
+  roleRequired Role
+  isEditable   Boolean @default(true)
+
+  contractWorkflows ContractWorkflow[]
+
+  @@schema("workflow")
+}
+
+// Estado autoritativo del ciclo de vida del contrato. contracts.Contract.status es solo espejo.
+model ContractWorkflow {
+  id         Int      @id @default(autoincrement())
+  contractId Int      @unique // referencia lógica a contracts.Contract
+  stageId    Int
+  status     String   // espejo textual del ContractStatus actual (autoridad del State Machine)
+  enteredAt  DateTime @default(now())
+  comment    String?
+  createdById Int?    // solicitante (auth.User) — destinatario de notificaciones de resultado
+
+  stage       WorkflowStage        @relation(fields: [stageId], references: [id])
+  transitions WorkflowTransition[]
+
+  @@schema("workflow")
+}
+
+model WorkflowTransition {
+  id                 Int              @id @default(autoincrement())
+  contractWorkflowId Int
+  fromStatus         String
+  toStatus           String
+  action             TransitionAction
+  comment            String?
+  performedBy        Int // referencia lógica a auth.User
+  performedAt        DateTime         @default(now())
+
+  contractWorkflow ContractWorkflow @relation(fields: [contractWorkflowId], references: [id])
+
+  @@schema("workflow")
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  userId     Int? // destinatario concreto (auth.User) — null si es por rol
+  role       Role? // destinatario por rol — el front filtra por rol del usuario
+  contractId Int? // referencia lógica a contracts.Contract
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@schema("workflow")
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  contractId Int
+  userId     Int
+  action     String
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@schema("workflow")
+}

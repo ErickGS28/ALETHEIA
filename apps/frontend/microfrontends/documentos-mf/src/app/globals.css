@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import "../../../../commons/src/styles/tokens.css";
+
+/* Design system compartido (commons/ui) */
+@source "../../../../commons/src";
