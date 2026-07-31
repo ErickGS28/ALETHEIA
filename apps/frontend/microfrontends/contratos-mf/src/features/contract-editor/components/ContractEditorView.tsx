@@ -53,7 +53,7 @@ function normalizePageSetup(raw: unknown): PageSetup {
 }
 
 export function ContractEditorView() {
-  const { can } = useRole();
+  const { role } = useRole();
   const toast = useToast();
   const {
     data: contractsData,
@@ -66,7 +66,10 @@ export function ContractEditorView() {
     isError: isTemplatesError,
   } = useListTemplatesQuery();
 
-  const contracts = useMemo(() => contractsData ?? [], [contractsData]);
+  const contracts = useMemo(
+    () => (contractsData ?? []).filter((c) => c.status === 'LAWYER_REVIEW'),
+    [contractsData],
+  );
   const templates = useMemo<Template[]>(
     () => (templatesData ?? []).map(toUiTemplate),
     [templatesData],
@@ -141,7 +144,7 @@ export function ContractEditorView() {
     // serverDoc cambia por contrato; contractId garantiza re-hidratación al cambiar.
   }, [serverDoc, isFetchingDoc, contractId]);
 
-  const canAccess = can('TEMPLATES_MANAGE') || can('CONTRACT_EDIT');
+  const canAccess = role === 'ABOGADO';
   if (!canAccess) {
     return <NoAccess title="Elaborar documento" />;
   }
