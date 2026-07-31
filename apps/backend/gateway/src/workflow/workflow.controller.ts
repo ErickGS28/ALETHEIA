@@ -5,17 +5,22 @@ import {
   type UserContext,
   WORKFLOW_PATTERNS,
 } from '@aletheia/backend-commons';
-import { Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import type { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { FileStorageService } from '../documents/storage/file-storage.service';
+import { contractDocumentKey } from '../documents/storage/contract-document-key.util';
 import { CreateStageDto, TransitionDto, UpdateStageDto } from './dto/workflow.dto';
 
 @ApiTags('workflow')
 @ApiBearerAuth('access-token')
 @Controller('workflow')
 export class WorkflowController {
-  constructor(@Inject(SERVICE_CLIENTS.WORKFLOW) private readonly workflow: ClientProxy) {}
+  constructor(
+    @Inject(SERVICE_CLIENTS.WORKFLOW) private readonly workflow: ClientProxy,
+    private readonly storage: FileStorageService,
+  ) {}
 
   // --- Configuración de etapas (declarado ANTES de /:contractId) ---
 
@@ -49,11 +54,22 @@ export class WorkflowController {
 
   @Post(':contractId/approve')
   @ApiOperation({ summary: 'Aprobar (el privilegio lo valida el State Machine)' })
-  approve(
+  async approve(
     @Param('contractId', ParseIntPipe) contractId: number,
     @Body() body: TransitionDto,
     @CurrentUser() user: UserContext,
   ) {
+    const workflow = await firstValueFrom(
+      this.workflow.send(WORKFLOW_PATTERNS.GET, { contractId }),
+    );
+    if (workflow.status === 'LAWYER_REVIEW') {
+      const doc = await this.storage.readText(contractDocumentKey(contractId));
+      if (!doc) {
+        throw new BadRequestException(
+          'Elabora el documento formal del contrato antes de aprobarlo.',
+        );
+      }
+    }
     return firstValueFrom(
       this.workflow.send(WORKFLOW_PATTERNS.TRANSITION, {
         contractId,
