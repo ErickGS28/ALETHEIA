@@ -7,8 +7,10 @@
  */
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = 'C:\\ERICK\\UTEZ\\9NO\\DW Integral\\Integradora\\DocBase\\ALETHEIA';
+const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const NODE_OPTS = '--max-old-space-size=512';
 
 const procs = [];
@@ -59,6 +61,9 @@ startService('contracts-service', `${ROOT}\\apps\\backend\\services\\contracts-s
 await wait(10_000);
 
 startService('workflow-service', `${ROOT}\\apps\\backend\\services\\workflow-service`);
+await wait(10_000);
+
+startService('documents-service', `${ROOT}\\apps\\backend\\services\\documents-service`);
 await wait(12_000);
 
 // ── Frontend — web-shell + 7 MFs (two batches of 4) ──────────────────────

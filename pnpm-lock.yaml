@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@nestjs/cli@11.0.21':
+    hash: 574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af
+    path: patches/@nestjs__cli@11.0.21.patch
+
 importers:
 
   .:
@@ -132,7 +137,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.21(@types/node@22.19.19)
+        version: 11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)
       '@nestjs/schematics':
         specifier: ^11.0.0
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -190,7 +195,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.21(@types/node@22.19.19)
+        version: 11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)
       '@nestjs/schematics':
         specifier: ^11.0.0
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -248,7 +253,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.21(@types/node@22.19.19)
+        version: 11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)
       '@nestjs/schematics':
         specifier: ^11.0.0
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -303,7 +308,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.21(@types/node@22.19.19)
+        version: 11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)
       '@nestjs/schematics':
         specifier: ^11.0.0
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -358,7 +363,7 @@ importers:
     devDependencies:
       '@nestjs/cli':
         specifier: ^11.0.0
-        version: 11.0.21(@types/node@22.19.19)
+        version: 11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)
       '@nestjs/schematics':
         specifier: ^11.0.0
         version: 11.1.0(chokidar@4.0.3)(typescript@5.9.3)
@@ -4852,7 +4857,7 @@ snapshots:
       bullmq: 5.78.0
       tslib: 2.8.1
 
-  '@nestjs/cli@11.0.21(@types/node@22.19.19)':
+  '@nestjs/cli@11.0.21(patch_hash=574fbae7150e9a36b137467d41cbe39a0feb54b49b2135be4f6208ebc1d9e2af)(@types/node@22.19.19)':
     dependencies:
       '@angular-devkit/core': 19.2.24(chokidar@4.0.3)
       '@angular-devkit/schematics': 19.2.24(chokidar@4.0.3)
