@@ -20,6 +20,26 @@ export const DEFAULT_PAGE_SETUP: PageSetup = {
   margins: { top: 25, right: 25, bottom: 25, left: 25 },
 };
 
+/**
+ * Coerces an untrusted page-setup value (server document or stale local cache,
+ * which may have a missing/partial/legacy shape) into a valid {@link PageSetup}.
+ * Without this, a malformed `margins` crashes consumers that render it directly.
+ */
+export function normalizePageSetup(raw: unknown): PageSetup {
+  const value = (raw ?? {}) as Partial<PageSetup>;
+  const margins = (value.margins ?? {}) as Partial<PageMargins>;
+  const fallback = DEFAULT_PAGE_SETUP;
+  return {
+    size: value.size === 'LETTER' || value.size === 'A4' ? value.size : fallback.size,
+    margins: {
+      top: typeof margins.top === 'number' ? margins.top : fallback.margins.top,
+      right: typeof margins.right === 'number' ? margins.right : fallback.margins.right,
+      bottom: typeof margins.bottom === 'number' ? margins.bottom : fallback.margins.bottom,
+      left: typeof margins.left === 'number' ? margins.left : fallback.margins.left,
+    },
+  };
+}
+
 /** Dimensiones de la hoja (mm) + keyword CSS `size` para `@page`. */
 export const PAGE_DIMENSIONS: Record<
   PageSetup['size'],
