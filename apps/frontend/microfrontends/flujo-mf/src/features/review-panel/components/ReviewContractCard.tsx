@@ -8,9 +8,8 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
-  DEFAULT_PAGE_SETUP,
   DocumentPreview,
-  type PageSetup,
+  normalizePageSetup,
 } from '@aletheia/frontend-commons';
 import type { Privilege, Role } from '@aletheia/frontend-commons';
 import Link from 'next/link';
@@ -23,8 +22,8 @@ import {
 } from '../../../components/ui/icons';
 import { SlaIndicator } from '../../../components/ui/sla-indicator';
 import { type WorkflowContract, providerTypeLabel } from '../../_shared/adapters';
-import { useContractWorkflow } from '../../_shared/useWorkflow';
 import { useGetContractDocumentQuery } from '../../_shared/flujo-api';
+import { useContractWorkflow } from '../../_shared/useWorkflow';
 import {
   ROLE_REVIEW_PRIVILEGE,
   STATUS_LABELS,
@@ -33,20 +32,6 @@ import {
   statusBadgeVariant,
 } from '../../_shared/workflow-rules';
 import type { ReviewActionKind } from './ReviewActionModal';
-
-function normalizePageSetup(raw: PageSetup | undefined): PageSetup {
-  const fallback = DEFAULT_PAGE_SETUP;
-  const margins = raw?.margins ?? fallback.margins;
-  return {
-    size: raw?.size === 'LETTER' || raw?.size === 'A4' ? raw.size : fallback.size,
-    margins: {
-      top: typeof margins.top === 'number' ? margins.top : fallback.margins.top,
-      right: typeof margins.right === 'number' ? margins.right : fallback.margins.right,
-      bottom: typeof margins.bottom === 'number' ? margins.bottom : fallback.margins.bottom,
-      left: typeof margins.left === 'number' ? margins.left : fallback.margins.left,
-    },
-  };
-}
 
 interface ReviewContractCardProps {
   contract: WorkflowContract;
@@ -63,8 +48,9 @@ export function ReviewContractCard({
   onAction,
 }: ReviewContractCardProps) {
   const { sla, isError: slaError } = useContractWorkflow(contract.id);
-  const { data: document, isFetching: loadingDocument } = useGetContractDocumentQuery(
+  const { data: contractDocument, isFetching: loadingDocument } = useGetContractDocumentQuery(
     Number(contract.id),
+    { skip: role !== 'APROBADOR' },
   );
   const privilege = ROLE_REVIEW_PRIVILEGE[role] as Privilege;
   const showReject = canDefinitiveReject(contract.status);
@@ -109,15 +95,15 @@ export function ReviewContractCard({
           <p className="font-sans text-xs text-muted-foreground">Calculando SLA…</p>
         )}
 
-        {loadingDocument ? (
+        {role !== 'APROBADOR' ? null : loadingDocument ? (
           <p className="font-sans text-xs text-muted-foreground">Cargando documento…</p>
-        ) : document ? (
-          <div className="max-h-64 overflow-y-auto rounded-base border-2 border-border">
+        ) : contractDocument ? (
+          <div className="max-h-80 overflow-y-auto rounded-base border-2 border-border">
             <DocumentPreview
-              body={document.body}
-              header={document.header}
-              footer={document.footer}
-              pageSetup={normalizePageSetup(document.pageSetup)}
+              body={contractDocument.body}
+              header={contractDocument.header}
+              footer={contractDocument.footer}
+              pageSetup={normalizePageSetup(contractDocument.pageSetup)}
             />
           </div>
         ) : (
