@@ -3,7 +3,7 @@
 // { data, statusCode, message } envelope, so each hook receives the payload
 // directly (a Contract[], a WorkflowState, a Notification[], etc.).
 
-import { baseApi } from '@aletheia/frontend-commons';
+import { type PageSetup, baseApi } from '@aletheia/frontend-commons';
 
 // ─── Backend shapes (payload, already unwrapped) ────────────────────────────
 
@@ -78,6 +78,13 @@ export interface ApiNotification {
   createdAt: string;
 }
 
+export interface FlujoContractDocument {
+  body: string;
+  header?: string;
+  footer?: string;
+  pageSetup?: PageSetup;
+}
+
 interface ListContractsParams {
   status?: ContractStatus;
   areaId?: number;
@@ -139,6 +146,11 @@ export const flujoApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/notifications/${id}/read`, method: 'PATCH' }),
       invalidatesTags: ['Notification'],
     }),
+
+    getContractDocument: b.query<FlujoContractDocument | null, number>({
+      query: (id) => ({ url: `/contracts/${id}/document` }),
+      providesTags: (_res, _err, id) => [{ type: 'Document', id: `contract-${id}` }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -151,4 +163,5 @@ export const {
   useReturnWorkflowMutation,
   useListNotificationsQuery,
   useMarkNotificationReadMutation,
+  useGetContractDocumentQuery,
 } = flujoApi;

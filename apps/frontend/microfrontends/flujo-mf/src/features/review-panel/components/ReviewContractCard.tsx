@@ -8,6 +8,9 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
+  DEFAULT_PAGE_SETUP,
+  DocumentPreview,
+  type PageSetup,
 } from '@aletheia/frontend-commons';
 import type { Privilege, Role } from '@aletheia/frontend-commons';
 import Link from 'next/link';
@@ -21,6 +24,7 @@ import {
 import { SlaIndicator } from '../../../components/ui/sla-indicator';
 import { type WorkflowContract, providerTypeLabel } from '../../_shared/adapters';
 import { useContractWorkflow } from '../../_shared/useWorkflow';
+import { useGetContractDocumentQuery } from '../../_shared/flujo-api';
 import {
   ROLE_REVIEW_PRIVILEGE,
   STATUS_LABELS,
@@ -29,6 +33,20 @@ import {
   statusBadgeVariant,
 } from '../../_shared/workflow-rules';
 import type { ReviewActionKind } from './ReviewActionModal';
+
+function normalizePageSetup(raw: PageSetup | undefined): PageSetup {
+  const fallback = DEFAULT_PAGE_SETUP;
+  const margins = raw?.margins ?? fallback.margins;
+  return {
+    size: raw?.size === 'LETTER' || raw?.size === 'A4' ? raw.size : fallback.size,
+    margins: {
+      top: typeof margins.top === 'number' ? margins.top : fallback.margins.top,
+      right: typeof margins.right === 'number' ? margins.right : fallback.margins.right,
+      bottom: typeof margins.bottom === 'number' ? margins.bottom : fallback.margins.bottom,
+      left: typeof margins.left === 'number' ? margins.left : fallback.margins.left,
+    },
+  };
+}
 
 interface ReviewContractCardProps {
   contract: WorkflowContract;
@@ -45,6 +63,9 @@ export function ReviewContractCard({
   onAction,
 }: ReviewContractCardProps) {
   const { sla, isError: slaError } = useContractWorkflow(contract.id);
+  const { data: document, isFetching: loadingDocument } = useGetContractDocumentQuery(
+    Number(contract.id),
+  );
   const privilege = ROLE_REVIEW_PRIVILEGE[role] as Privilege;
   const showReject = canDefinitiveReject(contract.status);
 
@@ -86,6 +107,21 @@ export function ReviewContractCard({
           <Badge variant="destructive">SLA no disponible</Badge>
         ) : (
           <p className="font-sans text-xs text-muted-foreground">Calculando SLA…</p>
+        )}
+
+        {loadingDocument ? (
+          <p className="font-sans text-xs text-muted-foreground">Cargando documento…</p>
+        ) : document ? (
+          <div className="max-h-64 overflow-y-auto rounded-base border-2 border-border">
+            <DocumentPreview
+              body={document.body}
+              header={document.header}
+              footer={document.footer}
+              pageSetup={normalizePageSetup(document.pageSetup)}
+            />
+          </div>
+        ) : (
+          <Badge variant="secondary">El Abogado aún no elabora el documento formal</Badge>
         )}
 
         <div className="mt-auto flex flex-wrap items-center gap-2 border-t-2 border-border pt-4">
