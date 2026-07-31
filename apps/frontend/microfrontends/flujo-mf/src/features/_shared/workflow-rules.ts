@@ -53,11 +53,22 @@ export const ACTION_LABELS: Record<TransitionAction, string> = {
 
 // ─── Role ↔ queue mapping ─────────────────────────────────────────────────
 
-/** Statuses each role is responsible for reviewing. */
+/**
+ * Statuses each role is responsible for reviewing.
+ *
+ * Debe reflejar exactamente qué transición autoriza cada privilegio en
+ * `contract-state-machine.ts` (workflow-service), no el nombre del estado:
+ *  - CONTRACT_REVIEW_ADMIN (Administrador) autoriza SUBMITTED -> ADMIN_REVIEW.
+ *  - CONTRACT_REVIEW_LAWYER (Abogado)      autoriza ADMIN_REVIEW -> LAWYER_REVIEW.
+ *  - CONTRACT_APPROVE (Aprobador)          autoriza LAWYER_REVIEW -> APPROVAL_PENDING.
+ * Es decir, cada rol actúa sobre el estado ANTERIOR al que lleva su nombre en
+ * la etapa siguiente — un contrato en LAWYER_REVIEW ya pasó por el Abogado y
+ * espera al Aprobador, no al revés.
+ */
 export const ROLE_QUEUE: Partial<Record<Role, ContractStatus[]>> = {
-  ADMINISTRADOR: ['SUBMITTED', 'ADMIN_REVIEW'],
-  ABOGADO: ['LAWYER_REVIEW'],
-  APROBADOR: ['APPROVAL_PENDING'],
+  ADMINISTRADOR: ['SUBMITTED'],
+  ABOGADO: ['ADMIN_REVIEW'],
+  APROBADOR: ['LAWYER_REVIEW'],
 };
 
 /** Privilege required to act on a given role's queue. */
