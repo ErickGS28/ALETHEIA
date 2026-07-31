@@ -5,12 +5,22 @@ import {
   type UserContext,
   WORKFLOW_PATTERNS,
 } from '@aletheia/backend-commons';
-import { BadRequestException, Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import type { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
-import { FileStorageService } from '../documents/storage/file-storage.service';
 import { contractDocumentKey } from '../documents/storage/contract-document-key.util';
+import { FileStorageService } from '../documents/storage/file-storage.service';
 import { CreateStageDto, TransitionDto, UpdateStageDto } from './dto/workflow.dto';
 
 @ApiTags('workflow')
@@ -59,10 +69,10 @@ export class WorkflowController {
     @Body() body: TransitionDto,
     @CurrentUser() user: UserContext,
   ) {
-    const workflow = await firstValueFrom(
+    const workflow = await firstValueFrom<{ status: string }>(
       this.workflow.send(WORKFLOW_PATTERNS.GET, { contractId }),
     );
-    if (workflow.status === 'LAWYER_REVIEW') {
+    if (workflow.status === 'ADMIN_REVIEW') {
       const doc = await this.storage.readText(contractDocumentKey(contractId));
       if (!doc) {
         throw new BadRequestException(
