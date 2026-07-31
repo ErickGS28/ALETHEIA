@@ -60,7 +60,9 @@ export const ACTION_LABELS: Record<TransitionAction, string> = {
  * `contract-state-machine.ts` (workflow-service), no el nombre del estado:
  *  - CONTRACT_REVIEW_ADMIN (Administrador) autoriza SUBMITTED -> ADMIN_REVIEW.
  *  - CONTRACT_REVIEW_LAWYER (Abogado)      autoriza ADMIN_REVIEW -> LAWYER_REVIEW.
- *  - CONTRACT_APPROVE (Aprobador)          autoriza LAWYER_REVIEW -> APPROVAL_PENDING.
+ *  - CONTRACT_APPROVE (Aprobador)          autoriza tanto LAWYER_REVIEW -> APPROVAL_PENDING
+ *    como APPROVAL_PENDING -> SIGNING ("Aprobar y enviar a firma", un segundo
+ *    clic explícito del Aprobador, separado de su primera aprobación).
  * Es decir, cada rol actúa sobre el estado ANTERIOR al que lleva su nombre en
  * la etapa siguiente — un contrato en LAWYER_REVIEW ya pasó por el Abogado y
  * espera al Aprobador, no al revés.
@@ -68,7 +70,7 @@ export const ACTION_LABELS: Record<TransitionAction, string> = {
 export const ROLE_QUEUE: Partial<Record<Role, ContractStatus[]>> = {
   ADMINISTRADOR: ['SUBMITTED'],
   ABOGADO: ['ADMIN_REVIEW'],
-  APROBADOR: ['LAWYER_REVIEW'],
+  APROBADOR: ['LAWYER_REVIEW', 'APPROVAL_PENDING'],
 };
 
 /** Privilege required to act on a given role's queue. */
@@ -118,9 +120,24 @@ export function approveLabel(status: ContractStatus): string {
   }
 }
 
-/** Whether the approver can issue a definitive rejection (→ REJECTED). */
+/**
+ * Whether the approver can issue a definitive rejection (→ REJECTED).
+ * Only LAWYER_REVIEW has that transition in contract-state-machine.ts — it's
+ * the Aprobador's actual working stage (see ROLE_QUEUE above). APPROVAL_PENDING
+ * has no REJECT rule at all: by then the Aprobador already approved once.
+ */
 export function canDefinitiveReject(status: ContractStatus): boolean {
-  return status === 'APPROVAL_PENDING';
+  return status === 'LAWYER_REVIEW';
+}
+
+/**
+ * Whether "Devolver" (→ DRAFT) is a valid action for this status. Valid for
+ * SUBMITTED, ADMIN_REVIEW and LAWYER_REVIEW; APPROVAL_PENDING has no RETURN
+ * rule — by then the contract already has its formal document and a first
+ * approval, "Aprobar y enviar a firma" is the only action left for it.
+ */
+export function canReturn(status: ContractStatus): boolean {
+  return status !== 'APPROVAL_PENDING';
 }
 
 // ─── SLA semaphore types (HU-12) ──────────────────────────────────────────

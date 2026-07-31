@@ -84,12 +84,12 @@ const TRANSITIONS: Partial<
     RETURN: { next: 'DRAFT', privilege: 'CONTRACT_REVIEW_LAWYER', notifyCreator: true },
   },
   LAWYER_REVIEW: {
-    APPROVE: { next: 'APPROVAL_PENDING', privilege: 'CONTRACT_APPROVE', notifyRole: 'FIRMANTE' },
+    APPROVE: { next: 'APPROVAL_PENDING', privilege: 'CONTRACT_APPROVE', notifyRole: 'APROBADOR' },
     REJECT: { next: 'REJECTED', privilege: 'CONTRACT_APPROVE', notifyCreator: true },
     RETURN: { next: 'DRAFT', privilege: 'CONTRACT_APPROVE', notifyCreator: true },
   },
   APPROVAL_PENDING: {
-    APPROVE: { next: 'SIGNING', privilege: 'CONTRACT_SIGN', notifyRole: 'FIRMANTE' },
+    APPROVE: { next: 'SIGNING', privilege: 'CONTRACT_APPROVE', notifyRole: 'FIRMANTE' },
   },
   SIGNING: {
     SIGN: { next: 'SIGNED', privilege: 'CONTRACT_SIGN', notifyCreator: true },

@@ -29,6 +29,7 @@ import {
   STATUS_LABELS,
   approveLabel,
   canDefinitiveReject,
+  canReturn,
   statusBadgeVariant,
 } from '../../_shared/workflow-rules';
 import type { ReviewActionKind } from './ReviewActionModal';
@@ -54,6 +55,7 @@ export function ReviewContractCard({
   );
   const privilege = ROLE_REVIEW_PRIVILEGE[role] as Privilege;
   const showReject = canDefinitiveReject(contract.status);
+  const showReturn = canReturn(contract.status);
 
   return (
     <Card className="flex flex-col">
@@ -124,16 +126,18 @@ export function ReviewContractCard({
               <CheckIcon />
               {approveLabel(contract.status)}
             </Button>
-            <Button
-              variant="neutral"
-              size="sm"
-              disabled={disabled}
-              onClick={() => onAction('return', contract)}
-              aria-label={`Devolver al solicitante — contrato ${contract.folio}`}
-            >
-              <ReturnIcon />
-              Devolver
-            </Button>
+            {showReturn ? (
+              <Button
+                variant="neutral"
+                size="sm"
+                disabled={disabled}
+                onClick={() => onAction('return', contract)}
+                aria-label={`Devolver al solicitante — contrato ${contract.folio}`}
+              >
+                <ReturnIcon />
+                Devolver
+              </Button>
+            ) : null}
             {showReject ? (
               <Button
                 variant="destructive"
