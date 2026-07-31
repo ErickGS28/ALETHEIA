@@ -6,15 +6,16 @@ Guía de referencia por rol para probar el flujo de revisión de contratos. Sirv
 
 ## 0. Antes de empezar — estás en la rama correcta
 
-La rama por defecto del repositorio (`main`) **todavía no tiene este flujo**: solo funcionan el login y dos endpoints de solo lectura para el asistente de Alexa (`contracts/expiring`, `contracts/metrics`, `reports/daily-summary`, `reports/bottlenecks`).
+**Desde el 30 de julio de 2026, este flujo vive en `main`.** La reestructura de microservicios + microfrontends que antes vivía en la rama sin fusionar `feat/clm-integration` (estructura `apps/backend/gateway` + `apps/backend/services/*` + `apps/frontend/microfrontends/*`, distinta a la del monolito viejo `clm-system/`) se consolidó ahí, junto con una ronda de arreglos al flujo de revisión (ver §5/§6/§9 más abajo). El monolito viejo y la skill de Alexa que le pegaba quedaron archivados en el tag `archive/monolith-clm-system`, recuperables si hace falta, pero ya no son el código activo.
 
-El flujo completo — Solicitante → Administrador → Abogado → Aprobador → Firmante — vive en la rama sin fusionar **`feat/clm-integration`** (microservicios + microfrontends, estructura de carpetas distinta a `clm-system/`). Antes de reportar un módulo como "roto", confirma con:
+Antes de reportar un módulo como "roto", confirma que tu copia tiene la estructura nueva:
 
 ```bash
-git branch --show-current
+git branch --show-current   # debe decir "main" (o una rama derivada de main)
+ls apps/backend/gateway     # si no existe, te falta un git pull
 ```
 
-que estás sobre `feat/clm-integration` (o una rama derivada de ella). Sobre `main`, prácticamente nada de este manual aplica todavía.
+**Ojo con `origin/main` en GitHub:** el repo remoto exige Pull Request para actualizar `main` (no acepta push directo), así que puede que el PR que trae este trabajo (`unify/microservices-as-main` → `main`) todavía no esté fusionado ahí cuando tú clonas. Si tu `main` local está desactualizado respecto a lo descrito aquí, revisa si ese PR ya se mergeó antes de reportar algo como "no existe".
 
 ### Cómo levantarlo
 
@@ -116,37 +117,41 @@ Primer filtro después de que una solicitud se envía. Configura el sistema (usu
 
 ## 5. Abogado
 
-Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el documento formal del contrato a partir de una de ellas.
+Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el documento formal del contrato a partir de una de ellas — es el contenido que Aprobador y Firmante van a ver después, no un ejercicio aparte.
 
-**Pantallas:** `/flujo` (cola LAWYER_REVIEW) · `/contratos` (editor de plantillas y del documento formal) · `/documentos` (carga y versiones)
+**Ojo con la cola:** el Abogado actúa sobre contratos en **`ADMIN_REVIEW`**, no en `LAWYER_REVIEW` — su propia aprobación es lo que produce el estado `LAWYER_REVIEW` (queda para el Aprobador). Si ves la cola vacía estando en `LAWYER_REVIEW`, no es un bug: revisa `ADMIN_REVIEW`.
+
+**Pantallas:** `/flujo` (cola **ADMIN_REVIEW**) · `/contratos` (editor de plantillas y del documento formal — "Elaborar documento" solo funciona con contratos en `ADMIN_REVIEW`) · `/documentos` (solo versiones — ver nota abajo)
 
 **Pasos para probar:**
-1. Inicia sesión como Abogado y entra a **Flujo de trabajo** — cola solo con contratos en **LAWYER_REVIEW**.
-2. Aprueba uno → pasa a **APPROVAL_PENDING**. Rechaza otro con comentario → regresa a **DRAFT**.
-3. En **Contratos → Plantillas**, crea o edita una plantilla en el editor de texto enriquecido.
-4. Elabora el documento formal de un contrato desde una plantilla: tamaño de página, márgenes, encabezado/pie, vista previa en vivo.
-5. En **Documentos**, sube una nueva versión de un documento existente y revisa el historial de versiones.
+1. Inicia sesión como Abogado y entra a **Flujo de trabajo** — cola solo con contratos en **ADMIN_REVIEW**.
+2. Antes de aprobar, ve a **Contratos → Elaborar documento**, selecciona ese contrato (el selector solo lista los que están en `ADMIN_REVIEW`) y redacta el documento formal desde una plantilla: tamaño de página, márgenes, encabezado/pie, vista previa en vivo.
+3. Intenta **Aprobar** un contrato de esa cola **sin** haberle elaborado documento todavía → debe rechazarse con un 400 explicando que falta el documento (verifica esto explícitamente, es el arreglo más reciente al flujo).
+4. Ahora sí, con el documento guardado, **Aprueba** → pasa a **LAWYER_REVIEW**. En otro, **Rechaza** con comentario → regresa a **DRAFT**.
+5. En **Contratos → Plantillas**, crea o edita una plantilla en el editor de texto enriquecido.
+6. En **Documentos**, sube una **nueva versión** de un documento existente y revisa el historial — confirma que ya **no** aparece la opción de cargar un documento nuevo desde cero (esa es solo del Solicitante).
 
-**No debería poder:** ver/actuar sobre SUBMITTED (Administrador) ni APPROVAL_PENDING (Aprobador) · dar la aprobación final ni firmar.
-
-**Gap conocido:** mismo problema de carga de documentos que Solicitante (HU-08).
+**No debería poder:** ver/actuar sobre `SUBMITTED` (Administrador), `LAWYER_REVIEW` ni `APPROVAL_PENDING` (Aprobador) · dar la aprobación final ni firmar · aprobar un contrato sin haber elaborado su documento · cargar un documento nuevo desde cero en `/documentos` (solo versionar) · entrar a "Elaborar documento" para un contrato que no está en `ADMIN_REVIEW`.
 
 ## 6. Aprobador
 
-Da la aprobación final de negocio antes de firma. Su decisión es la última puerta: si rechaza, el contrato no vuelve a DRAFT, se cierra como rechazado.
+Da la aprobación de negocio antes de firma, ya con el documento formal del Abogado sobre la mesa — literalmente: ahora se ve dentro de su propia card de revisión. Su decisión es la última puerta: si rechaza, el contrato no vuelve a DRAFT, se cierra como rechazado.
 
-**Pantallas:** `/flujo` (cola APPROVAL_PENDING, con panel de notificaciones) · `/reportes`
+**Ojo con la cola:** el Aprobador actúa sobre contratos en **`LAWYER_REVIEW`**, no en `APPROVAL_PENDING` — su propia aprobación es lo que produce `APPROVAL_PENDING`.
+
+**Pantallas:** `/flujo` (cola **LAWYER_REVIEW**, con panel de notificaciones y, dentro de cada card, la vista previa del documento formal que elaboró el Abogado) · `/reportes`
 
 **Pasos para probar:**
-1. Inicia sesión como Aprobador y entra a **Flujo de trabajo** — cola en **APPROVAL_PENDING**.
-2. En un contrato, usa **Aprobar y enviar a firma** → pasa a **SIGNING**.
-3. En otro, usa **Rechazar** con motivo obligatorio → pasa a **REJECTED** (estado final).
-4. Revisa el panel de notificaciones dentro de Flujo — marca alertas como leídas.
-5. Entra a **Reportes** y confirma los mismos KPIs y exportación que Administrador.
+1. Inicia sesión como Aprobador y entra a **Flujo de trabajo** — cola en **LAWYER_REVIEW**.
+2. En un contrato, confirma que ves la vista previa del documento formal dentro de la misma card (no en pantalla aparte) antes de decidir. Si el Abogado no le elaboró documento a ese contrato, deberías ver un aviso en vez de la vista previa — no debería pasar en el camino feliz, ya que el Abogado no puede aprobar sin documento (§5).
+3. Usa **Aprobar** → pasa a **APPROVAL_PENDING**.
+4. En otro, usa **Rechazar** con motivo obligatorio → pasa a **REJECTED** (estado final).
+5. Revisa el panel de notificaciones dentro de Flujo — marca alertas como leídas.
+6. Entra a **Reportes** y confirma los mismos KPIs y exportación que Administrador.
 
-**No debería poder:** actuar sobre ADMIN_REVIEW o LAWYER_REVIEW · firmar el contrato ni editar el documento.
+**No debería poder:** actuar sobre `SUBMITTED` o `ADMIN_REVIEW` · firmar el contrato ni editar el documento.
 
-**Gaps conocidos:** ninguno propio más allá de los generales — de los roles con la ruta más completa.
+**Gap conocido, bloqueante:** una vez que apruebas y el contrato queda en `APPROVAL_PENDING`, **ningún rol tiene hoy una pantalla para avanzarlo a `SIGNING`** — ver §9. No lo reportes como bug nuevo del Aprobador; es un hueco de diseño pendiente entre esta etapa y Firmante.
 
 ## 7. Firmante
 
@@ -155,11 +160,12 @@ Cierra el ciclo de vida: captura la firma electrónica del contrato ya aprobado.
 **Pantallas:** `/firmas` (lista de pendientes) · `/firmas/detalle/[id]` · `/firmas/firmar/[id]` (lienzo de firma)
 
 **Pasos para probar:**
-1. Inicia sesión como Firmante y entra a **Firmas** — solo contratos en **SIGNING**.
-2. Abre uno y entra a **Firmar**: dibuja la firma en el lienzo (mouse o táctil).
-3. Opcional: selecciona un apoderado antes de guardar.
-4. Da clic en **Guardar firma**. El contrato pasa a **SIGNED** vía una cola en segundo plano — puede tardar unos segundos; buen momento para probar si la pantalla refresca sola o hace falta recargar.
-5. Confirma en el detalle que el estado quedó en **SIGNED** y que la firma se muestra.
+1. Inicia sesión como Firmante y entra a **Firmas** — solo contratos en **SIGNING**. Por el gap descrito en §6/§9, hoy no hay forma de que un contrato llegue solo a `SIGNING` — para probar este rol necesitas moverlo ahí a mano (directo por API/DB) mientras ese gap sigue abierto.
+2. Abre uno y entra a **Firmar**: confirma que ves la vista previa del documento formal (mismo componente que usa el Aprobador) antes del lienzo de firma.
+3. Dibuja la firma en el lienzo (mouse o táctil).
+4. Opcional: selecciona un apoderado antes de guardar.
+5. Da clic en **Guardar firma**. El contrato pasa a **SIGNED** vía una cola en segundo plano — puede tardar unos segundos; buen momento para probar si la pantalla refresca sola o hace falta recargar.
+6. Confirma en el detalle que el estado quedó en **SIGNED** y que la firma se muestra.
 
 **No debería poder:** iniciar/editar/revisar/aprobar contratos · entrar a `/admin`, `/contratos` o al panel de revisión de `/flujo`.
 
@@ -175,11 +181,12 @@ La forma más rápida de validar que el flujo entero funciona: seguir un solo co
 |---|---|---|---|
 | 1 | Solicitante | Crea la solicitud, adjunta documentos y la envía a revisión | — → DRAFT → SUBMITTED |
 | 2 | Administrador | La revisa en su cola y la aprueba | SUBMITTED → ADMIN_REVIEW |
-| 3 | Abogado | Revisión legal, aprueba y deja lista la versión formal del documento | ADMIN_REVIEW → LAWYER_REVIEW → APPROVAL_PENDING |
-| 4 | Aprobador | Aprobación final, lo envía a firma | APPROVAL_PENDING → SIGNING |
-| 5 | Firmante | Captura la firma y cierra el contrato | SIGNING → SIGNED |
+| 3 | Abogado | Elabora el documento formal desde una plantilla (obligatorio) y aprueba | ADMIN_REVIEW → LAWYER_REVIEW |
+| 4 | Aprobador | Revisa el documento formal (ya visible en su card) y da la aprobación de negocio | LAWYER_REVIEW → APPROVAL_PENDING |
+| 5 | ⚠️ nadie, hoy | **El recorrido se atora aquí** — ningún rol tiene en pantalla la acción para esta transición. Ver gap en §9. | APPROVAL_PENDING → SIGNING |
+| 6 | Firmante | Captura la firma y cierra el contrato | SIGNING → SIGNED |
 
-**Variantes para no probar solo el camino feliz:** repite el recorrido rechazando en cada etapa (regresa a DRAFT desde Administrador/Abogado, rechazo definitivo desde Aprobador), y prueba cancelar + recuperar desde el Solicitante en cualquier punto antes de SIGNING.
+**Variantes para no probar solo el camino feliz:** repite el recorrido rechazando en cada etapa (regresa a DRAFT desde Administrador/Abogado, rechazo definitivo desde Aprobador), y prueba cancelar + recuperar desde el Solicitante en cualquier punto antes de SIGNING. Para llegar hasta Firmante mientras el paso 5 sigue sin dueño, avanza ese contrato a `SIGNING` manualmente (API o BD directa) — no es parte del recorrido real todavía.
 
 ## 9. Cobertura conocida (antes de reportar un bug)
 
@@ -195,12 +202,16 @@ Estos huecos ya están identificados en el código — repórtalos si quieres, p
 | Métricas del dashboard de rol | Los tiles de resumen ("Contratos activos", etc.) son placeholders fijos, no conectados a datos reales. | No conectado | — |
 | Cuenta demo de Administrador | Tiene los 19 privilegios del sistema en vez de solo los del rol — puede hacer cosas que un Administrador real no debería. | Dato de seed | — |
 | `scripts/dev-staged.mjs` | No compila `@aletheia/backend-commons` antes de arrancar los servicios backend — arréglalo con `pnpm --filter @aletheia/backend-commons build` antes de correrlo (ver §0). | Bug del script de arranque, no de la app | — |
+| `APPROVAL_PENDING → SIGNING` sin dueño | Esa transición requiere el privilegio `CONTRACT_SIGN` (solo lo tiene Firmante), pero `/firmas` solo lista contratos ya en `SIGNING` — ningún rol tiene botón ni pantalla para dispararla. El recorrido E2E (§8) se atora exactamente ahí. Repórtalo si quieres seguimiento, pero no como hallazgo nuevo: ya está identificado, falta decidir quién la dispara (¿Aprobador la envía a firma, o es automática?). | Bloqueante, sin dueño asignado | — |
+| Lectura del documento formal sin validar visibilidad | `GET /contracts/:id/document` no comprueba que el usuario pueda ver ese contrato específico — cualquiera autenticado puede leer el documento de cualquier contrato por id. Es el mismo hueco que ya tenía (y sigue teniendo) `GET /contracts/:id`, no es una regresión nueva de la conexión plantillas↔flujo. | Parcial (heredado) | — |
+| `Contract.templateId` sin usar en BD | Aunque el Abogado elabore el documento desde una plantilla, la columna `templateId` del contrato nunca se setea — el vínculo formal contrato↔plantilla en base de datos quedó fuera de alcance a propósito, no es un bug. | Fuera de alcance (decisión de producto) | — |
 
 ## 10. Fuentes de este manual
 
-- Código de `feat/clm-integration` (gateway, servicios, microfrontends) — commit `1654b6d`.
-- `docs/04-product/historias-de-usuario.md` (esa rama, 26 HUs)
-- `docs/04-product/roles-y-cobertura.md` (esa rama)
-- `docs/03-runbooks/ejecutar-proyecto.md` (esa rama)
+- Código de `main` — la reestructura de microservicios/microfrontends (gateway, servicios, microfrontends) se consolidó ahí el 30 de julio de 2026, junto con los arreglos de esa misma sesión: privilegios del Abogado, etiquetas de notificación, cola de revisión por rol, y la conexión plantillas↔flujo.
+- `docs/04-product/historias-de-usuario.md`
+- `docs/04-product/roles-y-cobertura.md`
+- `docs/03-runbooks/ejecutar-proyecto.md`
+- `docs/plans/2026-07-30-conectar-plantillas-contratos-design.md` y `docs/superpowers/plans/2026-07-30-conectar-plantillas-contratos.md` — diseño y plan de la conexión plantillas↔flujo, con el detalle de qué cambió y por qué.
 
 También existe una versión visual (HTML) de este mismo manual, publicada como Artifact de Claude — privada por defecto, útil para lectura rápida con navegación lateral, pero no es la fuente de verdad: **este archivo es la fuente de verdad**, porque vive versionado en el repo.
