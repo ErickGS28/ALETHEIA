@@ -16,16 +16,17 @@ Además, hoy cualquiera con `CONTRACT_EDIT` (incluido Solicitante) puede entrar 
 
 Se mantiene el diseño ya intencionado en el código y en el manual QA: el **Abogado**
 redacta el documento formal a partir de una plantilla durante su propia etapa de
-revisión (`LAWYER_REVIEW`) — no el Solicitante al crear la solicitud. El objetivo de
-este trabajo es exclusivamente **conectar** esa redacción con lo que ven los roles
-posteriores, no rediseñar quién la origina.
+revisión (`ADMIN_REVIEW` — el estado en el que el contrato está mientras el Abogado
+lo revisa; su aprobación es lo que produce `LAWYER_REVIEW`) — no el Solicitante al
+crear la solicitud. El objetivo de este trabajo es exclusivamente **conectar** esa
+redacción con lo que ven los roles posteriores, no rediseñar quién la origina.
 
 ## Alcance
 
 1. Solo el Abogado puede elaborar/guardar el documento, y solo mientras el contrato
-   está en `LAWYER_REVIEW`.
-2. El Abogado no puede aprobar (pasar a `APPROVAL_PENDING`) sin haber guardado un
-   documento — bloqueado en el backend, no solo advertido en la UI.
+   está en `ADMIN_REVIEW`.
+2. El Abogado no puede aprobar (pasar de `ADMIN_REVIEW` a `LAWYER_REVIEW`) sin haber
+   guardado un documento — bloqueado en el backend, no solo advertido en la UI.
 3. Aprobador (cola `LAWYER_REVIEW`) y Firmante ven el documento elaborado — Aprobador
    integrado en su card de revisión, Firmante antes de firmar.
 
@@ -43,7 +44,7 @@ posteriores, no rediseñar quién la origina.
 **`ContractsController` (`apps/backend/gateway/src/contracts/contracts.controller.ts`)**
 - `PUT :id/document`: hoy solo exige el privilegio `CONTRACT_EDIT` (por eso entra
   Solicitante). Cambia a validar dentro del handler: `user.roles.includes('ABOGADO')`
-  y que el contrato esté en `LAWYER_REVIEW` (una llamada a `WORKFLOW_PATTERNS.GET`
+  y que el contrato esté en `ADMIN_REVIEW` (una llamada a `WORKFLOW_PATTERNS.GET`
   antes de guardar). Si no se cumple, 403/400 con mensaje explícito.
 - `GET :id/document`: se relaja — deja de exigir `CONTRACT_EDIT` (que solo tienen
   Solicitante/Abogado/Administrador-con-todos-los-privilegios) y pasa a permitir
@@ -52,7 +53,7 @@ posteriores, no rediseñar quién la origina.
 
 **`WorkflowController` (`apps/backend/gateway/src/workflow/workflow.controller.ts`)**
 - `approve()`: antes de reenviar la transición a `workflow-service`, si el estado
-  actual del contrato es `LAWYER_REVIEW`, consulta
+  actual del contrato es `ADMIN_REVIEW`, consulta
   `FileStorageService.readText(contractDocumentKey(contractId))`. Si no existe,
   responde 400 sin llegar a `workflow-service` (mensaje: "Elabora el documento
   formal antes de aprobar").
@@ -68,7 +69,7 @@ posteriores, no rediseñar quién la origina.
 - Gate de acceso: de `can('TEMPLATES_MANAGE') || can('CONTRACT_EDIT')` a
   `role === 'ABOGADO'` (usa `useRole()`, que expone el rol activo exacto).
 - El selector de contratos (`useListContractsQuery`) filtra a solo los contratos en
-  `LAWYER_REVIEW` — hoy lista todos sin importar el estado.
+  `ADMIN_REVIEW` — hoy lista todos sin importar el estado.
 
 **`ReviewContractCard`** (`flujo-mf/src/features/review-panel/components/ReviewContractCard.tsx`)
 - Agrega un fetch de `GET /contracts/:id/document`. Si existe, se muestra con
@@ -81,8 +82,8 @@ y/o `signature-canvas/components/SignatureCanvasView.tsx`)
 - Mismo patrón: fetch del documento + `DocumentPreview` antes del lienzo de firma.
 
 ## Testing
-- Backend: casos de `PUT :id/document` (Abogado+LAWYER_REVIEW → 200; otro rol → 403;
-  Abogado en otra etapa → 400) y de `approve()` sobre `LAWYER_REVIEW` (sin documento
+- Backend: casos de `PUT :id/document` (Abogado+ADMIN_REVIEW → 200; otro rol → 403;
+  Abogado en otra etapa → 400) y de `approve()` sobre `ADMIN_REVIEW` (sin documento
   → 400; con documento → transición normal).
 - Frontend: gate de acceso de `ContractEditorView` por rol; filtro del selector de
   contratos; render condicional de `DocumentPreview` en `ReviewContractCard` y en

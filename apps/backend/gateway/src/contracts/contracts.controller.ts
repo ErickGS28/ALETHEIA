@@ -5,6 +5,7 @@ import {
   SERVICE_CLIENTS,
   type UserContext,
   WORKFLOW_PATTERNS,
+  contractStatusLabel,
 } from '@aletheia/backend-commons';
 import {
   BadRequestException,
@@ -84,12 +85,12 @@ export class ContractsController {
     if (!user.roles.includes('ABOGADO')) {
       throw new ForbiddenException('Solo el Abogado puede elaborar el documento formal.');
     }
-    const workflow = await firstValueFrom(
+    const workflow = await firstValueFrom<{ status: string }>(
       this.workflow.send(WORKFLOW_PATTERNS.GET, { contractId: id }),
     );
-    if (workflow.status !== 'LAWYER_REVIEW') {
+    if (workflow.status !== 'ADMIN_REVIEW') {
       throw new BadRequestException(
-        'El contrato debe estar en Revisión Legal para elaborar su documento.',
+        `El contrato debe estar en ${contractStatusLabel('ADMIN_REVIEW')} para elaborar su documento.`,
       );
     }
     const document: SaveContractDocumentDto = {
