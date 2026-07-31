@@ -10,12 +10,11 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
-  DEFAULT_PAGE_SETUP,
   DocumentPreview,
   Label,
   LoadingState,
-  type PageSetup,
   Select,
+  normalizePageSetup,
   useToast,
 } from '@aletheia/frontend-commons';
 import { useRouter } from 'next/navigation';
@@ -27,20 +26,6 @@ import {
   useListApoderadosQuery,
 } from '../../signatures/api/signaturesApi';
 import { SignaturePad, type SignaturePadHandle } from './SignaturePad';
-
-function normalizePageSetup(raw: PageSetup | undefined): PageSetup {
-  const fallback = DEFAULT_PAGE_SETUP;
-  const margins = raw?.margins ?? fallback.margins;
-  return {
-    size: raw?.size === 'LETTER' || raw?.size === 'A4' ? raw.size : fallback.size,
-    margins: {
-      top: typeof margins.top === 'number' ? margins.top : fallback.margins.top,
-      right: typeof margins.right === 'number' ? margins.right : fallback.margins.right,
-      bottom: typeof margins.bottom === 'number' ? margins.bottom : fallback.margins.bottom,
-      left: typeof margins.left === 'number' ? margins.left : fallback.margins.left,
-    },
-  };
-}
 
 interface SignatureCanvasViewProps {
   contractId: string;
@@ -57,6 +42,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
   } = useGetContractQuery(contractId);
   const { data: contractDocument, isFetching: loadingDocument } = useGetContractDocumentQuery(
     contractId,
+    { skip: !contract || contract.status !== 'SIGNING' },
   );
   const { data: apoderados } = useListApoderadosQuery();
   const [createSignature, { isLoading: saving }] = useCreateSignatureMutation();
@@ -171,7 +157,9 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
                 </CardContent>
               ) : (
                 <CardContent className="pt-0">
-                  <Badge variant="secondary">Este contrato no tiene documento formal elaborado</Badge>
+                  <Badge variant="secondary">
+                    Este contrato no tiene documento formal elaborado
+                  </Badge>
                 </CardContent>
               )}
               <CardContent className="space-y-6">
