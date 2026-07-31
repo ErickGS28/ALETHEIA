@@ -1,4 +1,4 @@
-import { baseApi } from '@aletheia/frontend-commons';
+import { type PageSetup, baseApi } from '@aletheia/frontend-commons';
 
 /** Estado del contrato en el gateway. */
 export type ContractStatus =
@@ -66,6 +66,14 @@ export interface CreateSignatureBody {
   apoderadoId?: number;
 }
 
+/** Documento elaborado del contrato. */
+export interface SignatureContractDocument {
+  body: string;
+  header?: string;
+  footer?: string;
+  pageSetup?: PageSetup;
+}
+
 /** Parámetros para listar contratos. */
 export interface ListContractsParams {
   status?: ContractStatus;
@@ -99,6 +107,10 @@ export const signaturesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Signature', 'Contract'],
     }),
+    getContractDocument: b.query<SignatureContractDocument | null, number | string>({
+      query: (id) => `/contracts/${id}/document`,
+      providesTags: (_res, _err, id) => [{ type: 'Document', id: `contract-${id}` }],
+    }),
   }),
 });
 
@@ -108,4 +120,5 @@ export const {
   useListApoderadosQuery,
   useListSignaturesQuery,
   useCreateSignatureMutation,
+  useGetContractDocumentQuery,
 } = signaturesApi;
