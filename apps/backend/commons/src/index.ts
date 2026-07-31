@@ -17,3 +17,6 @@ export * from './security/interfaces/user-context.interface';
 export * from './messaging/patterns';
 export * from './messaging/redis';
 export * from './messaging/queues';
+
+// Dominio compartido
+export * from './domain/contract-status-labels';

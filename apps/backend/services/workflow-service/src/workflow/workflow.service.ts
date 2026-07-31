@@ -4,6 +4,7 @@ import {
   QUEUES,
   type StatusChangedJob,
   type UserContext,
+  contractStatusLabel,
 } from '@aletheia/backend-commons';
 import { InjectQueue } from '@nestjs/bullmq';
 import {
@@ -254,7 +255,7 @@ export class WorkflowService {
     createdById: number | null,
     nextStatus: ContractStatus,
   ) {
-    const message = `Contrato ${contractId} ahora en estado ${nextStatus}`;
+    const message = `Contrato ${contractId} ahora en estado ${contractStatusLabel(nextStatus)}`;
     let job: NotifyJob;
 
     if (rule.notifyCreator) {
