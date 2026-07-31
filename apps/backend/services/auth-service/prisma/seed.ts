@@ -54,7 +54,6 @@ const ROLE_PRIVILEGES: Record<Role, string[]> = {
   [Role.ABOGADO]: [
     'CONTRACT_REVIEW_LAWYER',
     'CONTRACT_VIEW_AREA',
-    'DOCUMENT_UPLOAD',
     'DOCUMENT_VERSION',
     'TEMPLATES_MANAGE',
     'REPORTS_VIEW',
