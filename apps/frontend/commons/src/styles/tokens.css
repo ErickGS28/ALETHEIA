@@ -1,0 +1,289 @@
+/* ALETHEIA · Design System (Neobrutalism) — tokens compartidos.
+   Importar DESPUÉS de `@import "tailwindcss"` en el globals.css de cada app. */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ─── Marca ─────────────────────────────────────────── */
+  --color-main: #15a8b5; /* teal primario */
+  --color-main-foreground: #ffffff;
+  --color-main-hover: #128c97; /* teal -10% para hover de acciones primarias */
+
+  /* Acento secundario complementario (coral) — personalidad de marca.
+     Úsalo en acentos, highlights y elementos de marca; NO en estados. */
+  --color-accent: #fb6a55;
+  --color-accent-foreground: #ffffff;
+  --color-accent-hover: #ef5740;
+
+  /* ─── Superficie ────────────────────────────────────── */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a; /* casi-negro para texto principal */
+  --color-secondary-background: #f4f4f3; /* fill suave (cards alternas, hover) */
+  --color-muted: #ececeb; /* fill neutro (chips, skeleton) */
+  --color-muted-foreground: #5c5c5c; /* texto secundario — reemplaza foreground/50-60 */
+  --color-border: #0a0a0a; /* borde neobrutalist negro */
+  --color-border-muted: #d9d9d6; /* borde sutil para divisores internos */
+  --color-shadow: #0a0a0a;
+
+  /* ─── Estados semánticos (reservados para feedback/SLA) ─ */
+  --color-destructive: #e5484d;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #2f9e63;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f5a623;
+  --color-warning-foreground: #0a0a0a;
+  --color-info: #15a8b5;
+  --color-info-foreground: #ffffff;
+
+  /* ─── Forma y elevación (Neobrutalism pulido) ───────── */
+  --radius-base: 8px;
+  --radius-sm: 5px;
+  --radius-lg: 12px;
+  --shadow-shadow: 4px 4px 0px 0px var(--color-shadow); /* sombra dura clásica */
+  --shadow-sm: 2px 2px 0px 0px var(--color-shadow); /* elementos pequeños */
+  --shadow-lg: 6px 6px 0px 0px var(--color-shadow); /* énfasis (modales/hero) */
+  --shadow-reverse: 4px 4px 0px 0px rgba(255, 255, 255, 0.4); /* botón sobre superficie oscura */
+
+  /* ─── Font Weights ──────────────────────────────────── */
+  --font-weight-base: 500;
+  --font-weight-heading: 800;
+
+  /* ─── Font Families ─────────────────────────────────── */
+  --font-sans: var(--font-dm-sans, "DM Sans", ui-sans-serif, sans-serif);
+  --font-heading: var(--font-koulen, "Anton", ui-sans-serif, sans-serif);
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* raíz estándar — base de toda la escala rem de Tailwind */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  * {
+    border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-size: 1rem; /* 16px — texto base cómodo y legible */
+    line-height: 1.6;
+    font-variation-settings: "opsz" 14;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ─── Neobrutalism grid background ──────────────────────────────────── */
+.bg-grid {
+  background-color: #ffffff;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.065) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.065) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── Stagger animation ─────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-hero {
+  animation: fadeSlideUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
+.delay-400 {
+  animation-delay: 400ms;
+}
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+/* ─── Contenido enriquecido (plantillas / contratos) ────────────────────── */
+.prose-clm h1 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  line-height: 1.25;
+  margin: 0.75rem 0 0.5rem;
+}
+.prose-clm h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin: 0.75rem 0 0.5rem;
+}
+.prose-clm h3 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  margin: 0.75rem 0 0.25rem;
+}
+.prose-clm p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+.prose-clm ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.prose-clm ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.prose-clm li {
+  margin: 0.2rem 0;
+  line-height: 1.5;
+}
+.prose-clm strong {
+  font-weight: 700;
+}
+.prose-clm em {
+  font-style: italic;
+}
+.prose-clm a {
+  color: var(--color-main);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-clm blockquote {
+  border-left: 4px solid var(--color-border);
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+.prose-clm pre {
+  background: var(--color-secondary-background);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  overflow-x: auto;
+}
+.prose-clm code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.prose-clm mark {
+  background: #fde047;
+  padding: 0 0.1em;
+}
+
+/* Variable de contrato ({{...}}) como píldora visual no editable. */
+.clm-variable {
+  display: inline-block;
+  background: color-mix(in srgb, var(--color-main) 16%, transparent);
+  color: var(--color-main);
+  border: 1px solid color-mix(in srgb, var(--color-main) 45%, transparent);
+  border-radius: 4px;
+  padding: 0 0.3em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.prose-clm hr {
+  border: none;
+  border-top: 2px solid var(--color-border);
+  margin: 1rem 0;
+}
+.prose-clm img {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+  border-radius: var(--radius-base);
+}
+.prose-clm table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75rem 0;
+  table-layout: fixed;
+}
+.prose-clm th,
+.prose-clm td {
+  border: 2px solid var(--color-border);
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+  text-align: left;
+}
+.prose-clm th {
+  background: var(--color-secondary-background);
+  font-weight: 700;
+}
+
+/* Editor (ProseMirror) */
+.clm-editor:focus,
+.ProseMirror:focus {
+  outline: none;
+}
+.ProseMirror .tableWrapper {
+  overflow-x: auto;
+}
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: rgba(0, 0, 0, 0.35);
+  font-family: var(--font-mono);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Salto de página: línea divisoria en pantalla; corte real al imprimir. */
+.clm-page-break {
+  border-top: 2px dashed var(--color-border);
+  margin: 1rem 0;
+  height: 0;
+  position: relative;
+}
+.clm-page-break::after {
+  content: "Salto de página";
+  position: absolute;
+  top: -0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-background);
+  padding: 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.45);
+}
+@media print {
+  .clm-page-break {
+    break-after: page;
+    border: none;
+  }
+  .clm-page-break::after {
+    display: none;
+  }
+}

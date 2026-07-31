@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../../../../commons/src/styles/tokens.css";
+
+/* Design system compartido (commons/ui) */
+@source "../../../../commons/src";
+
+/* Los estilos de contenido enriquecido (.prose-clm, editor, tablas, salto de
+   página, impresión) viven ahora en commons/src/styles/tokens.css. */

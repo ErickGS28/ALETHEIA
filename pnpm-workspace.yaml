@@ -1,0 +1,11 @@
+packages:
+  # Backend — microservicios
+  - 'apps/backend/gateway'
+  - 'apps/backend/services/*'
+  - 'apps/backend/commons'
+  # Frontend — host + microfrontends + commons
+  - 'apps/frontend/web-shell'
+  - 'apps/frontend/microfrontends/*'
+  - 'apps/frontend/commons'
+  # Compartidos cross-stack
+  - 'packages/*'

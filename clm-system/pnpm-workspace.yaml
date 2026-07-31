@@ -1,5 +1,0 @@
-packages:
-  - 'apps/*'
-  - 'apps/frontend/*'
-  - 'apps/frontend/microfrontends/*'
-  - 'packages/*'

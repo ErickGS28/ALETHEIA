@@ -1,0 +1,56 @@
+// documents-service — schema 'documents' (schema-per-service)
+// Dueño de: documentos (versionado, Factory por tipo de proveedor) y firmas (Strategy).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["documents"]
+}
+
+model Document {
+  id             Int       @id @default(autoincrement())
+  contractId     Int // referencia lógica a contracts.Contract
+  name           String
+  type           String // ej. INE, RFC, ACTA_CONSTITUTIVA (catálogo del Factory)
+  isRequired     Boolean   @default(true)
+  currentVersion Int       @default(1)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  versions DocumentVersion[]
+
+  @@schema("documents")
+}
+
+model DocumentVersion {
+  id           Int      @id @default(autoincrement())
+  documentId   Int
+  version      Int
+  fileUrl      String
+  fileSize     Int?
+  mimeType     String?
+  uploadedById Int // referencia lógica a auth.User
+  createdAt    DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@schema("documents")
+}
+
+model Signature {
+  id            Int      @id @default(autoincrement())
+  contractId    Int // referencia lógica a contracts.Contract
+  apoderadoId   Int? // referencia lógica a contracts.Apoderado
+  signedById    Int // referencia lógica a auth.User (firmante)
+  method        String   @default("CANVAS") // estrategia usada: CANVAS | ELECTRONIC
+  signatureData String // base64 del canvas o payload de la firma electrónica
+  signedAt      DateTime @default(now())
+
+  @@schema("documents")
+}
