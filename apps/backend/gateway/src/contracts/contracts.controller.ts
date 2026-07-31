@@ -7,8 +7,10 @@ import {
   WORKFLOW_PATTERNS,
 } from '@aletheia/backend-commons';
 import {
+  BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Param,
@@ -21,14 +23,12 @@ import {
 import type { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { contractDocumentKey } from '../documents/storage/contract-document-key.util';
 import { FileStorageService } from '../documents/storage/file-storage.service';
 import { SaveContractDocumentDto } from './dto/contract-document.dto';
 import { CancelContractDto, ContractFiltersDto } from './dto/contract-filters.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
-
-/** Deterministic storage key for a contract's elaborated document (JSON). */
-const contractDocumentKey = (contractId: number) => `contract-document-${contractId}.json`;
 
 @ApiTags('contracts')
 @ApiBearerAuth('access-token')
@@ -67,7 +67,6 @@ export class ContractsController {
   }
 
   @Get(':id/document')
-  @RequirePrivilege('CONTRACT_EDIT')
   @ApiOperation({ summary: 'Obtener el documento elaborado (HTML/diseño) de un contrato' })
   async getDocument(@Param('id', ParseIntPipe) id: number) {
     const raw = await this.storage.readText(contractDocumentKey(id));
@@ -76,9 +75,23 @@ export class ContractsController {
   }
 
   @Put(':id/document')
-  @RequirePrivilege('CONTRACT_EDIT')
   @ApiOperation({ summary: 'Guardar el documento elaborado (HTML/diseño) de un contrato' })
-  async saveDocument(@Param('id', ParseIntPipe) id: number, @Body() dto: SaveContractDocumentDto) {
+  async saveDocument(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: SaveContractDocumentDto,
+    @CurrentUser() user: UserContext,
+  ) {
+    if (!user.roles.includes('ABOGADO')) {
+      throw new ForbiddenException('Solo el Abogado puede elaborar el documento formal.');
+    }
+    const workflow = await firstValueFrom(
+      this.workflow.send(WORKFLOW_PATTERNS.GET, { contractId: id }),
+    );
+    if (workflow.status !== 'LAWYER_REVIEW') {
+      throw new BadRequestException(
+        'El contrato debe estar en Revisión Legal para elaborar su documento.',
+      );
+    }
     const document: SaveContractDocumentDto = {
       body: dto.body,
       header: dto.header ?? '',
