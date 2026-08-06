@@ -1,5 +1,5 @@
 // ALEXA/lambda/dateRange.test.js
-const { resolveDateRange, describeAmazonDate } = require('./dateRange');
+const { resolveDateRange, describeAmazonDate, normalizeAmbiguousYear } = require('./dateRange');
 
 describe('resolveDateRange', () => {
   it('returns the same day for a plain date', () => {
@@ -29,6 +29,42 @@ describe('resolveDateRange', () => {
 
   it('returns null when the value is missing', () => {
     expect(resolveDateRange(undefined)).toBeNull();
+  });
+});
+
+describe('normalizeAmbiguousYear', () => {
+  it('keeps the resolved year when it is not in the future', () => {
+    const now = new Date('2026-08-06T12:00:00.000Z');
+    expect(normalizeAmbiguousYear(2026, 7, now)).toBe(2026); // agosto
+    expect(normalizeAmbiguousYear(2025, 7, now)).toBe(2025);
+  });
+
+  it('rolls back to the current year when that month has not finished yet (the reported bug)', () => {
+    const now = new Date('2026-08-06T12:00:00.000Z');
+    expect(normalizeAmbiguousYear(2027, 7, now)).toBe(2026); // "agosto" -> agosto 2026, no 2027
+  });
+
+  it('keeps the future year when the current year occurrence already passed', () => {
+    const now = new Date('2026-08-06T12:00:00.000Z');
+    expect(normalizeAmbiguousYear(2027, 0, now)).toBe(2027); // enero de este año ya pasó
+  });
+});
+
+describe('resolveDateRange — mes ambiguo sin año (bug reportado)', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-06T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('resuelve "agosto" (sin año) al agosto de este año, no al siguiente', () => {
+    expect(resolveDateRange('2027-08')).toEqual({ isoStart: '2026-08-01', isoEnd: '2026-08-31' });
+  });
+
+  it('describe "agosto" (sin año) con el año correcto', () => {
+    expect(describeAmazonDate('2027-08')).toBe('agosto de 2026');
   });
 });
 
