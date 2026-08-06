@@ -11,6 +11,19 @@
           "samples": ["ayuda", "qué puedo decir", "opciones"]
         },
         {
+          "name": "ValidarClaveIntent",
+          "samples": [
+            "sésamo",
+            "ábrete sésamo",
+            "abrete sésamo",
+            "la clave es sésamo",
+            "mi clave es sésamo",
+            "la contraseña es sésamo",
+            "clave sésamo",
+            "es sésamo"
+          ]
+        },
+        {
           "name": "ResumenEjecutivoIntent",
           "samples": [
             "dame mi resumen del día",

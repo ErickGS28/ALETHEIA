@@ -10,16 +10,41 @@ const {
   buildBottlenecksSpeech,
 } = require('./speechBuilders');
 
-const WELCOME_SPEECH =
-  'Bienvenido al resumen ejecutivo de ALETHEIA. Puedo darte el reporte de contratos firmados, ' +
-  'alertarte sobre cuellos de botella o listar contratos por expirar. ¿Qué métrica deseas consultar hoy?';
+const AUTH_PROMPT_SPEECH = 'Antes de continuar, dime la palabra clave.';
+
+const WELCOME_SPEECH = `Bienvenido a ALETHEIA CLM. ${AUTH_PROMPT_SPEECH}`;
+
+const AUTHENTICATED_WELCOME_SPEECH =
+  'Clave correcta. Puedo darte el reporte de contratos firmados, alertarte sobre cuellos de botella ' +
+  'o listar contratos por expirar. ¿Qué métrica deseas consultar hoy?';
+
+const WRONG_KEYWORD_SPEECH = 'Esa no es la palabra clave correcta. Intenta de nuevo.';
 
 const HELP_SPEECH =
-  'Puedes pedirme un resumen ejecutivo del día, preguntar por contratos rechazados este mes, ' +
-  'o consultar qué contratos vencen pronto.';
+  'Así funciona ALETHEIA CLM: primero debes decir la palabra clave para autenticarte. ' +
+  'Una vez validada, puedes preguntarme, por ejemplo: mi resumen del día, para saber cuántos ' +
+  'contratos están pendientes, firmados o rechazados hoy. También puedes decir: qué contratos ' +
+  'vencen este mes, para saber cuáles están por expirar, o pedirme: alertas de cuellos de botella, ' +
+  'para saber en qué etapa se están atorando los contratos. ¿Qué te gustaría consultar?';
 
 const BACKEND_ERROR_SPEECH =
   'Lo siento, no pude consultar la información en este momento. Intenta de nuevo en unos minutos.';
+
+// Palabra clave de sesión: exigida por el profesor como capa mínima de "seguridad" en la skill.
+// No es autenticación real (cualquiera que escuche la demo la conoce) — es una validación de
+// una sola palabra, una vez por sesión, antes de dar acceso a los reportes.
+function isAuthenticated(handlerInput) {
+  const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+  return sessionAttributes.authenticated === true;
+}
+
+function requireAuthResponse(handlerInput) {
+  return handlerInput.responseBuilder
+    .speak(AUTH_PROMPT_SPEECH)
+    .reprompt(AUTH_PROMPT_SPEECH)
+    .withShouldEndSession(false)
+    .getResponse();
+}
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -28,7 +53,27 @@ const LaunchRequestHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(WELCOME_SPEECH)
-      .reprompt(WELCOME_SPEECH)
+      .reprompt(AUTH_PROMPT_SPEECH)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
+const ValidarClaveIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === 'ValidarClaveIntent'
+    );
+  },
+  handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    sessionAttributes.authenticated = true;
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
+    return handlerInput.responseBuilder
+      .speak(AUTHENTICATED_WELCOME_SPEECH)
+      .reprompt('¿Qué métrica deseas consultar?')
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -42,6 +87,10 @@ const ResumenEjecutivoIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    if (!isAuthenticated(handlerInput)) {
+      return requireAuthResponse(handlerInput);
+    }
+
     try {
       const data = await apiClient.getDailySummary();
       const speech = buildResumenEjecutivoSpeech(data);
@@ -68,6 +117,10 @@ const ConsultarMetricasPorFechaIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    if (!isAuthenticated(handlerInput)) {
+      return requireAuthResponse(handlerInput);
+    }
+
     const currentIntent = handlerInput.requestEnvelope.request.intent;
 
     if (handlerInput.requestEnvelope.request.dialogState !== 'COMPLETED') {
@@ -126,6 +179,10 @@ const ConsultarContratosPorExpirarIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    if (!isAuthenticated(handlerInput)) {
+      return requireAuthResponse(handlerInput);
+    }
+
     const currentIntent = handlerInput.requestEnvelope.request.intent;
 
     if (handlerInput.requestEnvelope.request.dialogState !== 'COMPLETED') {
@@ -169,6 +226,10 @@ const AlertaCuelloDeBotellaIntentHandler = {
     );
   },
   async handle(handlerInput) {
+    if (!isAuthenticated(handlerInput)) {
+      return requireAuthResponse(handlerInput);
+    }
+
     try {
       const data = await apiClient.getBottlenecks();
       const speech = buildBottlenecksSpeech(data);
@@ -211,6 +272,14 @@ const FallbackIntentHandler = {
     );
   },
   handle(handlerInput) {
+    if (!isAuthenticated(handlerInput)) {
+      return handlerInput.responseBuilder
+        .speak(WRONG_KEYWORD_SPEECH)
+        .reprompt(AUTH_PROMPT_SPEECH)
+        .withShouldEndSession(false)
+        .getResponse();
+    }
+
     return handlerInput.responseBuilder
       .speak(`No entendí eso. ${HELP_SPEECH}`)
       .reprompt(HELP_SPEECH)
@@ -258,6 +327,7 @@ const ErrorHandler = {
 const skill = Alexa.SkillBuilders.custom()
   .addRequestHandlers(
     LaunchRequestHandler,
+    ValidarClaveIntentHandler,
     ResumenEjecutivoIntentHandler,
     ConsultarMetricasPorFechaIntentHandler,
     ConsultarContratosPorExpirarIntentHandler,
