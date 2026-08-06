@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── DM Sans — local variable font ─────────────────────────────────── */
+/* Cargada via next/font/local en layout.tsx como --font-dm-sans        */
+
+@theme inline {
+  /* ─── ALETHEIA · Neobrutalism Color Tokens ─────────── */
+  --color-main:                 #15A8B5;
+  --color-main-foreground:      #ffffff;
+  --color-background:           #ffffff;
+  --color-foreground:           #000000;
+  --color-secondary-background: #e8e8e8;
+  --color-border:               #000000;
+  --color-shadow:               #000000;
+
+  /* ─── Shape ─────────────────────────────────────────── */
+  --radius-base:   5px;
+  --shadow-shadow: 4px 4px 0px 0px var(--color-shadow);
+
+  /* ─── Font Weights ───────────────────────────────────── */
+  /* DM Sans variable: 100–900. base=500 (Medium), heading=800 (ExtraBold) */
+  --font-weight-base:    500;
+  --font-weight-heading: 800;
+
+  /* ─── Font Families ──────────────────────────────────── */
+  --font-sans:    var(--font-dm-sans, 'DM Sans', ui-sans-serif, sans-serif);
+  --font-heading: var(--font-koulen, 'Koulen', ui-sans-serif, sans-serif);
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-variation-settings: "opsz" 14;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-variation-settings: "opsz" 32;
+  }
+}
+
+/* ─── Neobrutalism grid background ──────────────────────────────────── */
+/* Color base: teal muy tenue. Líneas: rejilla de cuadros 40px.         */
+/* Aplicar a secciones contenedoras — los cards internos van bg-white.  */
+.bg-grid {
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.065) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.065) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ─── Stagger animation ──────────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero { animation: fadeSlideUp 0.6s ease-out forwards; opacity: 0; }
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }

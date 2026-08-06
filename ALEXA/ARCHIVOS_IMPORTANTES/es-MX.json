@@ -1,0 +1,191 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "aletheia clm",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "HelpIntent",
+          "samples": ["ayuda", "qué puedo decir", "opciones"]
+        },
+        {
+          "name": "ResumenEjecutivoIntent",
+          "samples": [
+            "dame mi resumen del día",
+            "reporte ejecutivo de contratos",
+            "cómo vamos con los contratos",
+            "dame el resumen ejecutivo",
+            "cuál es mi resumen del día"
+          ]
+        },
+        {
+          "name": "AlertaCuelloDeBotellaIntent",
+          "samples": [
+            "dónde están atorados los contratos",
+            "qué etapa tiene más contratos pendientes",
+            "reporte de cuellos de botella",
+            "dime los cuellos de botella",
+            "dónde hay cuellos de botella"
+          ]
+        },
+        {
+          "name": "ConsultarContratosPorExpirarIntent",
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "samples": ["{rangoFecha}", "en {rangoFecha}", "para {rangoFecha}"]
+            }
+          ],
+          "samples": [
+            "qué contratos vencen {rangoFecha}",
+            "dime qué acuerdos expiran {rangoFecha}",
+            "contratos a punto de caducar",
+            "contratos por vencer {rangoFecha}",
+            "qué contratos vencen en {rangoFecha}",
+            "acuerdos que expiran {rangoFecha}"
+          ]
+        },
+        {
+          "name": "ConsultarMetricasPorFechaIntent",
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "samples": ["{rangoFecha}", "en {rangoFecha}", "para {rangoFecha}"]
+            },
+            {
+              "name": "estadoContrato",
+              "type": "EstadoContratoType",
+              "samples": ["{estadoContrato}", "el estado {estadoContrato}", "contratos {estadoContrato}"]
+            }
+          ],
+          "samples": [
+            "cuántos contratos fueron {estadoContrato} {rangoFecha}",
+            "dime los contratos {estadoContrato} {rangoFecha}",
+            "resumen de contratos {estadoContrato} {rangoFecha}",
+            "contratos {estadoContrato} {rangoFecha}",
+            "cuántos contratos {estadoContrato} hay {rangoFecha}",
+            "dame los contratos {estadoContrato} de {rangoFecha}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "EstadoContratoType",
+          "values": [
+            { "id": "DRAFT", "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] } },
+            { "id": "SUBMITTED", "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] } },
+            {
+              "id": "ADMIN_REVIEW",
+              "name": {
+                "value": "en revisión del administrador",
+                "synonyms": ["revisión administrativa", "revisión de administrador"]
+              }
+            },
+            {
+              "id": "LAWYER_REVIEW",
+              "name": {
+                "value": "en revisión del abogado",
+                "synonyms": ["revisión legal", "revisión de abogado"]
+              }
+            },
+            {
+              "id": "APPROVAL_PENDING",
+              "name": {
+                "value": "pendiente de aprobación",
+                "synonyms": ["pendientes de aprobación", "por aprobar"]
+              }
+            },
+            {
+              "id": "SIGNING",
+              "name": {
+                "value": "en firma",
+                "synonyms": ["por firmar", "en proceso de firma", "aprobado", "aprobados"]
+              }
+            },
+            { "id": "SIGNED", "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] } },
+            {
+              "id": "REJECTED",
+              "name": { "value": "rechazado", "synonyms": ["rechazados", "rechazada", "rechazadas"] }
+            },
+            {
+              "id": "CANCELLED",
+              "name": { "value": "cancelado", "synonyms": ["cancelados", "cancelada", "canceladas"] }
+            }
+          ]
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "ConsultarContratosPorExpirarIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha"
+              }
+            }
+          ]
+        },
+        {
+          "name": "ConsultarMetricasPorFechaIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha"
+              }
+            },
+            {
+              "name": "estadoContrato",
+              "type": "EstadoContratoType",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
+        "variations": [
+          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha",
+        "variations": [
+          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados o en revisión."
+          }
+        ]
+      }
+    ]
+  }
+}

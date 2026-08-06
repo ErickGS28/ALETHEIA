@@ -1,9 +1,9 @@
-name: aletheia
+name: clm-system
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: aletheia_postgres
+    container_name: clm_postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: clm_dev
@@ -19,21 +19,5 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: aletheia_redis
-    restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
 volumes:
   postgres_data:
-  redis_data:
