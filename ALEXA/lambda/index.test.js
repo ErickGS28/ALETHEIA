@@ -3,7 +3,7 @@ jest.mock('./apiClient');
 const apiClient = require('./apiClient');
 const { handler } = require('./index');
 
-function buildEnvelope(request) {
+function buildEnvelope(request, sessionAttributes = {}) {
   return {
     version: '1.0',
     session: {
@@ -11,6 +11,7 @@ function buildEnvelope(request) {
       sessionId: 'test-session',
       application: { applicationId: 'test-app' },
       user: { userId: 'test-user' },
+      attributes: sessionAttributes,
     },
     context: {
       System: {
@@ -32,12 +33,14 @@ function buildIntentRequest(intentName, slots = {}, dialogState = 'COMPLETED') {
   };
 }
 
+const AUTHENTICATED = { authenticated: true };
+
 describe('ALETHEIA CLM Alexa skill handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('responds with the welcome speech on LaunchRequest', async () => {
+  it('asks for the keyword on LaunchRequest', async () => {
     const event = buildEnvelope({
       type: 'LaunchRequest',
       requestId: 'test-request',
@@ -46,13 +49,48 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
 
     const result = await handler(event, {});
 
-    expect(result.response.outputSpeech.ssml).toContain('Bienvenido al resumen ejecutivo de ALETHEIA');
+    expect(result.response.outputSpeech.ssml).toContain('Bienvenido a ALETHEIA CLM');
+    expect(result.response.outputSpeech.ssml).toContain('dime la palabra clave');
     expect(result.response.shouldEndSession).toBe(false);
+  });
+
+  it('authenticates the session on ValidarClaveIntent and welcomes the user', async () => {
+    const event = buildEnvelope(buildIntentRequest('ValidarClaveIntent'));
+
+    const result = await handler(event, {});
+
+    expect(result.response.outputSpeech.ssml).toContain('Clave correcta');
+    expect(result.sessionAttributes).toEqual({ authenticated: true });
+  });
+
+  it('blocks report intents until the session is authenticated', async () => {
+    const event = buildEnvelope(buildIntentRequest('ResumenEjecutivoIntent'));
+
+    const result = await handler(event, {});
+
+    expect(apiClient.getDailySummary).not.toHaveBeenCalled();
+    expect(result.response.outputSpeech.ssml).toContain('dime la palabra clave');
+  });
+
+  it('treats an unrecognized utterance before auth as a wrong keyword attempt', async () => {
+    const event = buildEnvelope(buildIntentRequest('AMAZON.FallbackIntent'));
+
+    const result = await handler(event, {});
+
+    expect(result.response.outputSpeech.ssml).toContain('no es la palabra clave correcta');
+  });
+
+  it('falls back to the help speech on AMAZON.FallbackIntent once authenticated', async () => {
+    const event = buildEnvelope(buildIntentRequest('AMAZON.FallbackIntent'), AUTHENTICATED);
+
+    const result = await handler(event, {});
+
+    expect(result.response.outputSpeech.ssml).toContain('No entendí eso');
   });
 
   it('responds with the resumen ejecutivo speech, calling apiClient.getDailySummary', async () => {
     apiClient.getDailySummary.mockResolvedValue({ pendientes: 6, firmados: 1, rechazados: 1 });
-    const event = buildEnvelope(buildIntentRequest('ResumenEjecutivoIntent'));
+    const event = buildEnvelope(buildIntentRequest('ResumenEjecutivoIntent'), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -63,6 +101,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
   it('delegates the dialog when ConsultarMetricasPorFechaIntent is not yet completed', async () => {
     const event = buildEnvelope(
       buildIntentRequest('ConsultarMetricasPorFechaIntent', {}, 'IN_PROGRESS'),
+      AUTHENTICATED,
     );
 
     const result = await handler(event, {});
@@ -88,7 +127,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
       rangoFecha: { name: 'rangoFecha', value: '2026-06' },
     };
-    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots));
+    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -107,7 +146,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
       rangoFecha: { name: 'rangoFecha', value: '2026-06' },
     };
-    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots));
+    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -130,7 +169,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
     });
     const slots = { rangoFecha: { name: 'rangoFecha', value: '2026-07' } };
-    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots));
+    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -141,7 +180,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
   it('responds gracefully when there are no contratos por expirar', async () => {
     apiClient.getExpiringContracts.mockResolvedValue({ count: 0, contratos: [], masUrgente: null });
     const slots = { rangoFecha: { name: 'rangoFecha', value: '2026-07' } };
-    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots));
+    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -153,7 +192,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       etapas: [{ stageId: 2, stageName: 'Revisión Legal', cantidadVencidos: 2 }],
       peor: { stageId: 2, stageName: 'Revisión Legal', cantidadVencidos: 2 },
     });
-    const event = buildEnvelope(buildIntentRequest('AlertaCuelloDeBotellaIntent'));
+    const event = buildEnvelope(buildIntentRequest('AlertaCuelloDeBotellaIntent'), AUTHENTICATED);
 
     const result = await handler(event, {});
 
@@ -162,7 +201,7 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
 
   it('responds with the fallback speech when the backend call fails', async () => {
     apiClient.getBottlenecks.mockRejectedValue(new Error('backend down'));
-    const event = buildEnvelope(buildIntentRequest('AlertaCuelloDeBotellaIntent'));
+    const event = buildEnvelope(buildIntentRequest('AlertaCuelloDeBotellaIntent'), AUTHENTICATED);
 
     const result = await handler(event, {});
 
