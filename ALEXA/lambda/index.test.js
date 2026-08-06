@@ -23,11 +23,12 @@ function buildEnvelope(request, sessionAttributes = {}) {
   };
 }
 
-function buildIntentRequest(intentName, slots = {}, dialogState = 'COMPLETED') {
+function buildIntentRequest(intentName, slots = {}, dialogState = 'COMPLETED', locale = 'es-MX') {
   return {
     type: 'IntentRequest',
     requestId: 'test-request',
     timestamp: new Date().toISOString(),
+    locale,
     dialogState,
     intent: { name: intentName, confirmationStatus: 'NONE', slots },
   };
@@ -214,5 +215,40 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
     const result = await handler(event, {});
 
     expect(result.response.shouldEndSession).toBe(true);
+  });
+
+  it('routes to the global ErrorHandler and still speaks when no handler matches the request', async () => {
+    const event = buildEnvelope(buildIntentRequest('SomeCompletelyUnknownIntent'), AUTHENTICATED);
+
+    const result = await handler(event, {});
+
+    expect(result.response.outputSpeech).toBeDefined();
+    expect(result.response.outputSpeech.ssml).toContain('no pude consultar la información');
+    expect(result.response.shouldEndSession).toBe(false);
+  });
+
+  it('falls back to the default locale (es-MX) for an unsupported locale', async () => {
+    const request = buildIntentRequest('ValidarClaveIntent', {}, 'COMPLETED', 'fr-FR');
+    const event = buildEnvelope(request);
+
+    const result = await handler(event, {});
+
+    expect(result.response.outputSpeech.ssml).toContain('Clave correcta');
+  });
+
+  it('logs the request status (type, intent, dialogState, auth) and the response outcome', async () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const event = buildEnvelope(buildIntentRequest('ValidarClaveIntent'));
+
+    await handler(event, {});
+
+    const requestLog = logSpy.mock.calls.find((call) => call[0] === '[REQUEST]');
+    const responseLog = logSpy.mock.calls.find((call) => call[0] === '[RESPONSE]');
+    expect(requestLog).toBeDefined();
+    expect(requestLog[1]).toContain('"intent":"ValidarClaveIntent"');
+    expect(responseLog).toBeDefined();
+    expect(responseLog[1]).toContain('"hasSpeech":true');
+
+    logSpy.mockRestore();
   });
 });
