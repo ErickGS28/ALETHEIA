@@ -13,12 +13,12 @@ import {
   normalizePageSetup,
 } from '@aletheia/frontend-commons';
 import type { Privilege, Role } from '@aletheia/frontend-commons';
-import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import {
   ArrowRightIcon,
   CheckIcon,
+  EyeIcon,
   RejectIcon,
   ReturnIcon,
   TimelineIcon,
@@ -103,7 +103,7 @@ export function ReviewContractCard({
 
         {role !== 'APROBADOR' ? null : (
           <Button variant="neutral" size="sm" onClick={() => setPreviewOpen(true)}>
-            <Eye className="h-4 w-4" />
+            <EyeIcon />
             Ver contrato
           </Button>
         )}

@@ -125,7 +125,7 @@ export const flujoApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
       async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -147,7 +147,7 @@ export const flujoApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
       async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -169,7 +169,7 @@ export const flujoApi = baseApi.injectEndpoints({
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
       async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;

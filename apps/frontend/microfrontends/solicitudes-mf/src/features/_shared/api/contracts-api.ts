@@ -50,8 +50,6 @@ export const contractsApi = baseApi.injectEndpoints({
     submitContract: b.mutation<BackendContract, number>({
       query: (id) => ({ url: `/contracts/${id}/submit`, method: 'POST' }),
       invalidatesTags: (_r, _e, id) => [
-        { type: 'Contract', id },
-        { type: 'Contract', id: 'LIST' },
         { type: 'Workflow', id },
         { type: 'Report', id },
       ],
