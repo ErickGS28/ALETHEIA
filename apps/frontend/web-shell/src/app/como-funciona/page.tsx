@@ -538,6 +538,12 @@ export default function ComoFuncionaPage() {
               <CornerUpLeft className="h-4 w-4" /> Volver al inicio
             </Link>
           </div>
+          <p className="mt-8 text-sm text-background/50">
+            ¿Vas a probar el flujo a fondo?{' '}
+            <Link href="/manual" className="underline underline-offset-4 hover:text-background">
+              Manual de roles y flujo de revisión
+            </Link>
+          </p>
         </div>
       </section>
 

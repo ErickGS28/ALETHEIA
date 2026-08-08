@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     'Guía de referencia por rol para probar el flujo de revisión de contratos de ALETHEIA CLM, de punta a punta.',
 };
 
+export const dynamic = 'force-dynamic';
+
 const MANUAL_PATH = path.join(
   process.cwd(),
   '..',
@@ -23,7 +25,8 @@ async function loadManual() {
   try {
     const raw = await fs.readFile(MANUAL_PATH, 'utf8');
     return parseManualMarkdown(raw);
-  } catch {
+  } catch (error) {
+    console.error(`[manual] no se pudo leer ${MANUAL_PATH}`, error);
     return null;
   }
 }

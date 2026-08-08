@@ -23,11 +23,11 @@ export function parseManualMarkdown(markdown: string): ParsedManual {
     renderer: {
       heading({ tokens, depth, text }) {
         const html = this.parser.parseInline(tokens);
-        const match = SECTION_HEADING.exec(text.trim());
+        const match = depth === 2 ? SECTION_HEADING.exec(text.trim()) : null;
         const id = match ? `s${match[1]}` : undefined;
 
-        if (depth === 2 && match) {
-          toc.push({ id: `s${match[1]}`, label: match[2] });
+        if (match) {
+          toc.push({ id: `s${match[1]}`, label: `${match[1]}. ${match[2]}` });
         }
 
         return id
