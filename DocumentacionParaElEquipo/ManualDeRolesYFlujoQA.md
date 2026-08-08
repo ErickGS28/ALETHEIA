@@ -139,15 +139,15 @@ Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el do
 
 ## 6. Aprobador
 
-Da la aprobación de negocio antes de firma, ya con el documento formal del Abogado sobre la mesa — literalmente: ahora se ve dentro de su propia card de revisión. Su decisión es la última puerta: si rechaza, el contrato no vuelve a DRAFT, se cierra como rechazado.
+Da la aprobación de negocio antes de firma, ya con el documento formal del Abogado sobre la mesa — accesible con un botón **Ver contrato** dentro de su propia card de revisión. Su decisión es la última puerta: si rechaza, el contrato no vuelve a DRAFT, se cierra como rechazado.
 
 **Ojo con la cola:** el Aprobador actúa sobre contratos en **`LAWYER_REVIEW`**, no en `APPROVAL_PENDING` — su propia aprobación es lo que produce `APPROVAL_PENDING`.
 
-**Pantallas:** `/flujo` (cola **LAWYER_REVIEW**, con panel de notificaciones y, dentro de cada card, la vista previa del documento formal que elaboró el Abogado) · `/reportes`
+**Pantallas:** `/flujo` (cola **LAWYER_REVIEW**, con panel de notificaciones y, en cada card, un botón **Ver contrato** que abre en un modal la vista previa del documento formal que elaboró el Abogado) · `/reportes`
 
 **Pasos para probar:**
 1. Inicia sesión como Aprobador y entra a **Flujo de trabajo** — cola en **LAWYER_REVIEW**.
-2. En un contrato, confirma que ves la vista previa del documento formal dentro de la misma card (no en pantalla aparte) antes de decidir. Si el Abogado no le elaboró documento a ese contrato, deberías ver un aviso en vez de la vista previa — no debería pasar en el camino feliz, ya que el Abogado no puede aprobar sin documento (§5).
+2. En un contrato, da clic en **Ver contrato** y confirma que el modal muestra la vista previa del documento formal antes de decidir. Si el Abogado no le elaboró documento a ese contrato, deberías ver un aviso en vez de la vista previa — no debería pasar en el camino feliz, ya que el Abogado no puede aprobar sin documento (§5).
 3. Usa **Aprobar** → pasa a **APPROVAL_PENDING**.
 4. En otro, usa **Rechazar** con motivo obligatorio → pasa a **REJECTED** (estado final).
 5. Revisa el panel de notificaciones dentro de Flujo — marca alertas como leídas.
@@ -186,7 +186,7 @@ La forma más rápida de validar que el flujo entero funciona: seguir un solo co
 | 1 | Solicitante | Crea la solicitud, adjunta documentos y la envía a revisión | — → DRAFT → SUBMITTED |
 | 2 | Administrador | La revisa en su cola y la aprueba | SUBMITTED → ADMIN_REVIEW |
 | 3 | Abogado | **Conecta una plantilla con este contrato** elaborando el documento formal (obligatorio) y aprueba | ADMIN_REVIEW → LAWYER_REVIEW |
-| 4 | Aprobador | Revisa el documento formal (ya visible en su card) y da la aprobación de negocio | LAWYER_REVIEW → APPROVAL_PENDING |
+| 4 | Aprobador | Revisa el documento formal (botón **Ver contrato** → modal) y da la aprobación de negocio | LAWYER_REVIEW → APPROVAL_PENDING |
 | 5 | ⚠️ nadie, hoy | **El recorrido se atora aquí** — ningún rol tiene en pantalla la acción para esta transición. Ver gap en §9. | APPROVAL_PENDING → SIGNING |
 | 6 | Firmante | Captura la firma y cierra el contrato | SIGNING → SIGNED |
 
