@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# Git worktrees (local scratch, not committed)
+.worktrees/
+
 # Tooling artifacts
 .playwright-cli/
 
