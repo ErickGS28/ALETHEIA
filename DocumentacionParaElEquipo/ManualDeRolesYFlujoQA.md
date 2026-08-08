@@ -218,4 +218,4 @@ Estos huecos ya están identificados en el código — repórtalos si quieres, p
 - `docs/03-runbooks/ejecutar-proyecto.md`
 - `docs/plans/2026-07-30-conectar-plantillas-contratos-design.md` y `docs/superpowers/plans/2026-07-30-conectar-plantillas-contratos.md` — diseño y plan de la conexión plantillas↔flujo, con el detalle de qué cambió y por qué.
 
-También existe una versión visual (HTML) de este mismo manual, publicada como Artifact de Claude — privada por defecto, útil para lectura rápida con navegación lateral, pero no es la fuente de verdad: **este archivo es la fuente de verdad**, porque vive versionado en el repo.
+También existe una versión visual navegable de este mismo manual, publicada como página pública del proyecto en `localhost:4000/manual` (código en `apps/frontend/web-shell/src/app/manual/`) — lee este mismo archivo en vivo, así que nunca queda desactualizada ni depende de que alguien recuerde dónde vive. No es la fuente de verdad: **este archivo es la fuente de verdad**, porque vive versionado en el repo.
