@@ -56,6 +56,8 @@ DRAFT --(Solicitante envía)--> SUBMITTED --(Administrador aprueba)--> ADMIN_REV
   --(pasa a firma)--> SIGNING --(Firmante firma)--> SIGNED
 ```
 
+**Conexión plantilla↔contrato:** ocurre durante `ADMIN_REVIEW`, la dispara el Abogado — ver §5.
+
 Ramas:
 - **CANCELLED** ← Solicitante, desde cualquier estado activo (motivo obligatorio). Puede **recuperar** de vuelta a DRAFT.
 - **REJECTED** ← Administrador/Abogado regresan a DRAFT con comentario. El Aprobador rechaza en definitiva (estado final, sin regreso).
@@ -119,6 +121,8 @@ Primer filtro después de que una solicitud se envía. Configura el sistema (usu
 
 Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el documento formal del contrato a partir de una de ellas — es el contenido que Aprobador y Firmante van a ver después, no un ejercicio aparte.
 
+> **Aquí se conecta plantilla ↔ contrato:** el Abogado, y solo el Abogado, elige una plantilla y la convierte en el documento formal de *este* contrato específico — ocurre durante `ADMIN_REVIEW`, en **Contratos → Elaborar documento** (paso 2 abajo). Ese documento resultante (no la plantilla en abstracto) es lo que después ven Aprobador, Firmante y el detalle general del contrato. Ninguna otra pantalla ni rol hace esta conexión.
+
 **Ojo con la cola:** el Abogado actúa sobre contratos en **`ADMIN_REVIEW`**, no en `LAWYER_REVIEW` — su propia aprobación es lo que produce el estado `LAWYER_REVIEW` (queda para el Aprobador). Si ves la cola vacía estando en `LAWYER_REVIEW`, no es un bug: revisa `ADMIN_REVIEW`.
 
 **Pantallas:** `/flujo` (cola **ADMIN_REVIEW**) · `/contratos` (editor de plantillas y del documento formal — "Elaborar documento" solo funciona con contratos en `ADMIN_REVIEW`) · `/documentos` (solo versiones — ver nota abajo)
@@ -181,7 +185,7 @@ La forma más rápida de validar que el flujo entero funciona: seguir un solo co
 |---|---|---|---|
 | 1 | Solicitante | Crea la solicitud, adjunta documentos y la envía a revisión | — → DRAFT → SUBMITTED |
 | 2 | Administrador | La revisa en su cola y la aprueba | SUBMITTED → ADMIN_REVIEW |
-| 3 | Abogado | Elabora el documento formal desde una plantilla (obligatorio) y aprueba | ADMIN_REVIEW → LAWYER_REVIEW |
+| 3 | Abogado | **Conecta una plantilla con este contrato** elaborando el documento formal (obligatorio) y aprueba | ADMIN_REVIEW → LAWYER_REVIEW |
 | 4 | Aprobador | Revisa el documento formal (ya visible en su card) y da la aprobación de negocio | LAWYER_REVIEW → APPROVAL_PENDING |
 | 5 | ⚠️ nadie, hoy | **El recorrido se atora aquí** — ningún rol tiene en pantalla la acción para esta transición. Ver gap en §9. | APPROVAL_PENDING → SIGNING |
 | 6 | Firmante | Captura la firma y cierra el contrato | SIGNING → SIGNED |
