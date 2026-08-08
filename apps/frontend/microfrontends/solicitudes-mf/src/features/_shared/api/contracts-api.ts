@@ -55,6 +55,28 @@ export const contractsApi = baseApi.injectEndpoints({
         { type: 'Workflow', id },
         { type: 'Report', id },
       ],
+      async onQueryStarted(id, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          // La respuesta real es la de workflow-service ({ contractId, status, ... }), no el
+          // BackendContract completo que declara el tipo de este mutation — solo `status` es
+          // fiable aquí. Inconsistencia de tipo preexistente, no introducida por este fix.
+          const status = (data as unknown as { status: BackendContract['status'] }).status;
+          dispatch(
+            contractsApi.util.updateQueryData('getContract', id, (draft) => {
+              draft.status = status;
+            }),
+          );
+          dispatch(
+            contractsApi.util.updateQueryData('listContracts', undefined, (draft) => {
+              const c = draft.find((c) => c.id === id);
+              if (c) c.status = status;
+            }),
+          );
+        } catch {
+          // La invalidación de tags ya declarada dispara un refetch normal si esto falla.
+        }
+      },
     }),
 
     cancelContract: b.mutation<BackendContract, { id: number; reason: string }>({
