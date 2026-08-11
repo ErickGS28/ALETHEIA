@@ -3,6 +3,7 @@
 const Alexa = require('ask-sdk-core');
 const apiClient = require('./apiClient');
 const { resolveDateRange, describeAmazonDate } = require('./dateRange');
+const { resolveLocale, strings, DEFAULT_LOCALE } = require('./languageStrings');
 const {
   buildResumenEjecutivoSpeech,
   buildMetricasPorFechaSpeech,
@@ -10,25 +11,10 @@ const {
   buildBottlenecksSpeech,
 } = require('./speechBuilders');
 
-const AUTH_PROMPT_SPEECH = 'Antes de continuar, dime la palabra clave.';
-
-const WELCOME_SPEECH = `Bienvenido a ALETHEIA CLM. ${AUTH_PROMPT_SPEECH}`;
-
-const AUTHENTICATED_WELCOME_SPEECH =
-  'Clave correcta. Puedo darte el reporte de contratos firmados, alertarte sobre cuellos de botella ' +
-  'o listar contratos por expirar. ¿Qué métrica deseas consultar hoy?';
-
-const WRONG_KEYWORD_SPEECH = 'Esa no es la palabra clave correcta. Intenta de nuevo.';
-
-const HELP_SPEECH =
-  'Así funciona ALETHEIA CLM: primero debes decir la palabra clave para autenticarte. ' +
-  'Una vez validada, puedes preguntarme, por ejemplo: mi resumen del día, para saber cuántos ' +
-  'contratos están pendientes, firmados o rechazados hoy. También puedes decir: qué contratos ' +
-  'vencen este mes, para saber cuáles están por expirar, o pedirme: alertas de cuellos de botella, ' +
-  'para saber en qué etapa se están atorando los contratos. ¿Qué te gustaría consultar?';
-
-const BACKEND_ERROR_SPEECH =
-  'Lo siento, no pude consultar la información en este momento. Intenta de nuevo en unos minutos.';
+// Si por lo que sea el interceptor de traducciones no llegó a correr (request
+// malformado, error antes de la interceptor chain), el ErrorHandler necesita un
+// speech de emergencia que no dependa de handlerInput.t.
+const FALLBACK_ERROR_SPEECH = strings[DEFAULT_LOCALE].BACKEND_ERROR;
 
 // Palabra clave de sesión: exigida por el profesor como capa mínima de "seguridad" en la skill.
 // No es autenticación real (cualquiera que escuche la demo la conoce) — es una validación de
@@ -40,11 +26,54 @@ function isAuthenticated(handlerInput) {
 
 function requireAuthResponse(handlerInput) {
   return handlerInput.responseBuilder
-    .speak(AUTH_PROMPT_SPEECH)
-    .reprompt(AUTH_PROMPT_SPEECH)
+    .speak(handlerInput.t('AUTH_PROMPT'))
+    .reprompt(handlerInput.t('AUTH_PROMPT'))
     .withShouldEndSession(false)
     .getResponse();
 }
+
+// Traduce (request, intent, dialogState, auth) a una sola línea de log — así, al
+// probar la skill, se puede ver en los logs exactamente qué intent llegó, si su
+// diálogo ya se completó o sigue en curso, y si la sesión estaba autenticada.
+// Responde a lo pedido por el equipo: "status del intent para que no se confundan".
+const LoggingRequestInterceptor = {
+  process(handlerInput) {
+    const { request } = handlerInput.requestEnvelope;
+    const intentName = request.type === 'IntentRequest' ? request.intent.name : null;
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    console.log(
+      '[REQUEST]',
+      JSON.stringify({
+        type: request.type,
+        intent: intentName,
+        dialogState: request.dialogState || null,
+        authenticated: sessionAttributes.authenticated === true,
+      }),
+    );
+  },
+};
+
+const LoggingResponseInterceptor = {
+  process(handlerInput, response) {
+    const hasSpeech = Boolean(response && response.outputSpeech);
+    console.log(
+      '[RESPONSE]',
+      JSON.stringify({ hasSpeech, shouldEndSession: response ? response.shouldEndSession : null }),
+    );
+    if (!hasSpeech) {
+      console.error('[RESPONSE] Se generó una respuesta sin outputSpeech — el usuario se queda sin voz.');
+    }
+  },
+};
+
+const LocalizationInterceptor = {
+  process(handlerInput) {
+    const request = handlerInput.requestEnvelope && handlerInput.requestEnvelope.request;
+    const locale = resolveLocale(request && request.locale);
+    const localeStrings = strings[locale];
+    handlerInput.t = (key) => localeStrings[key];
+  },
+};
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -52,8 +81,8 @@ const LaunchRequestHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak(WELCOME_SPEECH)
-      .reprompt(AUTH_PROMPT_SPEECH)
+      .speak(handlerInput.t('WELCOME'))
+      .reprompt(handlerInput.t('AUTH_PROMPT'))
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -72,8 +101,8 @@ const ValidarClaveIntentHandler = {
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
     return handlerInput.responseBuilder
-      .speak(AUTHENTICATED_WELCOME_SPEECH)
-      .reprompt('¿Qué métrica deseas consultar?')
+      .speak(handlerInput.t('AUTHENTICATED_WELCOME'))
+      .reprompt(handlerInput.t('VALIDAR_CLAVE_REPROMPT'))
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -96,13 +125,13 @@ const ResumenEjecutivoIntentHandler = {
       const speech = buildResumenEjecutivoSpeech(data);
       return handlerInput.responseBuilder
         .speak(speech)
-        .reprompt('¿Deseas consultar algo más?')
+        .reprompt(handlerInput.t('ASK_MORE'))
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
       console.error('ResumenEjecutivoIntent error:', error);
       return handlerInput.responseBuilder
-        .speak(BACKEND_ERROR_SPEECH)
+        .speak(handlerInput.t('BACKEND_ERROR'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -136,8 +165,8 @@ const ConsultarMetricasPorFechaIntentHandler = {
 
     if (!resolvedStatus) {
       return handlerInput.responseBuilder
-        .speak('No reconocí ese estado. Intenta con firmado, rechazado, o en revisión.')
-        .reprompt('¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados o en revisión.')
+        .speak(handlerInput.t('NO_ESTADO_MATCH'))
+        .reprompt(handlerInput.t('ELICIT_ESTADO'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -147,8 +176,8 @@ const ConsultarMetricasPorFechaIntentHandler = {
 
     if (!range) {
       return handlerInput.responseBuilder
-        .speak('No entendí ese periodo. ¿Para qué fecha o rango deseas consultar esta información?')
-        .reprompt('¿Para qué periodo deseas consultar esta información?')
+        .speak(handlerInput.t('NO_DATE_MATCH'))
+        .reprompt(handlerInput.t('ELICIT_DATE'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -158,13 +187,13 @@ const ConsultarMetricasPorFechaIntentHandler = {
       const speech = buildMetricasPorFechaSpeech(data, describeAmazonDate(rawDate));
       return handlerInput.responseBuilder
         .speak(speech)
-        .reprompt('¿Deseas consultar algo más?')
+        .reprompt(handlerInput.t('ASK_MORE'))
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
       console.error('ConsultarMetricasPorFechaIntent error:', error);
       return handlerInput.responseBuilder
-        .speak(BACKEND_ERROR_SPEECH)
+        .speak(handlerInput.t('BACKEND_ERROR'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -194,8 +223,8 @@ const ConsultarContratosPorExpirarIntentHandler = {
 
     if (!range) {
       return handlerInput.responseBuilder
-        .speak('No entendí ese periodo. ¿Para qué fecha o rango deseas consultar esta información?')
-        .reprompt('¿Para qué periodo deseas consultar esta información?')
+        .speak(handlerInput.t('NO_DATE_MATCH'))
+        .reprompt(handlerInput.t('ELICIT_DATE'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -205,13 +234,13 @@ const ConsultarContratosPorExpirarIntentHandler = {
       const speech = buildContratosPorExpirarSpeech(data, describeAmazonDate(rawDate));
       return handlerInput.responseBuilder
         .speak(speech)
-        .reprompt('¿Deseas consultar algo más?')
+        .reprompt(handlerInput.t('ASK_MORE'))
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
       console.error('ConsultarContratosPorExpirarIntent error:', error);
       return handlerInput.responseBuilder
-        .speak(BACKEND_ERROR_SPEECH)
+        .speak(handlerInput.t('BACKEND_ERROR'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -235,13 +264,13 @@ const AlertaCuelloDeBotellaIntentHandler = {
       const speech = buildBottlenecksSpeech(data);
       return handlerInput.responseBuilder
         .speak(speech)
-        .reprompt('¿Deseas consultar algo más?')
+        .reprompt(handlerInput.t('ASK_MORE'))
         .withShouldEndSession(false)
         .getResponse();
     } catch (error) {
       console.error('AlertaCuelloDeBotellaIntent error:', error);
       return handlerInput.responseBuilder
-        .speak(BACKEND_ERROR_SPEECH)
+        .speak(handlerInput.t('BACKEND_ERROR'))
         .withShouldEndSession(false)
         .getResponse();
     }
@@ -257,8 +286,8 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak(HELP_SPEECH)
-      .reprompt(HELP_SPEECH)
+      .speak(handlerInput.t('HELP'))
+      .reprompt(handlerInput.t('HELP'))
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -274,15 +303,15 @@ const FallbackIntentHandler = {
   handle(handlerInput) {
     if (!isAuthenticated(handlerInput)) {
       return handlerInput.responseBuilder
-        .speak(WRONG_KEYWORD_SPEECH)
-        .reprompt(AUTH_PROMPT_SPEECH)
+        .speak(handlerInput.t('WRONG_KEYWORD'))
+        .reprompt(handlerInput.t('AUTH_PROMPT'))
         .withShouldEndSession(false)
         .getResponse();
     }
 
     return handlerInput.responseBuilder
-      .speak(`No entendí eso. ${HELP_SPEECH}`)
-      .reprompt(HELP_SPEECH)
+      .speak(`${handlerInput.t('NOT_UNDERSTOOD_PREFIX')}${handlerInput.t('HELP')}`)
+      .reprompt(handlerInput.t('HELP'))
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -297,7 +326,7 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
-    return handlerInput.responseBuilder.speak('Hasta luego.').withShouldEndSession(true).getResponse();
+    return handlerInput.responseBuilder.speak(handlerInput.t('GOODBYE')).withShouldEndSession(true).getResponse();
   },
 };
 
@@ -310,17 +339,26 @@ const SessionEndedRequestHandler = {
   },
 };
 
+// Catch-all: cualquier excepción no atrapada por un handler (incluyendo errores
+// que ocurran antes de que corra el LocalizationInterceptor) debe terminar aquí
+// y SIEMPRE responder con voz — nunca dejar al usuario en silencio.
 const ErrorHandler = {
   canHandle() {
     return true;
   },
   handle(handlerInput, error) {
-    console.error('Error no manejado:', error);
-    return handlerInput.responseBuilder
-      .speak(BACKEND_ERROR_SPEECH)
-      .reprompt(BACKEND_ERROR_SPEECH)
-      .withShouldEndSession(false)
-      .getResponse();
+    const request = handlerInput.requestEnvelope && handlerInput.requestEnvelope.request;
+    console.error(
+      '[ERROR]',
+      JSON.stringify({
+        type: request && request.type,
+        intent: request && request.type === 'IntentRequest' ? request.intent.name : null,
+      }),
+      error,
+    );
+
+    const speech = (handlerInput.t && handlerInput.t('BACKEND_ERROR')) || FALLBACK_ERROR_SPEECH;
+    return handlerInput.responseBuilder.speak(speech).reprompt(speech).withShouldEndSession(false).getResponse();
   },
 };
 
@@ -337,6 +375,8 @@ const skill = Alexa.SkillBuilders.custom()
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,
   )
+  .addRequestInterceptors(LocalizationInterceptor, LoggingRequestInterceptor)
+  .addResponseInterceptors(LoggingResponseInterceptor)
   .addErrorHandlers(ErrorHandler)
   .create();
 
