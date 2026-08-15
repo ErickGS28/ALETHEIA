@@ -89,16 +89,19 @@ export function FileViewerModal({
             className="max-h-[70vh] w-full object-contain"
           />
         ) : (
-          <iframe
+          // <embed type="application/pdf"> instead of <iframe>: Chromium's built-in
+          // PDF viewer can't run inside a sandboxed iframe at all (no combination of
+          // sandbox tokens fixes it — confirmed live, showed a broken-document icon
+          // even with sandbox="allow-scripts"). <embed> renders strictly via the PDF
+          // plugin per its explicit type attribute — it can't fall back to
+          // interpreting the bytes as HTML/script the way an iframe navigation can,
+          // so this doesn't reopen the content-type-confusion risk the sandbox was
+          // guarding against.
+          <embed
             src={state.objectUrl}
-            title={fileName ?? title}
+            type="application/pdf"
+            aria-label={fileName ?? title}
             className="h-[70vh] w-full rounded-base border-2 border-border"
-            // allow-scripts only: Chromium's built-in PDF viewer needs script
-            // execution to render at all (an empty sandbox blocks it outright,
-            // showing a broken-document icon instead of the PDF). Deliberately
-            // omits allow-same-origin/allow-top-navigation/allow-forms/allow-popups
-            // so embedded content still can't touch the real origin or navigate out.
-            sandbox="allow-scripts"
           />
         )
       ) : (
