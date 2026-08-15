@@ -57,6 +57,7 @@ export class DiskStorageService implements StorageService {
   /** Resolves a stored file name to an absolute path, guarding against path traversal. */
   private resolvePath(storedFileName: string): string | null {
     const base = normalize(storedFileName).replace(/^(\.\.(\/|\\|$))+/, '');
+    if (base === '' || base === '.' || base === '..') return null;
     const absolutePath = join(this.uploadsDir, base);
     if (!absolutePath.startsWith(this.uploadsDir)) return null;
     if (!existsSync(absolutePath)) return null;

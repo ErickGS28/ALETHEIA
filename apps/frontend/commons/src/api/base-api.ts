@@ -66,6 +66,49 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 };
 
 /**
+ * Fetches a binary resource (e.g. a stored file served from `/files/:id`) as
+ * an authenticated Blob, mirroring baseQueryWithReauth's 401 -> refresh ->
+ * retry-once flow above. Can't reuse fetchBaseQuery/rawBaseQuery directly
+ * for this because RTK Query's fetchBaseQuery expects a JSON response, not
+ * a raw blob — so blob consumers (e.g. FileViewerModal) need their own
+ * fetch that still gets the same transparent re-auth behavior.
+ */
+export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
+  const doFetch = (token: string | null) =>
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+
+  let res = await doFetch(getAccessToken());
+
+  if (res.status === 401) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+      const refreshBody = refreshRes.ok
+        ? ((await refreshRes.json()) as { data?: { accessToken?: string } })
+        : undefined;
+      const newToken = refreshBody?.data?.accessToken;
+      if (newToken) {
+        updateAccessToken(newToken);
+        res = await doFetch(newToken);
+      } else {
+        clearSession();
+        if (typeof window !== 'undefined') window.location.href = '/';
+      }
+    } else {
+      clearSession();
+      if (typeof window !== 'undefined') window.location.href = '/';
+    }
+  }
+
+  if (!res.ok) throw new Error(`No se pudo cargar el archivo (${res.status}).`);
+  return res.blob();
+}
+
+/**
  * API base de RTK Query compartida por todos los microfrontends.
  * Cada MF agrega sus endpoints con `baseApi.injectEndpoints({ ... })` y consume los hooks
  * autogenerados. tagTypes habilita invalidación de caché entre queries y mutations.

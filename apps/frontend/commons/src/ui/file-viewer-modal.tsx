@@ -1,8 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { API_URL } from '../api/base-api';
-import { getAccessToken } from '../api/session';
+import { API_URL, fetchAuthenticatedBlob } from '../api/base-api';
 import { Button } from './button';
 import { Modal } from './modal';
 
@@ -54,12 +53,7 @@ export function FileViewerModal({
 
     (async () => {
       try {
-        const token = getAccessToken();
-        const res = await fetch(`${API_URL}${fileUrl}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
-        if (!res.ok) throw new Error(`No se pudo cargar el archivo (${res.status}).`);
-        const blob = await res.blob();
+        const blob = await fetchAuthenticatedBlob(`${API_URL}${fileUrl}`);
         if (cancelled) return;
         createdUrl = URL.createObjectURL(blob);
         setState({ status: 'ready', objectUrl: createdUrl });

@@ -46,7 +46,7 @@ export class DocumentsController {
 
   @Post(':contractId')
   @RequirePrivilege('DOCUMENT_UPLOAD')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data', 'application/json')
   @ApiOperation({ summary: 'Subir/crear documento de un contrato (multipart o JSON)' })
   async create(
@@ -79,7 +79,7 @@ export class DocumentsController {
 
   @Post(':id/versions')
   @RequirePrivilege('DOCUMENT_VERSION')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data', 'application/json')
   @ApiOperation({ summary: 'Crear nueva versión de un documento (multipart o JSON)' })
   async createVersion(

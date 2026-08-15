@@ -62,6 +62,10 @@ export class FilesController {
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     res.setHeader('Content-Disposition', `${disposition}; filename="${safeName}"`);
 
+    stream.on('error', () => {
+      if (!res.headersSent) res.status(404).end();
+      else res.destroy();
+    });
     stream.pipe(res);
   }
 }

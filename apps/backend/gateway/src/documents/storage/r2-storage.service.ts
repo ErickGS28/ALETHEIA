@@ -59,6 +59,7 @@ export class R2StorageService implements StorageService {
   }
 
   async getStream(id: string): Promise<NodeJS.ReadableStream | null> {
+    if (!this.isOwnKey(id)) return null;
     try {
       const result = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: id }));
       return result.Body as NodeJS.ReadableStream;
@@ -95,10 +96,22 @@ export class R2StorageService implements StorageService {
   }
 
   async delete(id: string): Promise<void> {
+    if (!this.isOwnKey(id)) return;
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: id }));
   }
 
   private safeKey(key: string): string {
     return key.replace(/[^a-z0-9._-]/gi, '_');
+  }
+
+  /**
+   * Confines read/delete access to keys this service could itself have
+   * produced (see save()/saveText()). Without this, any raw `id` supplied by
+   * a caller (e.g. GET /files/:id) would be passed straight through as an R2
+   * object key, letting an authenticated user read/delete ANY object in a
+   * shared bucket — including ones from other projects.
+   */
+  private isOwnKey(id: string): boolean {
+    return /^aletheia-[a-zA-Z0-9._-]+$/.test(id);
   }
 }

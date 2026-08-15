@@ -1,6 +1,5 @@
 // Adapters between the gateway payloads (Api*) and the UI-facing shapes
 // the documentos-mf components were built against.
-import { fileNameFromUrl } from './format';
 import type {
   ApiContract,
   ApiDocument,
@@ -55,10 +54,10 @@ export function adaptRequiredDoc(doc: ApiRequiredDoc): RequiredDocument {
 
 // ── Versions ──────────────────────────────────────────────────────────
 
-export function adaptVersion(v: ApiDocumentVersion): DocumentVersion {
+export function adaptVersion(v: ApiDocumentVersion, documentName: string): DocumentVersion {
   return {
     version: v.version,
-    fileName: fileNameFromUrl(v.fileUrl),
+    fileName: documentName,
     fileUrl: v.fileUrl,
     size: v.fileSize ?? 0,
     mimeType: v.mimeType ?? 'application/octet-stream',
@@ -79,7 +78,9 @@ export function adaptDocument(
   providerType: ProviderType,
   labels: Record<string, string> = {},
 ): DocumentRecord {
-  const versions = [...doc.versions].sort((a, b) => a.version - b.version).map(adaptVersion);
+  const versions = [...doc.versions]
+    .sort((a, b) => a.version - b.version)
+    .map((v) => adaptVersion(v, doc.name ?? doc.type));
   return {
     id: doc.id,
     contractId: doc.contractId,
