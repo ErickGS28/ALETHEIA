@@ -3,7 +3,7 @@ import { IsObject, IsOptional, IsString } from 'class-validator';
 
 /**
  * Elaborated contract document (rich-text body + page layout) produced by the
- * contract editor. Persisted as a JSON file via FileStorageService — no Prisma
+ * contract editor. Persisted as a JSON file via StorageService — no Prisma
  * schema is involved. pageSetup is kept as a free-form object so the gateway
  * stays decoupled from the frontend's PageSetup shape.
  */

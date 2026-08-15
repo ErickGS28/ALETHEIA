@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { FileStorageService } from '../documents/storage/file-storage.service';
+import { StorageModule } from '../documents/storage/storage.module';
 import { ContractsController } from './contracts.controller';
 
 @Module({
+  imports: [StorageModule],
   controllers: [ContractsController],
-  providers: [FileStorageService],
 })
 export class ContractsModule {}

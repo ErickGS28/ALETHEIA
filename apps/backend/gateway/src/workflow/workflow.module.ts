@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { FileStorageService } from '../documents/storage/file-storage.service';
+import { StorageModule } from '../documents/storage/storage.module';
 import { WorkflowController } from './workflow.controller';
 
 @Module({
+  imports: [StorageModule],
   controllers: [WorkflowController],
-  providers: [FileStorageService],
 })
 export class WorkflowModule {}

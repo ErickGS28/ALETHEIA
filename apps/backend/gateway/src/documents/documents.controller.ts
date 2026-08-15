@@ -23,7 +23,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { CreateDocumentDto, CreateVersionDto, ProviderTypeQueryDto } from './dto/document.dto';
-import { FileStorageService } from './storage/file-storage.service';
+import { assertValidUpload } from './storage/file-validation';
+import { STORAGE_SERVICE, type StorageService } from './storage/storage.interface';
 
 @ApiTags('documents')
 @ApiBearerAuth('access-token')
@@ -31,7 +32,7 @@ import { FileStorageService } from './storage/file-storage.service';
 export class DocumentsController {
   constructor(
     @Inject(SERVICE_CLIENTS.DOCUMENTS) private readonly documents: ClientProxy,
-    private readonly storage: FileStorageService,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   // Declarado ANTES de /:contractId para que 'required' no se capture como contractId.
@@ -108,6 +109,7 @@ export class DocumentsController {
     body: { fileUrl?: string },
   ): Promise<{ fileUrl: string; fileSize?: number; mimeType?: string } | Record<string, never>> {
     if (file) {
+      assertValidUpload(file);
       const { fileUrl, fileSize, mimeType } = await this.storage.save(file);
       return { fileUrl, fileSize, mimeType };
     }

@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { DocumentsController } from './documents.controller';
 import { FilesController } from './files.controller';
 import { SignaturesController } from './signatures.controller';
-import { FileStorageService } from './storage/file-storage.service';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
+  imports: [StorageModule],
   controllers: [DocumentsController, FilesController, SignaturesController],
-  providers: [FileStorageService],
 })
 export class DocumentsModule {}
