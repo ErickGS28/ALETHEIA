@@ -1,0 +1,194 @@
+// CLM — Contract Lifecycle Management
+// Schema completo documentado en: docs/BaseDatos.md
+// Este archivo es la fuente de verdad del modelo de datos.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  SOLICITANTE
+  ADMINISTRADOR
+  ABOGADO
+  APROBADOR
+  FIRMANTE
+}
+
+enum ContractStatus {
+  DRAFT
+  SUBMITTED
+  ADMIN_REVIEW
+  LAWYER_REVIEW
+  APPROVAL_PENDING
+  SIGNING
+  SIGNED
+  REJECTED
+  CANCELLED
+}
+
+enum ProviderType {
+  FISICA
+  MORAL
+}
+
+// ─── Core models ─────────────────────────────────────────────────────────────
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  name       String
+  lastName   String
+  password   String
+  roles      Role[]
+  privileges String[]
+  isActive   Boolean  @default(true)
+  areaId     Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  area          Area?          @relation(fields: [areaId], references: [id])
+  refreshTokens RefreshToken[]
+  contracts     Contract[]     @relation("ContractCreatedBy")
+  auditLogs     AuditLog[]
+  notifications Notification[]
+}
+
+model RefreshToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  userId    Int
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Society {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  contracts Contract[]
+}
+
+model Area {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  users     User[]
+  contracts Contract[]
+}
+
+model Template {
+  id        Int      @id @default(autoincrement())
+  name      String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contracts Contract[]
+}
+
+model Contract {
+  id           Int            @id @default(autoincrement())
+  title        String
+  vendorName   String
+  providerType ProviderType
+  status       ContractStatus @default(DRAFT)
+  expiresAt    DateTime?
+  areaId       Int
+  societyId    Int
+  templateId   Int?
+  createdById  Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  area          Area             @relation(fields: [areaId], references: [id])
+  society       Society          @relation(fields: [societyId], references: [id])
+  template      Template?        @relation(fields: [templateId], references: [id])
+  createdBy     User             @relation("ContractCreatedBy", fields: [createdById], references: [id])
+  documents     Document[]
+  workflow      ContractWorkflow?
+  signatures    Signature[]
+  auditLogs     AuditLog[]
+  notifications Notification[]
+}
+
+model WorkflowStage {
+  id        Int    @id @default(autoincrement())
+  name      String @unique
+  order     Int
+  slaHours  Int    @default(48)
+  roleRequired Role
+
+  contractWorkflows ContractWorkflow[]
+}
+
+model ContractWorkflow {
+  id         Int      @id @default(autoincrement())
+  contractId Int      @unique
+  stageId    Int
+  enteredAt  DateTime @default(now())
+  comment    String?
+
+  contract Contract      @relation(fields: [contractId], references: [id])
+  stage    WorkflowStage @relation(fields: [stageId], references: [id])
+}
+
+model Document {
+  id           Int      @id @default(autoincrement())
+  contractId   Int
+  name         String
+  fileUrl      String
+  version      Int      @default(1)
+  expiresAt    DateTime?
+  uploadedById Int
+  createdAt    DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+}
+
+model Signature {
+  id          Int      @id @default(autoincrement())
+  contractId  Int
+  signedById  Int
+  signatureData String
+  signedAt    DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  contractId Int?
+  message    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  contract Contract? @relation(fields: [contractId], references: [id])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  contractId Int
+  userId     Int
+  action     String
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  contract Contract @relation(fields: [contractId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+}
