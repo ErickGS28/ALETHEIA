@@ -876,8 +876,15 @@ export * from './ui/file-viewer-modal';
 
 - [ ] **Step 3: Verify commons compiles**
 
-Run: `pnpm --filter @aletheia/frontend-commons build`
-Expected: succeeds with no errors.
+`@aletheia/frontend-commons` has no build/type-check script of its own (`main`/`types` point straight
+at `src/index.ts` — it's consumed as raw TS source by whichever app imports it, and has no
+`tsconfig.json`). Verify it type-checks by building a consumer that already imports from the
+package (this pulls the new file into that build's TypeScript program via the `index.ts` barrel
+export, even before Task 6 wires it into any component):
+
+Run: `pnpm --filter documentos-mf build`
+Expected: succeeds with no errors (same as the Task 4 baseline — this only confirms the new file
+doesn't break the type-check; it isn't used by any component yet).
 
 - [ ] **Step 4: Commit**
 
