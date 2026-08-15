@@ -5,12 +5,10 @@ import type { ApiContract, ApiDocument, ApiRequiredDoc, BackendProviderType } fr
 
 interface UploadDocumentArgs {
   contractId: number;
+  file: File;
   body: {
     name: string;
     type: string;
-    fileUrl: string;
-    fileSize?: number;
-    mimeType?: string;
     isRequired?: boolean;
     expiresAt?: string;
   };
@@ -18,11 +16,7 @@ interface UploadDocumentArgs {
 
 interface AddVersionArgs {
   documentId: number;
-  body: {
-    fileUrl: string;
-    fileSize?: number;
-    mimeType?: string;
-  };
+  file: File;
 }
 
 export const documentsApi = baseApi.injectEndpoints({
@@ -51,20 +45,24 @@ export const documentsApi = baseApi.injectEndpoints({
     }),
     // POST /documents/:contractId — create a document (its first version)
     uploadDocument: b.mutation<ApiDocument, UploadDocumentArgs>({
-      query: ({ contractId, body }) => ({
-        url: `/documents/${contractId}`,
-        method: 'POST',
-        body,
-      }),
+      query: ({ contractId, file, body }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('name', body.name);
+        formData.append('type', body.type);
+        if (body.isRequired !== undefined) formData.append('isRequired', String(body.isRequired));
+        if (body.expiresAt) formData.append('expiresAt', body.expiresAt);
+        return { url: `/documents/${contractId}`, method: 'POST', body: formData };
+      },
       invalidatesTags: ['Document'],
     }),
     // POST /documents/:id/versions — add a new version, bumps currentVersion
     addVersion: b.mutation<ApiDocument, AddVersionArgs>({
-      query: ({ documentId, body }) => ({
-        url: `/documents/${documentId}/versions`,
-        method: 'POST',
-        body,
-      }),
+      query: ({ documentId, file }) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return { url: `/documents/${documentId}/versions`, method: 'POST', body: formData };
+      },
       invalidatesTags: ['Document'],
     }),
   }),
