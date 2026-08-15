@@ -37,7 +37,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${dmSans.variable} ${anton.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+      <body
+        className="min-h-screen bg-background text-foreground font-sans antialiased"
+        suppressHydrationWarning
+      >
         <NextTopLoader color="#15a8b5" showSpinner={false} height={3} />
         <StoreProvider>
           <ToastProvider>{children}</ToastProvider>

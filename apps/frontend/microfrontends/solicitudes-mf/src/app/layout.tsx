@@ -16,7 +16,10 @@ export const metadata: Metadata = { title: 'Solicitudes · ALETHEIA' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${dmSans.variable} ${anton.variable}`} suppressHydrationWarning>
-      <body className="bg-background text-foreground font-sans antialiased">
+      <body
+        className="bg-background text-foreground font-sans antialiased"
+        suppressHydrationWarning
+      >
         <ApiProvider>
           <ToastProvider>
             <MfSidebar>{children}</MfSidebar>
