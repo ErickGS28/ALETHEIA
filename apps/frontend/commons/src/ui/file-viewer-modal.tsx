@@ -1,0 +1,112 @@
+'use client';
+
+import * as React from 'react';
+import { API_URL } from '../api/base-api';
+import { getAccessToken } from '../api/session';
+import { Button } from './button';
+import { Modal } from './modal';
+
+export interface FileViewerModalProps {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  /** Relative URL from the gateway, e.g. "/files/<id>". */
+  fileUrl: string;
+  mimeType?: string;
+  fileName?: string;
+}
+
+const INLINE_SAFE_TYPES = new Set(['application/pdf', 'image/png', 'image/jpeg']);
+
+type ViewerState =
+  | { status: 'loading' }
+  | { status: 'error'; message: string }
+  | { status: 'ready'; objectUrl: string };
+
+/**
+ * Modal file viewer for genuinely uploaded documents (PDF/image/other) —
+ * distinct from DocumentPreview, which renders the elaborated contract's
+ * HTML body/header/footer, not a real file. Fetches the file as an
+ * authenticated blob (the gateway only accepts a Bearer header) rather than
+ * pointing <img>/<iframe> directly at fileUrl.
+ */
+export function FileViewerModal({
+  open,
+  onClose,
+  title,
+  fileUrl,
+  mimeType,
+  fileName,
+}: FileViewerModalProps) {
+  const [state, setState] = React.useState<ViewerState>({ status: 'loading' });
+
+  React.useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    let createdUrl: string | undefined;
+    setState({ status: 'loading' });
+
+    (async () => {
+      try {
+        const token = getAccessToken();
+        const res = await fetch(`${API_URL}${fileUrl}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!res.ok) throw new Error(`No se pudo cargar el archivo (${res.status}).`);
+        const blob = await res.blob();
+        if (cancelled) return;
+        createdUrl = URL.createObjectURL(blob);
+        setState({ status: 'ready', objectUrl: createdUrl });
+      } catch (err) {
+        if (cancelled) return;
+        setState({
+          status: 'error',
+          message: err instanceof Error ? err.message : 'Error desconocido.',
+        });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [open, fileUrl]);
+
+  const isInlineSafe = mimeType ? INLINE_SAFE_TYPES.has(mimeType) : false;
+  const isImage = mimeType?.startsWith('image/') ?? false;
+
+  return (
+    <Modal open={open} onClose={onClose} title={title} className="max-w-3xl">
+      {state.status === 'loading' ? (
+        <p className="font-sans text-xs text-muted-foreground">Cargando documento…</p>
+      ) : state.status === 'error' ? (
+        <p className="font-sans text-xs text-destructive">{state.message}</p>
+      ) : isInlineSafe ? (
+        isImage ? (
+          <img
+            src={state.objectUrl}
+            alt={fileName ?? title}
+            className="max-h-[70vh] w-full object-contain"
+          />
+        ) : (
+          <iframe
+            src={state.objectUrl}
+            title={fileName ?? title}
+            className="h-[70vh] w-full rounded-base border-2 border-border"
+          />
+        )
+      ) : (
+        <div className="space-y-3">
+          <p className="font-sans text-xs text-muted-foreground">
+            Este tipo de archivo no se puede previsualizar.
+          </p>
+          <Button asChild>
+            <a href={state.objectUrl} download={fileName}>
+              Descargar {fileName ?? 'archivo'}
+            </a>
+          </Button>
+        </div>
+      )}
+    </Modal>
+  );
+}
