@@ -9,13 +9,16 @@ import {
   CardTitle,
   CookiePrivilegeGuard,
   DocumentPreview,
+  Modal,
   normalizePageSetup,
 } from '@aletheia/frontend-commons';
 import type { Privilege, Role } from '@aletheia/frontend-commons';
 import Link from 'next/link';
+import { useState } from 'react';
 import {
   ArrowRightIcon,
   CheckIcon,
+  EyeIcon,
   RejectIcon,
   ReturnIcon,
   TimelineIcon,
@@ -49,9 +52,10 @@ export function ReviewContractCard({
   onAction,
 }: ReviewContractCardProps) {
   const { sla, isError: slaError } = useContractWorkflow(contract.id);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const { data: contractDocument, isFetching: loadingDocument } = useGetContractDocumentQuery(
     Number(contract.id),
-    { skip: role !== 'APROBADOR' },
+    { skip: role !== 'APROBADOR' || !previewOpen },
   );
   const privilege = ROLE_REVIEW_PRIVILEGE[role] as Privilege;
   const showReject = canDefinitiveReject(contract.status);
@@ -97,19 +101,11 @@ export function ReviewContractCard({
           <p className="font-sans text-xs text-muted-foreground">Calculando SLA…</p>
         )}
 
-        {role !== 'APROBADOR' ? null : loadingDocument ? (
-          <p className="font-sans text-xs text-muted-foreground">Cargando documento…</p>
-        ) : contractDocument ? (
-          <div className="max-h-80 overflow-y-auto rounded-base border-2 border-border">
-            <DocumentPreview
-              body={contractDocument.body}
-              header={contractDocument.header}
-              footer={contractDocument.footer}
-              pageSetup={normalizePageSetup(contractDocument.pageSetup)}
-            />
-          </div>
-        ) : (
-          <Badge variant="secondary">El Abogado aún no elabora el documento formal</Badge>
+        {role !== 'APROBADOR' ? null : (
+          <Button variant="neutral" size="sm" onClick={() => setPreviewOpen(true)}>
+            <EyeIcon />
+            Ver contrato
+          </Button>
         )}
 
         <div className="mt-auto flex flex-wrap items-center gap-2 border-t-2 border-border pt-4">
@@ -161,6 +157,29 @@ export function ReviewContractCard({
           </Link>
         </div>
       </CardContent>
+
+      {role === 'APROBADOR' ? (
+        <Modal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          title={`Contrato ${contract.folio}`}
+          description={`${contract.society} · ${contract.provider}`}
+          className="max-w-3xl"
+        >
+          {loadingDocument ? (
+            <p className="font-sans text-xs text-muted-foreground">Cargando documento…</p>
+          ) : contractDocument ? (
+            <DocumentPreview
+              body={contractDocument.body}
+              header={contractDocument.header}
+              footer={contractDocument.footer}
+              pageSetup={normalizePageSetup(contractDocument.pageSetup)}
+            />
+          ) : (
+            <Badge variant="secondary">El Abogado aún no elabora el documento formal</Badge>
+          )}
+        </Modal>
+      ) : null}
     </Card>
   );
 }

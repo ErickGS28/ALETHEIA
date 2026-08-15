@@ -30,6 +30,7 @@ export * from './ui/table';
 export * from './ui/skeleton';
 export * from './ui/dropdown-menu';
 export * from './ui/modal';
+export * from './ui/file-viewer-modal';
 export * from './ui/confirm-dialog';
 export * from './ui/states';
 export * from './ui/toast';

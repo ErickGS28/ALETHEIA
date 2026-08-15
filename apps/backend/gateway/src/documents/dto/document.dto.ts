@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
@@ -45,6 +46,7 @@ export class CreateDocumentDto {
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value === 'true' : value))
   @IsBoolean()
   isRequired?: boolean;
 

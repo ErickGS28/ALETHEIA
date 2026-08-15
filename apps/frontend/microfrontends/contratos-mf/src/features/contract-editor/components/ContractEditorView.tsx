@@ -11,6 +11,7 @@ import {
   ConfirmDialog,
   DEFAULT_PAGE_SETUP,
   DocumentPreview,
+  Modal,
   PageHeader,
   type PageSetup,
   PageSetupControl,
@@ -20,7 +21,7 @@ import {
   useRole,
   useToast,
 } from '@aletheia/frontend-commons';
-import { Eye, EyeOff, FileText, Save } from 'lucide-react';
+import { Eye, FileText, Save } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Label } from '../../../components/ui/label';
 import { NoAccess } from '../../../components/ui/no-access';
@@ -309,9 +310,9 @@ export function ContractEditorView() {
                   <Button onClick={handleSave} disabled={isSaving}>
                     <Save className="h-4 w-4" /> {isSaving ? 'Guardando…' : 'Guardar documento'}
                   </Button>
-                  <Button variant="neutral" onClick={() => setShowPreview((v) => !v)}>
-                    {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    {showPreview ? 'Ocultar vista previa' : 'Ver documento'}
+                  <Button variant="neutral" onClick={() => setShowPreview(true)}>
+                    <Eye className="h-4 w-4" />
+                    Ver documento
                   </Button>
                   {savedAt ? (
                     <span className="font-sans text-xs text-muted-foreground">
@@ -366,22 +367,6 @@ export function ContractEditorView() {
               </CardContent>
             </Card>
 
-            {showPreview ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Vista previa del documento</CardTitle>
-                  <CardDescription>Así se verá el contrato impreso o en PDF.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <DocumentPreview
-                    body={body}
-                    header={header}
-                    footer={footer}
-                    pageSetup={pageSetup}
-                  />
-                </CardContent>
-              </Card>
-            ) : null}
           </>
         ) : (
           <Card>
@@ -406,6 +391,16 @@ export function ContractEditorView() {
         onConfirm={confirmApplyTemplate}
         onCancel={cancelApplyTemplate}
       />
+
+      <Modal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title="Vista previa del documento"
+        description="Así se verá el contrato impreso o en PDF."
+        className="max-w-3xl"
+      >
+        <DocumentPreview body={body} header={header} footer={footer} pageSetup={pageSetup} />
+      </Modal>
     </main>
   );
 }

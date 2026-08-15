@@ -54,5 +54,13 @@
       "trailingCommas": "all",
       "semicolons": "always"
     }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true
+    },
+    "formatter": {
+      "quoteStyle": "single"
+    }
   }
 }

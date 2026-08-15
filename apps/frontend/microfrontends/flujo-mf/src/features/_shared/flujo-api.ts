@@ -96,6 +96,15 @@ interface WorkflowActionArgs {
   comment?: string;
 }
 
+/** Respuesta real de POST /workflow/:id/{approve,reject,return} — la devuelve workflow-service. */
+export interface WorkflowTransitionResult {
+  contractId: number;
+  status: ContractStatus;
+  stageId: number;
+  stageName: string;
+  enteredAt: string;
+}
+
 // ─── Endpoints ──────────────────────────────────────────────────────────────
 
 export const flujoApi = baseApi.injectEndpoints({
@@ -110,31 +119,70 @@ export const flujoApi = baseApi.injectEndpoints({
       providesTags: ['Workflow'],
     }),
 
-    approveWorkflow: b.mutation<unknown, WorkflowActionArgs>({
+    approveWorkflow: b.mutation<WorkflowTransitionResult, WorkflowActionArgs>({
       query: ({ contractId, comment }) => ({
         url: `/workflow/${contractId}/approve`,
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
+      async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            flujoApi.util.updateQueryData('listContracts', undefined, (draft) => {
+              const c = draft.find((c) => c.id === contractId);
+              if (c) c.status = data.status;
+            }),
+          );
+        } catch {
+          // La invalidación de tags ya declarada dispara un refetch normal si esto falla.
+        }
+      },
     }),
 
-    rejectWorkflow: b.mutation<unknown, WorkflowActionArgs>({
+    rejectWorkflow: b.mutation<WorkflowTransitionResult, WorkflowActionArgs>({
       query: ({ contractId, comment }) => ({
         url: `/workflow/${contractId}/reject`,
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
+      async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            flujoApi.util.updateQueryData('listContracts', undefined, (draft) => {
+              const c = draft.find((c) => c.id === contractId);
+              if (c) c.status = data.status;
+            }),
+          );
+        } catch {
+          // La invalidación de tags ya declarada dispara un refetch normal si esto falla.
+        }
+      },
     }),
 
-    returnWorkflow: b.mutation<unknown, WorkflowActionArgs>({
+    returnWorkflow: b.mutation<WorkflowTransitionResult, WorkflowActionArgs>({
       query: ({ contractId, comment }) => ({
         url: `/workflow/${contractId}/return`,
         method: 'POST',
         body: { comment },
       }),
-      invalidatesTags: ['Contract', 'Workflow', 'Notification'],
+      invalidatesTags: ['Workflow', 'Notification'],
+      async onQueryStarted({ contractId }, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(
+            flujoApi.util.updateQueryData('listContracts', undefined, (draft) => {
+              const c = draft.find((c) => c.id === contractId);
+              if (c) c.status = data.status;
+            }),
+          );
+        } catch {
+          // La invalidación de tags ya declarada dispara un refetch normal si esto falla.
+        }
+      },
     }),
 
     listNotifications: b.query<ApiNotification[], void>({

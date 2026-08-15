@@ -17,7 +17,6 @@ import { ContractSelector } from '../../../components/ContractSelector';
 import { FileIcon } from '../../../components/ui/icons';
 import { adaptDocument } from '../../../lib/adapter';
 import { getApiErrorMessage } from '../../../lib/error';
-import { fileNameFromUrl } from '../../../lib/format';
 import { useContractOptions } from '../../../lib/useContractOptions';
 import { DocumentVersionsCard } from './DocumentVersionsCard';
 
@@ -60,11 +59,7 @@ export function DocumentVersionsView() {
     try {
       await addVersion({
         documentId,
-        body: {
-          fileUrl: `uploads/${fileNameFromUrl(file.name)}`,
-          fileSize: file.size,
-          mimeType: file.type || 'application/octet-stream',
-        },
+        file,
       }).unwrap();
       toast.success('Nueva versión subida', `Se agregó "${file.name}" como versión activa.`);
       return true;

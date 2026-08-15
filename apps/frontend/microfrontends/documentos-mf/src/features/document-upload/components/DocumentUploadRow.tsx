@@ -1,8 +1,8 @@
 'use client';
 
-import { Badge, Button, Input } from '@aletheia/frontend-commons';
+import { Badge, Button, FileViewerModal, Input } from '@aletheia/frontend-commons';
 import { useRef, useState } from 'react';
-import { CheckIcon, FileIcon, UploadIcon } from '../../../components/ui/icons';
+import { CheckIcon, EyeIcon, FileIcon, UploadIcon } from '../../../components/ui/icons';
 import { validateDocumentFile } from '../../../lib/fileValidation';
 import { formatBytes, formatDate, formatMimeType } from '../../../lib/format';
 import type { DocumentRecord, RequiredDocument } from '../../../lib/types';
@@ -57,6 +57,7 @@ export function DocumentUploadRow({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [expiryDate, setExpiryDate] = useState('');
+  const [viewerOpen, setViewerOpen] = useState(false);
 
   const isUploaded = Boolean(document);
   const active = document?.versions[document.versions.length - 1];
@@ -87,104 +88,125 @@ export function DocumentUploadRow({
   }
 
   return (
-    <div className="rounded-base border-2 border-border bg-background p-4 shadow-shadow">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-base border-2 border-border bg-secondary-background">
-            <FileIcon className="h-5 w-5" />
-          </span>
-          <div>
-            <div className="font-heading text-base">{requirement.label}</div>
-            <div className="font-sans text-xs text-muted-foreground">
-              {requirement.tracksExpiry
-                ? 'Acepta fecha de vigencia (opcional)'
-                : 'Sin fecha de vigencia'}
+    <>
+      <div className="rounded-base border-2 border-border bg-background p-4 shadow-shadow">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-base border-2 border-border bg-secondary-background">
+              <FileIcon className="h-5 w-5" />
+            </span>
+            <div>
+              <div className="font-heading text-base">{requirement.label}</div>
+              <div className="font-sans text-xs text-muted-foreground">
+                {requirement.tracksExpiry
+                  ? 'Acepta fecha de vigencia (opcional)'
+                  : 'Sin fecha de vigencia'}
+              </div>
             </div>
           </div>
+
+          {isUploaded ? (
+            <Badge variant="default" className="gap-1">
+              <CheckIcon className="h-3.5 w-3.5" />
+              Cargado
+            </Badge>
+          ) : (
+            <Badge variant="secondary">Pendiente</Badge>
+          )}
         </div>
 
-        {isUploaded ? (
-          <Badge variant="default" className="gap-1">
-            <CheckIcon className="h-3.5 w-3.5" />
-            Cargado
-          </Badge>
-        ) : (
-          <Badge variant="secondary">Pendiente</Badge>
-        )}
-      </div>
-
-      {isUploaded && active ? (
-        <div className="mt-3 grid grid-cols-2 gap-2 rounded-base border-2 border-border bg-secondary-background/40 p-3 font-sans text-xs text-foreground/70 sm:grid-cols-4">
-          <span className="truncate" title={active.fileName}>
-            {active.fileName}
-          </span>
-          <span>{formatBytes(active.size)}</span>
-          <span>{formatMimeType(active.mimeType)}</span>
-          <span>v{document.currentVersion}</span>
-          {document.expiryDate ? (
-            <span className="col-span-2 sm:col-span-4">
-              Vigencia: {formatDate(document.expiryDate)}
+        {isUploaded && active ? (
+          <div className="mt-3 grid grid-cols-2 gap-2 rounded-base border-2 border-border bg-secondary-background/40 p-3 font-sans text-xs text-foreground/70 sm:grid-cols-4">
+            <span className="truncate" title={active.fileName}>
+              {active.fileName}
             </span>
-          ) : null}
-        </div>
-      ) : (
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
-          <div className="flex-1 space-y-1.5">
-            <label
-              htmlFor={`file-${requirement.key}`}
-              className="font-sans text-xs uppercase tracking-wide text-muted-foreground"
+            <span>{formatBytes(active.size)}</span>
+            <span>{formatMimeType(active.mimeType)}</span>
+            <span>v{document.currentVersion}</span>
+            {document.expiryDate ? (
+              <span className="col-span-2 sm:col-span-4">
+                Vigencia: {formatDate(document.expiryDate)}
+              </span>
+            ) : null}
+            <Button
+              variant="neutral"
+              size="sm"
+              className="col-span-2 sm:col-span-4"
+              onClick={() => setViewerOpen(true)}
             >
-              Archivo
-            </label>
-            <Input
-              id={`file-${requirement.key}`}
-              ref={inputRef}
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg"
-              aria-invalid={fileError ? true : undefined}
-              aria-describedby={fileError ? `file-error-${requirement.key}` : undefined}
-              onChange={(e) => handleSelect(e.target.files?.[0] ?? null)}
-            />
+              <EyeIcon className="h-3.5 w-3.5" />
+              Ver documento
+            </Button>
           </div>
-
-          {requirement.tracksExpiry ? (
-            <div className="space-y-1.5 sm:w-44">
+        ) : (
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+            <div className="flex-1 space-y-1.5">
               <label
-                htmlFor={`exp-${requirement.key}`}
-                className="flex items-center gap-1 font-sans text-xs uppercase tracking-wide text-muted-foreground"
+                htmlFor={`file-${requirement.key}`}
+                className="font-sans text-xs uppercase tracking-wide text-muted-foreground"
               >
-                Vigencia
-                <span className="font-sans text-[10px] normal-case tracking-normal text-foreground/50">
-                  (opcional)
-                </span>
+                Archivo
               </label>
               <Input
-                id={`exp-${requirement.key}`}
-                type="date"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
+                id={`file-${requirement.key}`}
+                ref={inputRef}
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                aria-invalid={fileError ? true : undefined}
+                aria-describedby={fileError ? `file-error-${requirement.key}` : undefined}
+                onChange={(e) => handleSelect(e.target.files?.[0] ?? null)}
               />
             </div>
-          ) : null}
 
-          <Button
-            onClick={handleConfirm}
-            disabled={!pendingFile || disabled}
-            aria-label={`Cargar ${requirement.label}`}
-          >
-            <UploadIcon className="h-4 w-4" />
-            Cargar
-          </Button>
-        </div>
-      )}
+            {requirement.tracksExpiry ? (
+              <div className="space-y-1.5 sm:w-44">
+                <label
+                  htmlFor={`exp-${requirement.key}`}
+                  className="flex items-center gap-1 font-sans text-xs uppercase tracking-wide text-muted-foreground"
+                >
+                  Vigencia
+                  <span className="font-sans text-[10px] normal-case tracking-normal text-foreground/50">
+                    (opcional)
+                  </span>
+                </label>
+                <Input
+                  id={`exp-${requirement.key}`}
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                />
+              </div>
+            ) : null}
 
-      {isUploaded ? null : (
-        <FileSelectionFeedback
-          errorId={`file-error-${requirement.key}`}
-          fileError={fileError}
-          pendingFile={pendingFile}
+            <Button
+              onClick={handleConfirm}
+              disabled={!pendingFile || disabled}
+              aria-label={`Cargar ${requirement.label}`}
+            >
+              <UploadIcon className="h-4 w-4" />
+              Cargar
+            </Button>
+          </div>
+        )}
+
+        {isUploaded ? null : (
+          <FileSelectionFeedback
+            errorId={`file-error-${requirement.key}`}
+            fileError={fileError}
+            pendingFile={pendingFile}
+          />
+        )}
+      </div>
+      {active ? (
+        <FileViewerModal
+          open={viewerOpen}
+          onClose={() => setViewerOpen(false)}
+          title={requirement.label}
+          fileUrl={active.fileUrl}
+          mimeType={active.mimeType}
+          fileName={active.fileName}
         />
-      )}
-    </div>
+      ) : null}
+    </>
   );
 }

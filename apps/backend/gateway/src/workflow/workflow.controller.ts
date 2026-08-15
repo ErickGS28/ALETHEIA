@@ -20,7 +20,7 @@ import type { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { contractDocumentKey } from '../documents/storage/contract-document-key.util';
-import { FileStorageService } from '../documents/storage/file-storage.service';
+import { STORAGE_SERVICE, type StorageService } from '../documents/storage/storage.interface';
 import { CreateStageDto, TransitionDto, UpdateStageDto } from './dto/workflow.dto';
 
 @ApiTags('workflow')
@@ -29,7 +29,7 @@ import { CreateStageDto, TransitionDto, UpdateStageDto } from './dto/workflow.dt
 export class WorkflowController {
   constructor(
     @Inject(SERVICE_CLIENTS.WORKFLOW) private readonly workflow: ClientProxy,
-    private readonly storage: FileStorageService,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   // --- Configuración de etapas (declarado ANTES de /:contractId) ---

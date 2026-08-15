@@ -1,8 +1,8 @@
 import { basename, extname } from 'node:path';
-import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
+import { Controller, Get, Inject, NotFoundException, Param, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { FileStorageService } from './storage/file-storage.service';
+import { STORAGE_SERVICE, type StorageService } from './storage/storage.interface';
 
 /**
  * Content types inert enough to render inline. Everything else is forced to
@@ -40,7 +40,7 @@ const MIME_BY_EXT: Record<string, string> = {
 @ApiBearerAuth('access-token')
 @Controller('files')
 export class FilesController {
-  constructor(private readonly storage: FileStorageService) {}
+  constructor(@Inject(STORAGE_SERVICE) private readonly storage: StorageService) {}
 
   /**
    * Streams a stored document binary with the proper Content-Type.
@@ -49,14 +49,11 @@ export class FilesController {
    */
   @Get(':id')
   @ApiOperation({ summary: 'Descargar/servir un archivo almacenado' })
-  download(@Param('id') id: string, @Res() res: Response) {
-    const absolutePath = this.storage.resolvePath(id);
-    if (!absolutePath) throw new NotFoundException('Archivo no encontrado');
+  async download(@Param('id') id: string, @Res() res: Response) {
+    const stream = await this.storage.getStream(id);
+    if (!stream) throw new NotFoundException('Archivo no encontrado');
 
-    const contentType =
-      MIME_BY_EXT[extname(absolutePath).toLowerCase()] ?? 'application/octet-stream';
-    // Defensive serving: only inert types render inline; everything else downloads.
-    // nosniff + a locked-down CSP neutralize any active content even if served inline.
+    const contentType = MIME_BY_EXT[extname(id).toLowerCase()] ?? 'application/octet-stream';
     const disposition = INLINE_SAFE_TYPES.has(contentType) ? 'inline' : 'attachment';
     const safeName = basename(id).replace(/["\r\n]/g, '');
 
@@ -65,6 +62,10 @@ export class FilesController {
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     res.setHeader('Content-Disposition', `${disposition}; filename="${safeName}"`);
 
-    this.storage.createReadStream(absolutePath).pipe(res);
+    stream.on('error', () => {
+      if (!res.headersSent) res.status(404).end();
+      else res.destroy();
+    });
+    stream.pipe(res);
   }
 }

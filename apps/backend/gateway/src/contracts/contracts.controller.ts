@@ -25,7 +25,7 @@ import type { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { contractDocumentKey } from '../documents/storage/contract-document-key.util';
-import { FileStorageService } from '../documents/storage/file-storage.service';
+import { STORAGE_SERVICE, type StorageService } from '../documents/storage/storage.interface';
 import { SaveContractDocumentDto } from './dto/contract-document.dto';
 import { CancelContractDto, ContractFiltersDto } from './dto/contract-filters.dto';
 import { CreateContractDto } from './dto/create-contract.dto';
@@ -38,7 +38,7 @@ export class ContractsController {
   constructor(
     @Inject(SERVICE_CLIENTS.CONTRACTS) private readonly contracts: ClientProxy,
     @Inject(SERVICE_CLIENTS.WORKFLOW) private readonly workflow: ClientProxy,
-    private readonly storage: FileStorageService,
+    @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
   ) {}
 
   @Post()

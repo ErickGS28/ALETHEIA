@@ -65,6 +65,53 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   return result;
 };
 
+function redirectToLogin(): void {
+  clearSession();
+  if (typeof window !== 'undefined') window.location.href = '/';
+}
+
+/** Calls /auth/refresh the same way baseQueryWithReauth does; returns the new access token, if any. */
+async function tryRefreshAccessToken(): Promise<string | undefined> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return undefined;
+  const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!refreshRes.ok) return undefined;
+  const refreshBody = (await refreshRes.json()) as { data?: { accessToken?: string } };
+  return refreshBody.data?.accessToken;
+}
+
+/**
+ * Fetches a binary resource (e.g. a stored file served from `/files/:id`) as
+ * an authenticated Blob, mirroring baseQueryWithReauth's 401 -> refresh ->
+ * retry-once flow above. Can't reuse fetchBaseQuery/rawBaseQuery directly
+ * for this because RTK Query's fetchBaseQuery expects a JSON response, not
+ * a raw blob — so blob consumers (e.g. FileViewerModal) need their own
+ * fetch that still gets the same transparent re-auth behavior.
+ */
+export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
+  const doFetch = (token: string | null) =>
+    fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : undefined });
+
+  let res = await doFetch(getAccessToken());
+
+  if (res.status === 401) {
+    const newToken = await tryRefreshAccessToken();
+    if (newToken) {
+      updateAccessToken(newToken);
+      res = await doFetch(newToken);
+    } else {
+      redirectToLogin();
+    }
+  }
+
+  if (!res.ok) throw new Error(`No se pudo cargar el archivo (${res.status}).`);
+  return res.blob();
+}
+
 /**
  * API base de RTK Query compartida por todos los microfrontends.
  * Cada MF agrega sus endpoints con `baseApi.injectEndpoints({ ... })` y consume los hooks

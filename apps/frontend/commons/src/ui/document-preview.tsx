@@ -52,6 +52,11 @@ export function DocumentPreview({
         .clm-print-header { position: fixed; top: 0; left: 0; right: 0; }
         .clm-print-footer { position: fixed; bottom: 0; left: 0; right: 0; }
         .clm-page-number::before { content: counter(page); }
+        /* Si el preview se imprime desde dentro de un modal (position: fixed +
+           overflow-y: auto), esos ancestros recortarían la hoja a la altura del
+           viewport. Se neutralizan solo durante impresión. */
+        [role="dialog"] { position: static !important; overflow: visible !important; max-height: none !important; }
+        div:has(> [role="dialog"]) { position: static !important; overflow: visible !important; }
       }
     `;
     document.head.appendChild(style);

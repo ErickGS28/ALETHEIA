@@ -26,7 +26,6 @@ import {
   toBackendProviderType,
 } from '../../../lib/adapter';
 import { getApiErrorMessage } from '../../../lib/error';
-import { fileNameFromUrl } from '../../../lib/format';
 import { useContractOptions } from '../../../lib/useContractOptions';
 import { DocumentUploadRow } from './DocumentUploadRow';
 
@@ -96,13 +95,10 @@ export function DocumentUploadView() {
     try {
       await uploadDocument({
         contractId,
+        file,
         body: {
           name: file.name,
           type,
-          // No binary upload: fileUrl carries a URL/string derived from the file name.
-          fileUrl: `uploads/${fileNameFromUrl(file.name)}`,
-          fileSize: file.size,
-          mimeType: file.type || 'application/octet-stream',
           isRequired,
           expiresAt: expiryDate ? new Date(expiryDate).toISOString() : undefined,
         },
