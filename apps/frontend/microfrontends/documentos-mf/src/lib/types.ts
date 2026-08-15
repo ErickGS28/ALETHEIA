@@ -63,6 +63,8 @@ export interface DocumentVersion {
   /** Sequential version number, starting at 1. */
   version: number;
   fileName: string;
+  /** Relative gateway URL, e.g. "/files/<id>" — used by FileViewerModal. */
+  fileUrl: string;
   /** File size in bytes. */
   size: number;
   mimeType: string;

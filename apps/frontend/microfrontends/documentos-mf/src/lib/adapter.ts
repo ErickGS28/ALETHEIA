@@ -59,6 +59,7 @@ export function adaptVersion(v: ApiDocumentVersion): DocumentVersion {
   return {
     version: v.version,
     fileName: fileNameFromUrl(v.fileUrl),
+    fileUrl: v.fileUrl,
     size: v.fileSize ?? 0,
     mimeType: v.mimeType ?? 'application/octet-stream',
     uploadedBy: `Usuario #${v.uploadedById}`,
