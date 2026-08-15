@@ -16,7 +16,13 @@ export interface FileViewerModalProps {
   fileName?: string;
 }
 
-const INLINE_SAFE_TYPES = new Set(['application/pdf', 'image/png', 'image/jpeg']);
+const INLINE_SAFE_TYPES = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+]);
 
 type ViewerState =
   | { status: 'loading' }
@@ -93,6 +99,7 @@ export function FileViewerModal({
             src={state.objectUrl}
             title={fileName ?? title}
             className="h-[70vh] w-full rounded-base border-2 border-border"
+            sandbox=""
           />
         )
       ) : (
