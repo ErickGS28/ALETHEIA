@@ -65,6 +65,25 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   return result;
 };
 
+function redirectToLogin(): void {
+  clearSession();
+  if (typeof window !== 'undefined') window.location.href = '/';
+}
+
+/** Calls /auth/refresh the same way baseQueryWithReauth does; returns the new access token, if any. */
+async function tryRefreshAccessToken(): Promise<string | undefined> {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return undefined;
+  const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  });
+  if (!refreshRes.ok) return undefined;
+  const refreshBody = (await refreshRes.json()) as { data?: { accessToken?: string } };
+  return refreshBody.data?.accessToken;
+}
+
 /**
  * Fetches a binary resource (e.g. a stored file served from `/files/:id`) as
  * an authenticated Blob, mirroring baseQueryWithReauth's 401 -> refresh ->
@@ -80,27 +99,12 @@ export async function fetchAuthenticatedBlob(url: string): Promise<Blob> {
   let res = await doFetch(getAccessToken());
 
   if (res.status === 401) {
-    const refreshToken = getRefreshToken();
-    if (refreshToken) {
-      const refreshRes = await fetch(`${API_URL}/auth/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-      const refreshBody = refreshRes.ok
-        ? ((await refreshRes.json()) as { data?: { accessToken?: string } })
-        : undefined;
-      const newToken = refreshBody?.data?.accessToken;
-      if (newToken) {
-        updateAccessToken(newToken);
-        res = await doFetch(newToken);
-      } else {
-        clearSession();
-        if (typeof window !== 'undefined') window.location.href = '/';
-      }
+    const newToken = await tryRefreshAccessToken();
+    if (newToken) {
+      updateAccessToken(newToken);
+      res = await doFetch(newToken);
     } else {
-      clearSession();
-      if (typeof window !== 'undefined') window.location.href = '/';
+      redirectToLogin();
     }
   }
 
