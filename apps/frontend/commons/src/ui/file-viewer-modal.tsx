@@ -93,7 +93,12 @@ export function FileViewerModal({
             src={state.objectUrl}
             title={fileName ?? title}
             className="h-[70vh] w-full rounded-base border-2 border-border"
-            sandbox=""
+            // allow-scripts only: Chromium's built-in PDF viewer needs script
+            // execution to render at all (an empty sandbox blocks it outright,
+            // showing a broken-document icon instead of the PDF). Deliberately
+            // omits allow-same-origin/allow-top-navigation/allow-forms/allow-popups
+            // so embedded content still can't touch the real origin or navigate out.
+            sandbox="allow-scripts"
           />
         )
       ) : (
