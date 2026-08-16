@@ -235,7 +235,9 @@ export function CreateContractView() {
                   }
                 >
                   <option value="">Selecciona una sociedad…</option>
-                  {(societies ?? []).map((s) => (
+                  {(societies ?? [])
+                    .filter((s) => s.isActive)
+                    .map((s) => (
                     <option key={s.id} value={String(s.id)}>
                       {s.name}
                     </option>
@@ -303,7 +305,9 @@ export function CreateContractView() {
                   }
                 >
                   <option value="">Selecciona un área…</option>
-                  {(areas ?? []).map((a) => (
+                  {(areas ?? [])
+                    .filter((a) => a.isActive)
+                    .map((a) => (
                     <option key={a.id} value={String(a.id)}>
                       {a.name}
                     </option>
