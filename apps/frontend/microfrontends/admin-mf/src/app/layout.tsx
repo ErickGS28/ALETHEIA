@@ -1,6 +1,7 @@
 import { ApiProvider, MfSidebar, ToastProvider } from '@aletheia/frontend-commons';
 import type { Metadata } from 'next';
 import { Anton, DM_Sans } from 'next/font/google';
+import './globals.css';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans', display: 'swap' });
 const anton = Anton({

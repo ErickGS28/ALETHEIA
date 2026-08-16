@@ -4,7 +4,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Badge, Skeleton } from '@aletheia/frontend-commons';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
-import { ROLES } from '../data/roles';
+import { ROLES, ROLE_PRIVILEGES } from '../data/roles';
 import { useAuth } from '../hooks/useAuth';
 
 /* ─── Module definitions ─────────────────────────────────────────────── */
@@ -72,14 +72,17 @@ const STATS = [
 
 /* ─── Component ──────────────────────────────────────────────────────── */
 export function RoleDashboard() {
-  const { role, email, privileges, logout } = useAuth();
+  const { role, email, logout } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const roleMeta = ROLES.find((r) => r.id === role);
   const roleName = roleMeta?.label ?? role;
 
-  const privilegeSet = privileges as readonly string[];
+  // Matriz oficial por rol (no los privilegios crudos del JWT): el usuario admin demo
+  // se siembra con todos los privilegios para poder probar cualquier pantalla, pero eso
+  // no debe filtrarse a qué módulos se muestran como "disponibles para tu rol".
+  const officialPrivileges = role ? ROLE_PRIVILEGES[role] : [];
   const canAccess = (requires: readonly string[]) =>
-    requires.length === 0 || requires.some((p) => privilegeSet.includes(p));
+    requires.length === 0 || requires.some((p) => officialPrivileges.includes(p));
 
   const accessibleModules = MODULES.filter((m) => canAccess(m.requires));
 
@@ -90,7 +93,7 @@ export function RoleDashboard() {
         role={role ?? ''}
         email={email ?? ''}
         roleName={roleName ?? ''}
-        privileges={privileges}
+        privileges={officialPrivileges}
         onLogout={logout}
         mobileOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}

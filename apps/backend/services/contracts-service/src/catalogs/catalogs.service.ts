@@ -3,7 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 
 /**
  * CRUD de catálogos del dominio contracts: sociedades, áreas, apoderados y plantillas.
- * findAll devuelve solo registros activos.
+ * findAll devuelve TODOS los registros (activos e inactivos) — igual que
+ * auth-service/users.findAll(). El borrado es lógico (isActive); los consumidores que
+ * arman selects para crear/editar (p.ej. CreateContractView, firmas-mf) filtran por
+ * isActive del lado del cliente para no ofrecer catálogos desactivados.
  */
 @Injectable()
 export class CatalogsService {
@@ -11,7 +14,7 @@ export class CatalogsService {
 
   // ---- Society ----
   societyFindAll() {
-    return this.prisma.society.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+    return this.prisma.society.findMany({ orderBy: { name: 'asc' } });
   }
 
   societyCreate(dto: { name: string }) {
@@ -24,7 +27,7 @@ export class CatalogsService {
 
   // ---- Area ----
   areaFindAll() {
-    return this.prisma.area.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+    return this.prisma.area.findMany({ orderBy: { name: 'asc' } });
   }
 
   areaCreate(dto: { name: string }) {
@@ -37,7 +40,7 @@ export class CatalogsService {
 
   // ---- Apoderado ----
   apoderadoFindAll() {
-    return this.prisma.apoderado.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+    return this.prisma.apoderado.findMany({ orderBy: { name: 'asc' } });
   }
 
   apoderadoCreate(dto: { name: string; legalPower: string }) {
@@ -50,7 +53,7 @@ export class CatalogsService {
 
   // ---- Template ----
   templateFindAll() {
-    return this.prisma.template.findMany({ where: { isActive: true }, orderBy: { name: 'asc' } });
+    return this.prisma.template.findMany({ orderBy: { name: 'asc' } });
   }
 
   async templateFindOne(id: number) {
