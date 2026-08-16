@@ -28,7 +28,7 @@ import {
 } from '../../_shared/api/contracts-api';
 import { CancelContractModal } from '../../_shared/components/CancelContractModal';
 import { ErrorBanner } from '../../_shared/components/ErrorBanner';
-import { RequiredDocsList } from '../../_shared/components/RequiredDocsList';
+import { RequiredDocsStatus } from '../../_shared/components/RequiredDocsStatus';
 import { SlaIndicator } from '../../_shared/components/SlaIndicator';
 import { StatusBadge } from '../../_shared/components/StatusBadge';
 import {
@@ -165,7 +165,8 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
   const canSubmit = can('CONTRACT_SUBMIT') && isDraft;
   const canCancel = can('CONTRACT_CANCEL') && !isTerminal;
   const canRecover = can('CONTRACT_RECOVER') && isCancelled;
-  const hasActions = canEdit || canSubmit || canCancel || canRecover;
+  // Cancelar vive en el strip de estado/SLA, no en la barra de acciones.
+  const hasActions = canEdit || canSubmit || canRecover;
 
   // Real SLA comes from the workflow; fall back to the time-based heuristic.
   const sla: SlaLevel = workflow?.sla ? slaFromColor(workflow.sla.color) : computeSla(contract);
@@ -194,6 +195,19 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
             SLA
           </span>
           <SlaIndicator level={sla} />
+          {canCancel && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="ml-auto"
+              onClick={() => {
+                setActionError(null);
+                setCancelOpen(true);
+              }}
+            >
+              <XCircle className="h-4 w-4" /> Cancelar
+            </Button>
+          )}
         </div>
 
         {/* Action bar */}
@@ -220,18 +234,6 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
                 onClick={() => handleRecover(contract.numericId)}
               >
                 <RotateCcw className="h-4 w-4" /> Recuperar
-              </Button>
-            )}
-            {canCancel && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => {
-                  setActionError(null);
-                  setCancelOpen(true);
-                }}
-              >
-                <XCircle className="h-4 w-4" /> Cancelar
               </Button>
             )}
           </div>
@@ -268,11 +270,14 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
 
             <Card>
               <CardHeader>
-                <CardTitle>Documentos requeridos</CardTitle>
-                <CardDescription>Según tipo de proveedor (informativo)</CardDescription>
+                <CardTitle>Documentos</CardTitle>
+                <CardDescription>Estado de carga y acceso a documentos-mf</CardDescription>
               </CardHeader>
               <CardContent>
-                <RequiredDocsList providerType={contract.providerType} />
+                <RequiredDocsStatus
+                  contractId={contract.numericId}
+                  providerType={contract.providerType}
+                />
               </CardContent>
             </Card>
           </div>
