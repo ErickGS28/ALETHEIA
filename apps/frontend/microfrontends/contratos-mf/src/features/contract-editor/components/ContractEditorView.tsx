@@ -128,7 +128,12 @@ export function ContractEditorView() {
 
   const canAccess = role === 'ABOGADO';
   if (ready && !canAccess) {
-    return <NoAccess title="Elaborar documento" />;
+    return (
+      <NoAccess
+        title="Elaborar documento"
+        message="Necesitas el rol Abogado para elaborar el documento formal del contrato."
+      />
+    );
   }
 
   const loadTemplate = (templateId: string) => {

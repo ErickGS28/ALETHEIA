@@ -9,11 +9,15 @@ import {
   CardHeader,
   CardTitle,
   CookiePrivilegeGuard,
+  useRole,
 } from '@aletheia/frontend-commons';
 import { FileSignature, FileText, LayoutTemplate } from 'lucide-react';
 import Link from 'next/link';
 
 export function ContratosView() {
+  const { role, ready } = useRole();
+  const canElaborate = role === 'ABOGADO';
+
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -63,25 +67,24 @@ export function ContratosView() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <FileSignature className="h-6 w-6" />
-              <CardTitle className="text-xl">Elaborar documento</CardTitle>
-              <CardDescription>Genera el documento de un contrato (HU-19).</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CookiePrivilegeGuard
-                privilege="TEMPLATES_MANAGE"
-                fallback={<Badge variant="secondary">Sin permiso (TEMPLATES_MANAGE)</Badge>}
-              >
+          {/* Solo el Abogado elabora el documento formal — se oculta para el resto de roles
+              en vez de mostrarla y bloquearla después (ver ContractEditorView). */}
+          {ready && canElaborate && (
+            <Card>
+              <CardHeader>
+                <FileSignature className="h-6 w-6" />
+                <CardTitle className="text-xl">Elaborar documento</CardTitle>
+                <CardDescription>Genera el documento de un contrato (HU-19).</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <Link href="/elaborar">
                   <Button variant="neutral" className="w-full">
                     Elaborar contrato
                   </Button>
                 </Link>
-              </CookiePrivilegeGuard>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </main>
