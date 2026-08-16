@@ -1,16 +1,27 @@
 'use client';
 
+import { useRole } from '@aletheia/frontend-commons';
 import type { ReactNode } from 'react';
 import { ClockIcon, HistoryIcon, UploadIcon } from '../ui/icons';
-import { TabsNav } from '../ui/tabs-nav';
+import { type TabItem, TabsNav } from '../ui/tabs-nav';
 
-const TABS = [
-  { href: '/', label: 'Carga', icon: <UploadIcon className="h-4 w-4" /> },
+const TABS: (TabItem & { requiresPrivilege?: 'DOCUMENT_UPLOAD' })[] = [
+  {
+    href: '/',
+    label: 'Carga',
+    icon: <UploadIcon className="h-4 w-4" />,
+    requiresPrivilege: 'DOCUMENT_UPLOAD',
+  },
   { href: '/versiones', label: 'Versiones', icon: <HistoryIcon className="h-4 w-4" /> },
   { href: '/vigencia', label: 'Vigencia', icon: <ClockIcon className="h-4 w-4" /> },
 ];
 
 export function PageShell({ children }: { children: ReactNode }) {
+  const { can, ready } = useRole();
+  // Oculta "Carga" para roles sin DOCUMENT_UPLOAD (p.ej. Administrador) en vez de
+  // mostrarla y bloquear el contenido después (ver DocumentUploadView).
+  const tabs = TABS.filter((t) => !t.requiresPrivilege || !ready || can(t.requiresPrivilege));
+
   return (
     <main className="bg-grid min-h-screen p-4 sm:p-6">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -21,7 +32,7 @@ export function PageShell({ children }: { children: ReactNode }) {
           </p>
         </header>
 
-        <TabsNav items={TABS} />
+        <TabsNav items={tabs} />
 
         {children}
       </div>
