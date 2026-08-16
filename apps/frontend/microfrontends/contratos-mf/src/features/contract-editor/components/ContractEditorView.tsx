@@ -371,7 +371,6 @@ export function ContractEditorView() {
                 </div>
               </CardContent>
             </Card>
-
           </>
         ) : (
           <Card>

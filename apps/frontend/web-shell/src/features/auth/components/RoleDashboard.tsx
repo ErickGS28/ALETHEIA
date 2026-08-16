@@ -4,7 +4,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { Badge, Skeleton } from '@aletheia/frontend-commons';
 import { Menu } from 'lucide-react';
 import { useState } from 'react';
-import { ROLE_PRIVILEGES, ROLES } from '../data/roles';
+import { ROLES, ROLE_PRIVILEGES } from '../data/roles';
 import { useAuth } from '../hooks/useAuth';
 
 /* ─── Module definitions ─────────────────────────────────────────────── */
