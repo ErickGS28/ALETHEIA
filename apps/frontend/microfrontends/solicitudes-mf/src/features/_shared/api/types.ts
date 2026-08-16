@@ -48,6 +48,12 @@ export interface RequiredDoc {
   label: string;
 }
 
+/** GET /documents/:contractId item (solo lo que esta MF necesita: qué tipo ya existe). */
+export interface DocumentSummary {
+  id: number;
+  type: string;
+}
+
 /** GET /reports/audit/:contractId */
 export interface AuditLog {
   id: number;

@@ -14,6 +14,7 @@ import {
   LoadingState,
   PageHeader,
   Select,
+  cn,
   useRole,
   useToast,
 } from '@aletheia/frontend-commons';
@@ -67,6 +68,46 @@ function validate(form: FormState): Errors {
   return errors;
 }
 
+const STEPS = [
+  { n: 1, label: 'Datos de la solicitud' },
+  { n: 2, label: 'Documentos requeridos' },
+] as const;
+
+/** 2-step progress indicator: datos → documentos requeridos. */
+function StepIndicator({ step }: { step: 1 | 2 }) {
+  return (
+    <div className="flex items-center gap-2" aria-label={`Paso ${step} de ${STEPS.length}`}>
+      {STEPS.map((s, i) => (
+        <React.Fragment key={s.n}>
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                'flex h-7 w-7 shrink-0 items-center justify-center rounded-base border-2 border-border font-heading text-xs',
+                step === s.n
+                  ? 'bg-main text-main-foreground'
+                  : step > s.n
+                    ? 'bg-secondary-background text-foreground/70'
+                    : 'bg-background text-foreground/40',
+              )}
+            >
+              {step > s.n ? '✓' : s.n}
+            </span>
+            <span
+              className={cn(
+                'hidden font-sans text-xs sm:inline',
+                step === s.n ? 'text-foreground' : 'text-foreground/50',
+              )}
+            >
+              {s.label}
+            </span>
+          </div>
+          {i < STEPS.length - 1 && <div className="h-0.5 flex-1 bg-border" aria-hidden="true" />}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 export function CreateContractView() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -92,6 +133,7 @@ export function CreateContractView() {
   const [errors, setErrors] = React.useState<Errors>({});
   const [loaded, setLoaded] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [step, setStep] = React.useState<1 | 2>(1);
 
   // Hydrate the form in edit mode once the contract loads.
   React.useEffect(() => {
@@ -112,8 +154,6 @@ export function CreateContractView() {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const submitting = creating || updating;
-  // Validez en vivo para deshabilitar el submit cuando el formulario es inválido.
-  const hasErrors = Object.keys(validate(form)).length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +161,12 @@ export function CreateContractView() {
     const v = validate(form);
     setErrors(v);
     if (Object.keys(v).length > 0) return;
+
+    // Paso 1 solo valida y avanza; el envío real ocurre en el paso 2.
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
 
     const body = {
       title: form.title.trim(),
@@ -205,141 +251,168 @@ export function CreateContractView() {
           backHref="/solicitudes"
         />
 
+        <StepIndicator step={step} />
+
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Datos de la solicitud</CardTitle>
-              <CardDescription>
-                {isEdit
-                  ? `Folio: ${existing?.folio}`
-                  : 'El folio se asigna automáticamente al crear'}{' '}
-                · Estado inicial: Borrador
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <FormField label="Título del contrato" htmlFor="title" required error={errors.title}>
-                <Input
-                  id="title"
-                  placeholder="Ej. Suministro de equipo de cómputo"
-                  value={form.title}
-                  onChange={(e) => set('title', e.target.value)}
-                />
-              </FormField>
-
-              <FormField label="Sociedad" htmlFor="society" required error={errors.societyId}>
-                <Select
-                  id="society"
-                  value={form.societyId === '' ? '' : String(form.societyId)}
-                  onChange={(e) =>
-                    set('societyId', e.target.value === '' ? '' : Number(e.target.value))
-                  }
-                >
-                  <option value="">Selecciona una sociedad…</option>
-                  {(societies ?? [])
-                    .filter((s) => s.isActive)
-                    .map((s) => (
-                      <option key={s.id} value={String(s.id)}>
-                        {s.name}
-                      </option>
-                    ))}
-                </Select>
-              </FormField>
-
-              <div className="grid gap-5 sm:grid-cols-2">
+          {step === 1 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Datos de la solicitud</CardTitle>
+                <CardDescription>
+                  {isEdit
+                    ? `Folio: ${existing?.folio}`
+                    : 'El folio se asigna automáticamente al crear'}{' '}
+                  · Estado inicial: Borrador
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
                 <FormField
-                  label="Nombre del proveedor"
-                  htmlFor="providerName"
+                  label="Título del contrato"
+                  htmlFor="title"
                   required
-                  error={errors.providerName}
+                  error={errors.title}
                 >
                   <Input
-                    id="providerName"
-                    placeholder="Razón social o nombre"
-                    value={form.providerName}
-                    onChange={(e) => set('providerName', e.target.value)}
+                    id="title"
+                    placeholder="Ej. Suministro de equipo de cómputo"
+                    value={form.title}
+                    onChange={(e) => set('title', e.target.value)}
                   />
                 </FormField>
 
-                <FormField
-                  label="Email del proveedor"
-                  htmlFor="providerEmail"
-                  required
-                  error={errors.providerEmail}
-                >
-                  <Input
-                    id="providerEmail"
-                    type="email"
-                    placeholder="contacto@proveedor.mx"
-                    value={form.providerEmail}
-                    onChange={(e) => set('providerEmail', e.target.value)}
+                {/* Datos de la organización: sociedad + área que solicitan el contrato. */}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField label="Sociedad" htmlFor="society" required error={errors.societyId}>
+                    <Select
+                      id="society"
+                      value={form.societyId === '' ? '' : String(form.societyId)}
+                      onChange={(e) =>
+                        set('societyId', e.target.value === '' ? '' : Number(e.target.value))
+                      }
+                    >
+                      <option value="">Selecciona una sociedad…</option>
+                      {(societies ?? [])
+                        .filter((s) => s.isActive)
+                        .map((s) => (
+                          <option key={s.id} value={String(s.id)}>
+                            {s.name}
+                          </option>
+                        ))}
+                    </Select>
+                  </FormField>
+
+                  <FormField label="Área requirente" htmlFor="area" required error={errors.areaId}>
+                    <Select
+                      id="area"
+                      value={form.areaId === '' ? '' : String(form.areaId)}
+                      onChange={(e) =>
+                        set('areaId', e.target.value === '' ? '' : Number(e.target.value))
+                      }
+                    >
+                      <option value="">Selecciona un área…</option>
+                      {(areas ?? [])
+                        .filter((a) => a.isActive)
+                        .map((a) => (
+                          <option key={a.id} value={String(a.id)}>
+                            {a.name}
+                          </option>
+                        ))}
+                    </Select>
+                  </FormField>
+                </div>
+
+                {/* Datos del proveedor externo. */}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <FormField
+                    label="Nombre del proveedor"
+                    htmlFor="providerName"
+                    required
+                    error={errors.providerName}
+                  >
+                    <Input
+                      id="providerName"
+                      placeholder="Razón social o nombre"
+                      value={form.providerName}
+                      onChange={(e) => set('providerName', e.target.value)}
+                    />
+                  </FormField>
+
+                  <FormField
+                    label="Email del proveedor"
+                    htmlFor="providerEmail"
+                    required
+                    error={errors.providerEmail}
+                  >
+                    <Input
+                      id="providerEmail"
+                      type="email"
+                      placeholder="contacto@proveedor.mx"
+                      value={form.providerEmail}
+                      onChange={(e) => set('providerEmail', e.target.value)}
+                    />
+                  </FormField>
+                </div>
+
+                <Field label="Tipo de proveedor" required>
+                  <RadioCards
+                    name="providerType"
+                    value={form.providerType}
+                    onChange={(v) => set('providerType', v)}
+                    options={[
+                      {
+                        value: 'PERSONA_FISICA',
+                        label: PROVIDER_TYPE_LABEL.PERSONA_FISICA,
+                        hint: 'Individuo con actividad económica',
+                      },
+                      {
+                        value: 'PERSONA_MORAL',
+                        label: PROVIDER_TYPE_LABEL.PERSONA_MORAL,
+                        hint: 'Empresa / sociedad mercantil',
+                      },
+                    ]}
                   />
-                </FormField>
-              </div>
+                </Field>
+              </CardContent>
+            </Card>
+          )}
 
-              <Field label="Tipo de proveedor" required>
-                <RadioCards
-                  name="providerType"
-                  value={form.providerType}
-                  onChange={(v) => set('providerType', v)}
-                  options={[
-                    {
-                      value: 'PERSONA_FISICA',
-                      label: PROVIDER_TYPE_LABEL.PERSONA_FISICA,
-                      hint: 'Individuo con actividad económica',
-                    },
-                    {
-                      value: 'PERSONA_MORAL',
-                      label: PROVIDER_TYPE_LABEL.PERSONA_MORAL,
-                      hint: 'Empresa / sociedad mercantil',
-                    },
-                  ]}
-                />
-              </Field>
-
-              <FormField label="Área requirente" htmlFor="area" required error={errors.areaId}>
-                <Select
-                  id="area"
-                  value={form.areaId === '' ? '' : String(form.areaId)}
-                  onChange={(e) =>
-                    set('areaId', e.target.value === '' ? '' : Number(e.target.value))
-                  }
-                >
-                  <option value="">Selecciona un área…</option>
-                  {(areas ?? [])
-                    .filter((a) => a.isActive)
-                    .map((a) => (
-                      <option key={a.id} value={String(a.id)}>
-                        {a.name}
-                      </option>
-                    ))}
-                </Select>
-              </FormField>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Documentos requeridos</CardTitle>
-              <CardDescription>
-                Lista dinámica según el tipo de proveedor (informativo)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RequiredDocsList providerType={form.providerType} />
-            </CardContent>
-          </Card>
+          {step === 2 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Documentos requeridos</CardTitle>
+                <CardDescription>
+                  Antes de {isEdit ? 'guardar' : 'crear'} la solicitud, revisa qué documentos
+                  deberás subir después para {PROVIDER_TYPE_LABEL[form.providerType]}.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <RequiredDocsList providerType={form.providerType} />
+              </CardContent>
+            </Card>
+          )}
 
           {submitError && (
             <ErrorBanner message={submitError} onDismiss={() => setSubmitError(null)} />
           )}
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="neutral" onClick={() => router.push('/')}>
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={submitting || hasErrors}>
-              {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear solicitud'}
-            </Button>
+            {step === 1 ? (
+              <>
+                <Button type="button" variant="neutral" onClick={() => router.push('/')}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Siguiente</Button>
+              </>
+            ) : (
+              <>
+                <Button type="button" variant="neutral" onClick={() => setStep(1)}>
+                  Atrás
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear solicitud'}
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </div>

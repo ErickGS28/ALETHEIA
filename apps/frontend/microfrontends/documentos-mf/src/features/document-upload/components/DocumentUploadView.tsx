@@ -12,6 +12,7 @@ import {
   LoadingState,
   useToast,
 } from '@aletheia/frontend-commons';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import {
   useListDocumentsQuery,
@@ -39,11 +40,16 @@ export function DocumentUploadView() {
   } = useContractOptions();
   const [contractId, setContractId] = useState<number | ''>('');
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const contractIdParam = searchParams.get('contractId');
 
-  // Default to the first contract once loaded.
+  // Deep-link desde otro MF (?contractId=) si es válido; si no, el primer contrato.
   useEffect(() => {
-    if (contractId === '' && options.length > 0) setContractId(options[0].id);
-  }, [contractId, options]);
+    if (contractId !== '' || options.length === 0) return;
+    const fromUrl = contractIdParam ? Number(contractIdParam) : null;
+    const preselected = fromUrl && options.some((o) => o.id === fromUrl) ? fromUrl : null;
+    setContractId(preselected ?? options[0].id);
+  }, [contractId, options, contractIdParam]);
 
   const selected = contractId === '' ? undefined : byId.get(contractId);
   const providerType = selected?.providerType ?? 'PERSONA_FISICA';
@@ -77,6 +83,18 @@ export function DocumentUploadView() {
     contractDocs.some((d) => d.key === r.key),
   ).length;
   const total = requirements.length;
+
+  // Most recently uploaded first; slots still pending go last.
+  const sortedRequirements = useMemo(() => {
+    return [...requirements].sort((a, b) => {
+      const dateA = contractDocs.find((d) => d.key === a.key)?.versions.at(-1)?.uploadedAt;
+      const dateB = contractDocs.find((d) => d.key === b.key)?.versions.at(-1)?.uploadedAt;
+      if (dateA && dateB) return new Date(dateB).getTime() - new Date(dateA).getTime();
+      if (dateA) return -1;
+      if (dateB) return 1;
+      return 0;
+    });
+  }, [requirements, contractDocs]);
 
   const ready = !contractsLoading && !reqLoading && !docsLoading && contractId !== '';
 
@@ -185,8 +203,8 @@ export function DocumentUploadView() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
-            {requirements.map((req) => {
+          <div className="grid gap-3 sm:grid-cols-2">
+            {sortedRequirements.map((req) => {
               const doc = contractDocs.find((d) => d.key === req.key);
               return (
                 <DocumentUploadRow
