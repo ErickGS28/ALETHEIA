@@ -8,6 +8,7 @@ import type {
   BackendContract,
   CatalogItem,
   CreateContractBody,
+  DocumentSummary,
   ListContractsParams,
   RequiredDoc,
   UpdateContractBody,
@@ -126,6 +127,12 @@ export const contractsApi = baseApi.injectEndpoints({
     requiredDocs: b.query<RequiredDoc[], BackendProviderType>({
       query: (providerType) => ({ url: '/documents/required', params: { providerType } }),
     }),
+
+    /* ─── Documentos (solo lectura, para el resumen en el detalle) ──────── */
+    listDocuments: b.query<DocumentSummary[], number>({
+      query: (contractId) => `/documents/${contractId}`,
+      providesTags: ['Document'],
+    }),
   }),
 });
 
@@ -142,4 +149,5 @@ export const {
   useListSocietiesQuery,
   useListAreasQuery,
   useRequiredDocsQuery,
+  useListDocumentsQuery,
 } = contractsApi;
