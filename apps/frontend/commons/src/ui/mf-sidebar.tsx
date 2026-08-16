@@ -5,6 +5,7 @@ import {
   FileCheck2,
   FileText,
   FolderOpen,
+  LayoutDashboard,
   LogOut,
   Menu,
   PenLine,
@@ -185,6 +186,9 @@ export function MfSidebar({ children }: { children: ReactNode }) {
 
         {/* Nav */}
         <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+          {privileges.includes('USERS_MANAGE') &&
+            navLink('/', 'Panel de control', <LayoutDashboard className={ICON} />)}
+
           {SECTIONS.map((section) => {
             const visible = section.items.filter(canSee);
             if (!visible.length) return null;
