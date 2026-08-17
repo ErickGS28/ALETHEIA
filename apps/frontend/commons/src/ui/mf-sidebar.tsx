@@ -16,7 +16,7 @@ import {
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { clearSession } from '../api/session';
-import { type Privilege, type Role, ROLES } from '../auth/roles';
+import { type Privilege, ROLES, type Role } from '../auth/roles';
 import { useRole } from '../auth/useRole';
 import { cn } from '../utils/cn';
 import { Logo } from './logo';
