@@ -7,6 +7,7 @@ import {
   CardContent,
   EmptyState,
   LoadingState,
+  SuccessOverlay,
   useRole,
   useToast,
 } from '@aletheia/frontend-commons';
@@ -48,6 +49,7 @@ export function ReviewPanel() {
   const [modalKind, setModalKind] = useState<ReviewActionKind | null>(null);
   const [target, setTarget] = useState<WorkflowContract | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [sentToSigning, setSentToSigning] = useState<WorkflowContract | null>(null);
 
   const queueStatuses = queueStatusesForRole(role);
   const queue = useMemo(
@@ -79,10 +81,16 @@ export function ReviewPanel() {
       if (kind === 'approve') await wf.approve(target.id, { comment });
       else if (kind === 'return') await wf.returnToDraft(target.id, { comment });
       else if (kind === 'reject') await wf.reject(target.id, { comment });
-      // Solo en éxito: cierra el modal y notifica.
+      // Solo en éxito: cierra el modal.
       closeModal();
-      const ok = ACTION_SUCCESS[kind];
-      toast.success(ok.title, ok.description);
+      // "Aprobar y enviar a firma" (APPROVAL_PENDING -> SIGNING) es el último
+      // hito del Aprobador antes de la firma: celebración en vez de toast.
+      if (kind === 'approve' && target.status === 'APPROVAL_PENDING') {
+        setSentToSigning(target);
+      } else {
+        const ok = ACTION_SUCCESS[kind];
+        toast.success(ok.title, ok.description);
+      }
     } catch (err) {
       // 403 (privilege not granted) o cualquier error de validación del gateway.
       // Mantén el modal ABIERTO y muestra el error DENTRO para que el usuario lo vea.
@@ -187,6 +195,15 @@ export function ReviewPanel() {
         error={actionError}
         onClose={closeModal}
         onConfirm={handleConfirm}
+      />
+
+      <SuccessOverlay
+        open={sentToSigning !== null}
+        title="¡Aprobado y enviado a firma!"
+        description={
+          sentToSigning ? `${sentToSigning.folio} ya está listo para el Firmante.` : undefined
+        }
+        onDone={() => setSentToSigning(null)}
       />
     </PageShell>
   );
