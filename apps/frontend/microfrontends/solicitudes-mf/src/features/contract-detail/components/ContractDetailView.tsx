@@ -11,6 +11,7 @@ import {
   ErrorState,
   LoadingState,
   PageHeader,
+  SuccessOverlay,
   useRole,
   useToast,
 } from '@aletheia/frontend-commons';
@@ -59,6 +60,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
   const toast = useToast();
   const [cancelOpen, setCancelOpen] = React.useState(false);
   const [actionError, setActionError] = React.useState<string | null>(null);
+  const [submitted, setSubmitted] = React.useState(false);
 
   const numericId = Number(contractId);
   const validId = !Number.isNaN(numericId);
@@ -88,7 +90,7 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
     setActionError(null);
     try {
       await submitContract(id).unwrap();
-      toast.success('Solicitud enviada a revisión', 'La solicitud pasó a revisión.');
+      setSubmitted(true);
     } catch (error) {
       const message = getErrorMessage(error, 'No se pudo enviar la solicitud a revisión.');
       setActionError(message);
@@ -301,6 +303,13 @@ export function ContractDetailView({ contractId }: { contractId: string }) {
         contract={cancelOpen ? contract : null}
         onClose={() => setCancelOpen(false)}
         onConfirm={(reason) => handleCancel(contract.numericId, reason)}
+      />
+
+      <SuccessOverlay
+        open={submitted}
+        title="¡Solicitud enviada!"
+        description={`${contract.folio} pasó a revisión.`}
+        onDone={() => setSubmitted(false)}
       />
     </main>
   );
