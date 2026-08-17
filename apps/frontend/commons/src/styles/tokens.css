@@ -120,6 +120,175 @@
 .delay-300 {
   animation-delay: 300ms;
 }
+/* ─── Firma y archivo (hero decorativo del panel de control) ────────── */
+/* Ciclo único de 9s: entra -> firma -> sella -> se archiva -> créditos -> loop. */
+@keyframes paperLifecycle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 14px) scale(0.97);
+  }
+  7% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  90%,
+  100% {
+    opacity: 0;
+    transform: translate(118px, 80px) scale(0.3);
+  }
+}
+
+@keyframes signatureDraw {
+  0%,
+  9% {
+    stroke-dashoffset: 100;
+  }
+  52%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes penTravel {
+  0%,
+  8% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  52% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  58%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* Boil sutil y continuo: la hoja "respira" un poco, como si estuviera
+   grabada a mano en vez de renderizada perfectamente estática. */
+@keyframes paperBoil {
+  0%,
+  100% {
+    transform: rotate(-0.35deg) scale(1);
+  }
+  50% {
+    transform: rotate(0.45deg) scale(1.004);
+  }
+}
+
+/* El "sello" es solo esta marca apareciendo sobre el papel — sin objeto
+   volando desde fuera de la hoja, para que no se sienta como un corte. */
+@keyframes stampMark {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  63% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+  67% {
+    transform: scale(0.95);
+  }
+  71%,
+  90% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+@keyframes folderFlap {
+  0%,
+  73% {
+    transform: rotate(0deg);
+  }
+  78%,
+  87% {
+    transform: rotate(-22deg);
+  }
+  93%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes steamRise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scaleX(1);
+  }
+  35% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) scaleX(1.5);
+  }
+}
+
+/* Créditos: el logo aparece al cierre de cada ciclo, como un sello final. */
+@keyframes creditsFade {
+  0%,
+  89% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  93%,
+  97% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.animate-paper {
+  transform-origin: 200px 125px;
+  animation: paperLifecycle 9s ease-in-out infinite;
+}
+.animate-paper-boil {
+  transform-origin: 200px 125px;
+  animation: paperBoil 2.6s ease-in-out infinite;
+}
+.animate-signature {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: signatureDraw 9s ease-in-out infinite;
+}
+.animate-pen {
+  offset-rotate: auto;
+  animation: penTravel 9s ease-in-out infinite;
+}
+.animate-stamp-mark {
+  transform-origin: 250px 178px;
+  animation: stampMark 9s ease-in-out infinite;
+}
+.animate-folder-flap {
+  animation: folderFlap 9s ease-in-out infinite;
+}
+.animate-steam {
+  animation: steamRise 3s ease-in-out infinite;
+}
+.animate-credits {
+  animation: creditsFade 9s ease-in-out infinite;
+}
+
 .delay-400 {
   animation-delay: 400ms;
 }
