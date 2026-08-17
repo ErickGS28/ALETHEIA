@@ -13,6 +13,7 @@ import {
   LoadingState,
   PageHeader,
   Select,
+  SuccessOverlay,
   Table,
   TableBody,
   TableCell,
@@ -65,6 +66,7 @@ export function ContractListView() {
 
   const [cancelTarget, setCancelTarget] = React.useState<Contract | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
+  const [submittedFolio, setSubmittedFolio] = React.useState<string | null>(null);
 
   const goDetail = (c: Contract) => router.push(`/${c.id}`);
 
@@ -72,7 +74,7 @@ export function ContractListView() {
     setActionError(null);
     try {
       await submitContract(c.numericId).unwrap();
-      toast.success('Solicitud enviada a revisión', `${c.folio} pasó a revisión.`);
+      setSubmittedFolio(c.folio);
     } catch (error) {
       const message = getErrorMessage(
         error,
@@ -304,6 +306,13 @@ export function ContractListView() {
         onConfirm={(reason) => {
           if (cancelTarget) handleCancel(cancelTarget, reason);
         }}
+      />
+
+      <SuccessOverlay
+        open={submittedFolio !== null}
+        title="¡Solicitud enviada!"
+        description={`${submittedFolio} pasó a revisión.`}
+        onDone={() => setSubmittedFolio(null)}
       />
     </main>
   );

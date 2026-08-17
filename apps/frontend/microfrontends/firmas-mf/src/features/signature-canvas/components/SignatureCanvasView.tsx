@@ -14,6 +14,7 @@ import {
   Label,
   LoadingState,
   Select,
+  SuccessOverlay,
   normalizePageSetup,
   useToast,
 } from '@aletheia/frontend-commons';
@@ -51,6 +52,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
   const [hasDrawing, setHasDrawing] = useState(false);
   const [apoderadoId, setApoderadoId] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [signed, setSigned] = useState(false);
 
   const activeApoderados = (apoderados ?? []).filter((a) => a.isActive);
   const selectedApoderado = activeApoderados.find((a) => String(a.id) === apoderadoId);
@@ -73,8 +75,7 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
         signatureData: image,
         apoderadoId: apoderadoId ? Number(apoderadoId) : undefined,
       }).unwrap();
-      toast.success('Firma registrada', 'La firma se guardó correctamente.');
-      router.push(`/detalle/${contractId}`);
+      setSigned(true);
     } catch {
       const message = 'No se pudo registrar la firma. Verifica tus permisos e intenta de nuevo.';
       setError(message);
@@ -217,6 +218,13 @@ export function SignatureCanvasView({ contractId }: SignatureCanvasViewProps) {
           )}
         </CookiePrivilegeGuard>
       </div>
+
+      <SuccessOverlay
+        open={signed}
+        title="¡Firma registrada!"
+        description={`El contrato ${contract?.folio ?? ''} quedó firmado.`}
+        onDone={() => router.push(`/detalle/${contractId}`)}
+      />
     </main>
   );
 }
