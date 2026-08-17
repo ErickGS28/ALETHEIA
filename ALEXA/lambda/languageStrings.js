@@ -1,5 +1,3 @@
-'use strict';
-
 // Recurso de traducciones de la skill. Hoy solo existe es-MX, pero centralizar los
 // strings aquí (en vez de tenerlos como constantes sueltas en index.js) deja lista
 // la arquitectura para agregar más locales sin tocar la lógica de los handlers.
@@ -19,14 +17,22 @@ const strings = {
       'contratos están pendientes, firmados o rechazados hoy. También puedes decir: qué contratos ' +
       'vencen este mes, para saber cuáles están por expirar, o pedirme: alertas de cuellos de botella, ' +
       'para saber en qué etapa se están atorando los contratos. ¿Qué te gustaría consultar?',
-    BACKEND_ERROR: 'Lo siento, no pude consultar la información en este momento. Intenta de nuevo en unos minutos.',
+    BACKEND_ERROR:
+      'Lo siento, no pude consultar la información en este momento. Intenta de nuevo en unos minutos.',
     GOODBYE: 'Hasta luego.',
     ASK_MORE: '¿Deseas consultar algo más?',
     NOT_UNDERSTOOD_PREFIX: 'No entendí eso. ',
-    NO_ESTADO_MATCH: 'No reconocí ese estado. Intenta con firmado, rechazado, o en revisión.',
-    ELICIT_ESTADO: '¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados o en revisión.',
-    NO_DATE_MATCH: 'No entendí ese periodo. ¿Para qué fecha o rango deseas consultar esta información?',
-    ELICIT_DATE: '¿Para qué periodo deseas consultar esta información?',
+    NO_ESTADO_MATCH:
+      'No reconocí ese estado. ¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados, en revisión ' +
+      'legal, o pendientes de aprobación.',
+    ELICIT_ESTADO:
+      '¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados, en revisión legal, o pendientes de aprobación.',
+    NO_DATE_MATCH:
+      'No entendí ese periodo. ¿Para qué fecha o rango deseas consultar esta información? Por ejemplo, puedes ' +
+      'decir: la semana pasada, este mes, julio, o del uno al quince de julio.',
+    ELICIT_DATE:
+      '¿Para qué periodo deseas consultar esta información? Por ejemplo, puedes decir: la semana pasada, ' +
+      'este mes, julio, o del uno al quince de julio.',
     VALIDAR_CLAVE_REPROMPT: '¿Qué métrica deseas consultar?',
   },
 };

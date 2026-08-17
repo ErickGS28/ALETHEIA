@@ -8,7 +8,16 @@
         { "name": "AMAZON.FallbackIntent", "samples": [] },
         {
           "name": "HelpIntent",
-          "samples": ["ayuda", "qué puedo decir", "opciones"]
+          "samples": [
+            "ayuda",
+            "qué puedo decir",
+            "opciones",
+            "a ver qué puedo decir",
+            "pues qué opciones tengo",
+            "no sé qué decir, ayuda",
+            "oye, cómo le hago",
+            "este, ayuda"
+          ]
         },
         {
           "name": "ValidarClaveIntent",
@@ -20,7 +29,13 @@
             "mi clave es sésamo",
             "la contraseña es sésamo",
             "clave sésamo",
-            "es sésamo"
+            "es sésamo",
+            "este, sésamo",
+            "pues sésamo",
+            "digo, sésamo",
+            "espera, no, la clave es sésamo",
+            "ay se me olvidaba, sésamo",
+            "mi clave, o sea, es sésamo"
           ]
         },
         {
@@ -30,7 +45,13 @@
             "reporte ejecutivo de contratos",
             "cómo vamos con los contratos",
             "dame el resumen ejecutivo",
-            "cuál es mi resumen del día"
+            "cuál es mi resumen del día",
+            "este, dame mi resumen del día",
+            "a ver, cómo vamos con los contratos",
+            "dame, o sea, el resumen del día",
+            "nomás dime cómo vamos con los contratos",
+            "pues cuál es mi resumen del día",
+            "oye dame el resumen, digo, el ejecutivo"
           ]
         },
         {
@@ -40,7 +61,12 @@
             "qué etapa tiene más contratos pendientes",
             "reporte de cuellos de botella",
             "dime los cuellos de botella",
-            "dónde hay cuellos de botella"
+            "dónde hay cuellos de botella",
+            "a ver, dime dónde hay cuellos de botella",
+            "pues dónde se están atorando los contratos",
+            "dime, o sea, qué etapa tiene más pendientes",
+            "oye dame el reporte de cuellos de botella",
+            "nomás dime dónde están atorados los contratos"
           ]
         },
         {
@@ -58,7 +84,12 @@
             "contratos a punto de caducar",
             "contratos por vencer {rangoFecha}",
             "qué contratos vencen en {rangoFecha}",
-            "acuerdos que expiran {rangoFecha}"
+            "acuerdos que expiran {rangoFecha}",
+            "a ver, dime qué contratos vencen {rangoFecha}",
+            "nomás dime qué vence {rangoFecha}",
+            "perdón, digo, qué contratos vencen {rangoFecha}",
+            "este, qué contratos están por caducar {rangoFecha}",
+            "quiero saber, o sea, qué contratos expiran {rangoFecha}"
           ]
         },
         {
@@ -72,7 +103,11 @@
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
-              "samples": ["{estadoContrato}", "el estado {estadoContrato}", "contratos {estadoContrato}"]
+              "samples": [
+                "{estadoContrato}",
+                "el estado {estadoContrato}",
+                "contratos {estadoContrato}"
+              ]
             }
           ],
           "samples": [
@@ -81,7 +116,12 @@
             "resumen de contratos {estadoContrato} {rangoFecha}",
             "contratos {estadoContrato} {rangoFecha}",
             "cuántos contratos {estadoContrato} hay {rangoFecha}",
-            "dame los contratos {estadoContrato} de {rangoFecha}"
+            "dame los contratos {estadoContrato} de {rangoFecha}",
+            "a ver, dime los contratos {estadoContrato} {rangoFecha}",
+            "dame los contratos {estadoContrato}, los {estadoContrato} nomás, de {rangoFecha}",
+            "pues cuántos {estadoContrato} tenemos {rangoFecha}",
+            "quiero saber, o sea, cuántos contratos fueron {estadoContrato} {rangoFecha}",
+            "este, cuántos contratos {estadoContrato} hay {rangoFecha}"
           ]
         }
       ],
@@ -89,8 +129,14 @@
         {
           "name": "EstadoContratoType",
           "values": [
-            { "id": "DRAFT", "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] } },
-            { "id": "SUBMITTED", "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] } },
+            {
+              "id": "DRAFT",
+              "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] }
+            },
+            {
+              "id": "SUBMITTED",
+              "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] }
+            },
             {
               "id": "ADMIN_REVIEW",
               "name": {
@@ -119,14 +165,23 @@
                 "synonyms": ["por firmar", "en proceso de firma", "aprobado", "aprobados"]
               }
             },
-            { "id": "SIGNED", "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] } },
+            {
+              "id": "SIGNED",
+              "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] }
+            },
             {
               "id": "REJECTED",
-              "name": { "value": "rechazado", "synonyms": ["rechazados", "rechazada", "rechazadas"] }
+              "name": {
+                "value": "rechazado",
+                "synonyms": ["rechazados", "rechazada", "rechazadas"]
+              }
             },
             {
               "id": "CANCELLED",
-              "name": { "value": "cancelado", "synonyms": ["cancelados", "cancelada", "canceladas"] }
+              "name": {
+                "value": "cancelado",
+                "synonyms": ["cancelados", "cancelada", "canceladas"]
+              }
             }
           ]
         }
@@ -169,6 +224,12 @@
               "type": "EstadoContratoType",
               "confirmationRequired": false,
               "elicitationRequired": true,
+              "validations": [
+                {
+                  "type": "hasEntityResolutionMatch",
+                  "prompt": "Validate.Slot.ConsultarMetricasPorFechaIntent.estadoContrato.NoMatch"
+                }
+              ],
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato"
               }
@@ -181,13 +242,19 @@
       {
         "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
         "variations": [
-          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
+          {
+            "type": "PlainText",
+            "value": "¿Para qué periodo deseas consultar esta información? Por ejemplo, puedes decir: la semana pasada, este mes, julio, o del uno al quince de julio."
+          }
         ]
       },
       {
         "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha",
         "variations": [
-          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
+          {
+            "type": "PlainText",
+            "value": "¿Para qué periodo deseas consultar esta información? Por ejemplo, puedes decir: la semana pasada, este mes, julio, o del uno al quince de julio."
+          }
         ]
       },
       {
@@ -195,7 +262,16 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados o en revisión."
+            "value": "¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados, en revisión legal, o pendientes de aprobación."
+          }
+        ]
+      },
+      {
+        "id": "Validate.Slot.ConsultarMetricasPorFechaIntent.estadoContrato.NoMatch",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "No reconocí ese estado. ¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados, en revisión legal, o pendientes de aprobación."
           }
         ]
       }
