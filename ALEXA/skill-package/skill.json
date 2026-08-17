@@ -16,7 +16,9 @@
             "clm",
             "aletheia",
             "reportes"
-          ]
+          ],
+          "smallIconUri": "https://alexa-clm.levsek.com.mx/public/icon-108.png",
+          "largeIconUri": "https://alexa-clm.levsek.com.mx/public/icon-512.png"
         }
       },
       "isAvailableWorldwide": false,
@@ -25,6 +27,18 @@
       "distributionCountries": [
         "MX"
       ]
+    },
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "es-MX": {
+          "privacyPolicyUrl": ""
+        }
+      }
     },
     "apis": {
       "custom": {
