@@ -1,5 +1,3 @@
-'use strict';
-
 const Alexa = require('ask-sdk-core');
 const apiClient = require('./apiClient');
 const { resolveDateRange, describeAmazonDate } = require('./dateRange');
@@ -55,21 +53,23 @@ const LoggingRequestInterceptor = {
 
 const LoggingResponseInterceptor = {
   process(handlerInput, response) {
-    const hasSpeech = Boolean(response && response.outputSpeech);
+    const hasSpeech = Boolean(response?.outputSpeech);
     console.log(
       '[RESPONSE]',
       JSON.stringify({ hasSpeech, shouldEndSession: response ? response.shouldEndSession : null }),
     );
     if (!hasSpeech) {
-      console.error('[RESPONSE] Se generó una respuesta sin outputSpeech — el usuario se queda sin voz.');
+      console.error(
+        '[RESPONSE] Se generó una respuesta sin outputSpeech — el usuario se queda sin voz.',
+      );
     }
   },
 };
 
 const LocalizationInterceptor = {
   process(handlerInput) {
-    const request = handlerInput.requestEnvelope && handlerInput.requestEnvelope.request;
-    const locale = resolveLocale(request && request.locale);
+    const request = handlerInput.requestEnvelope?.request;
+    const locale = resolveLocale(request?.locale);
     const localeStrings = strings[locale];
     handlerInput.t = (key) => localeStrings[key];
   },
@@ -157,17 +157,34 @@ const ConsultarMetricasPorFechaIntentHandler = {
     }
 
     const estadoSlot = currentIntent.slots.estadoContrato;
-    const resolutions = estadoSlot.resolutions && estadoSlot.resolutions.resolutionsPerAuthority;
+    const resolutions = estadoSlot.resolutions?.resolutionsPerAuthority;
     const resolvedStatus =
-      resolutions && resolutions[0] && resolutions[0].status.code === 'ER_SUCCESS_MATCH'
+      resolutions?.[0] && resolutions[0].status.code === 'ER_SUCCESS_MATCH'
         ? resolutions[0].values[0].value.id
         : null;
 
     if (!resolvedStatus) {
+      // Defensa en profundidad: la validación declarativa `hasEntityResolutionMatch` del
+      // modelo de interacción ya debería impedir que dialogState llegue a COMPLETED con un
+      // estadoContrato sin match. Si de todos modos pasa (p. ej. modelo y Lambda desincronizados
+      // en un despliegue), no dejamos al usuario en un callejón sin salida: limpiamos el slot
+      // y forzamos a Alexa a re-elicitarlo, igual que hace la validación declarativa.
+      const updatedIntent = {
+        ...currentIntent,
+        slots: {
+          ...currentIntent.slots,
+          estadoContrato: {
+            ...estadoSlot,
+            value: undefined,
+            resolutions: undefined,
+            confirmationStatus: 'NONE',
+          },
+        },
+      };
       return handlerInput.responseBuilder
         .speak(handlerInput.t('NO_ESTADO_MATCH'))
         .reprompt(handlerInput.t('ELICIT_ESTADO'))
-        .withShouldEndSession(false)
+        .addElicitSlotDirective('estadoContrato', updatedIntent)
         .getResponse();
     }
 
@@ -175,15 +192,31 @@ const ConsultarMetricasPorFechaIntentHandler = {
     const range = resolveDateRange(rawDate);
 
     if (!range) {
+      // AMAZON.DATE no tiene validación declarativa (no es un slot type enumerable), así que
+      // este es el único mecanismo que evita el callejón sin salida: limpiamos el valor y
+      // forzamos la re-elicitación. Sin tope de intentos — se repite hasta que resolveDateRange
+      // acepte un valor.
+      const rangoFechaSlot = currentIntent.slots.rangoFecha;
+      const updatedIntent = {
+        ...currentIntent,
+        slots: {
+          ...currentIntent.slots,
+          rangoFecha: { ...rangoFechaSlot, value: undefined, confirmationStatus: 'NONE' },
+        },
+      };
       return handlerInput.responseBuilder
         .speak(handlerInput.t('NO_DATE_MATCH'))
         .reprompt(handlerInput.t('ELICIT_DATE'))
-        .withShouldEndSession(false)
+        .addElicitSlotDirective('rangoFecha', updatedIntent)
         .getResponse();
     }
 
     try {
-      const data = await apiClient.getContractsMetrics(resolvedStatus, range.isoStart, range.isoEnd);
+      const data = await apiClient.getContractsMetrics(
+        resolvedStatus,
+        range.isoStart,
+        range.isoEnd,
+      );
       const speech = buildMetricasPorFechaSpeech(data, describeAmazonDate(rawDate));
       return handlerInput.responseBuilder
         .speak(speech)
@@ -222,10 +255,20 @@ const ConsultarContratosPorExpirarIntentHandler = {
     const range = resolveDateRange(rawDate);
 
     if (!range) {
+      // Mismo mecanismo de loop sin tope que en ConsultarMetricasPorFechaIntentHandler: se
+      // limpia el slot y se re-eliciona en vez de terminar el turno en seco.
+      const rangoFechaSlot = currentIntent.slots.rangoFecha;
+      const updatedIntent = {
+        ...currentIntent,
+        slots: {
+          ...currentIntent.slots,
+          rangoFecha: { ...rangoFechaSlot, value: undefined, confirmationStatus: 'NONE' },
+        },
+      };
       return handlerInput.responseBuilder
         .speak(handlerInput.t('NO_DATE_MATCH'))
         .reprompt(handlerInput.t('ELICIT_DATE'))
-        .withShouldEndSession(false)
+        .addElicitSlotDirective('rangoFecha', updatedIntent)
         .getResponse();
     }
 
@@ -326,7 +369,10 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
-    return handlerInput.responseBuilder.speak(handlerInput.t('GOODBYE')).withShouldEndSession(true).getResponse();
+    return handlerInput.responseBuilder
+      .speak(handlerInput.t('GOODBYE'))
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 
@@ -347,18 +393,22 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
-    const request = handlerInput.requestEnvelope && handlerInput.requestEnvelope.request;
+    const request = handlerInput.requestEnvelope?.request;
     console.error(
       '[ERROR]',
       JSON.stringify({
-        type: request && request.type,
+        type: request?.type,
         intent: request && request.type === 'IntentRequest' ? request.intent.name : null,
       }),
       error,
     );
 
-    const speech = (handlerInput.t && handlerInput.t('BACKEND_ERROR')) || FALLBACK_ERROR_SPEECH;
-    return handlerInput.responseBuilder.speak(speech).reprompt(speech).withShouldEndSession(false).getResponse();
+    const speech = handlerInput.t?.('BACKEND_ERROR') || FALLBACK_ERROR_SPEECH;
+    return handlerInput.responseBuilder
+      .speak(speech)
+      .reprompt(speech)
+      .withShouldEndSession(false)
+      .getResponse();
   },
 };
 

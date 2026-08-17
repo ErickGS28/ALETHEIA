@@ -24,6 +24,7 @@ module.exports = {
         'firmas-mf',
         'reportes-mf',
         'admin-mf',
+        'alexa',
         'commons',
         'infra',
         'deps',
