@@ -10,6 +10,7 @@ import {
   CookiePrivilegeGuard,
   ErrorState,
   LoadingState,
+  SuccessOverlay,
   useToast,
 } from '@aletheia/frontend-commons';
 import { useSearchParams } from 'next/navigation';
@@ -65,6 +66,7 @@ export function DocumentUploadView() {
     { skip: contractId === '' },
   );
   const [uploadDocument, { isLoading: uploading }] = useUploadDocumentMutation();
+  const [checklistComplete, setChecklistComplete] = useState(false);
 
   const requirements = useMemo(() => (requiredRaw ?? []).map(adaptRequiredDoc), [requiredRaw]);
 
@@ -122,6 +124,11 @@ export function DocumentUploadView() {
         },
       }).unwrap();
       toast.success('Documento cargado', `"${file.name}" se cargó correctamente.`);
+      // Checklist completo justo con esta carga (no si ya lo estaba antes).
+      const uploadedAfter = new Set([...contractDocs.map((d) => d.key), type]).size;
+      if (uploadedCount < total && uploadedAfter >= total && total > 0) {
+        setChecklistComplete(true);
+      }
       return true;
     } catch (error) {
       toast.error(
@@ -133,92 +140,101 @@ export function DocumentUploadView() {
   }
 
   return (
-    <CookiePrivilegeGuard
-      privilege="DOCUMENT_UPLOAD"
-      fallback={
-        <Card>
-          <CardHeader>
-            <CardTitle>Carga de documentos</CardTitle>
-            <CardDescription>
-              Necesitas el privilegio DOCUMENT_UPLOAD para cargar documentos.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="secondary">Sin permiso para esta sección</Badge>
-          </CardContent>
-        </Card>
-      }
-    >
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Carga de documentos requeridos</CardTitle>
-            <CardDescription>
-              Selecciona el contrato; los documentos requeridos se obtienen según el tipo de
-              proveedor del contrato.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {contractsError ? (
-              <ErrorState
-                message="No se pudieron cargar los contratos."
-                onRetry={() => refetchContracts()}
-              />
-            ) : (
-              <>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <ContractSelector
-                    value={contractId}
-                    onChange={setContractId}
-                    options={options}
-                    disabled={contractsLoading}
-                  />
-                  <div className="space-y-1.5">
-                    <div className="font-sans text-xs uppercase tracking-wide text-muted-foreground">
-                      Tipo de proveedor
-                    </div>
-                    <div className="flex h-10 items-center rounded-base border-2 border-border bg-secondary-background/40 px-3 font-sans text-sm">
-                      {PROVIDER_TYPE_LABELS[providerType]}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between rounded-base border-2 border-border bg-secondary-background/40 px-4 py-3">
-                  <span className="font-sans text-xs text-foreground/70">
-                    Progreso de carga &middot; {PROVIDER_TYPE_LABELS[providerType]}
-                  </span>
-                  <Badge variant={total > 0 && uploadedCount === total ? 'default' : 'secondary'}>
-                    {uploadedCount} / {total} documentos
-                  </Badge>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {contractsError ? null : !ready ? (
+    <>
+      <CookiePrivilegeGuard
+        privilege="DOCUMENT_UPLOAD"
+        fallback={
           <Card>
-            <CardContent className="pt-6">
-              <LoadingState message="Cargando documentos…" />
+            <CardHeader>
+              <CardTitle>Carga de documentos</CardTitle>
+              <CardDescription>
+                Necesitas el privilegio DOCUMENT_UPLOAD para cargar documentos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Badge variant="secondary">Sin permiso para esta sección</Badge>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {sortedRequirements.map((req) => {
-              const doc = contractDocs.find((d) => d.key === req.key);
-              return (
-                <DocumentUploadRow
-                  key={req.key}
-                  requirement={req}
-                  document={doc}
-                  disabled={uploading}
-                  onUpload={(file, expiryDate) => handleUpload(req.key, file, expiryDate)}
+        }
+      >
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Carga de documentos requeridos</CardTitle>
+              <CardDescription>
+                Selecciona el contrato; los documentos requeridos se obtienen según el tipo de
+                proveedor del contrato.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contractsError ? (
+                <ErrorState
+                  message="No se pudieron cargar los contratos."
+                  onRetry={() => refetchContracts()}
                 />
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </CookiePrivilegeGuard>
+              ) : (
+                <>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <ContractSelector
+                      value={contractId}
+                      onChange={setContractId}
+                      options={options}
+                      disabled={contractsLoading}
+                    />
+                    <div className="space-y-1.5">
+                      <div className="font-sans text-xs uppercase tracking-wide text-muted-foreground">
+                        Tipo de proveedor
+                      </div>
+                      <div className="flex h-10 items-center rounded-base border-2 border-border bg-secondary-background/40 px-3 font-sans text-sm">
+                        {PROVIDER_TYPE_LABELS[providerType]}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-base border-2 border-border bg-secondary-background/40 px-4 py-3">
+                    <span className="font-sans text-xs text-foreground/70">
+                      Progreso de carga &middot; {PROVIDER_TYPE_LABELS[providerType]}
+                    </span>
+                    <Badge variant={total > 0 && uploadedCount === total ? 'default' : 'secondary'}>
+                      {uploadedCount} / {total} documentos
+                    </Badge>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {contractsError ? null : !ready ? (
+            <Card>
+              <CardContent className="pt-6">
+                <LoadingState message="Cargando documentos…" />
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {sortedRequirements.map((req) => {
+                const doc = contractDocs.find((d) => d.key === req.key);
+                return (
+                  <DocumentUploadRow
+                    key={req.key}
+                    requirement={req}
+                    document={doc}
+                    disabled={uploading}
+                    onUpload={(file, expiryDate) => handleUpload(req.key, file, expiryDate)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </CookiePrivilegeGuard>
+
+      <SuccessOverlay
+        open={checklistComplete}
+        title="¡Documentos completos!"
+        description={selected ? `Ya cargaste todo lo requerido para ${selected.label}.` : undefined}
+        onDone={() => setChecklistComplete(false)}
+      />
+    </>
   );
 }
