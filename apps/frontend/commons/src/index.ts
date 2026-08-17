@@ -34,6 +34,7 @@ export * from './ui/file-viewer-modal';
 export * from './ui/confirm-dialog';
 export * from './ui/states';
 export * from './ui/toast';
+export * from './ui/success-overlay';
 export * from './ui/contract-status';
 export * from './ui/back-button';
 export * from './ui/page-header';
