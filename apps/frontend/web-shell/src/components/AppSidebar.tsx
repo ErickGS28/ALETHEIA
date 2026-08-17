@@ -22,6 +22,8 @@ type NavItem = {
   label: string;
   icon: React.ReactNode;
   requires: string[];
+  /** Roles que igual tienen el privilegio pero para quienes esta sección no aporta nada. */
+  excludeRoles?: string[];
 };
 
 const ICON = 'h-[18px] w-[18px]';
@@ -41,6 +43,9 @@ const SECTIONS: { group: string; items: NavItem[] }[] = [
           'CONTRACT_CANCEL',
           'CONTRACT_RECOVER',
         ],
+        // Firmante ya tiene su cola completa (lista + detalle) en /firmas; ver
+        // el listado genérico de solicitudes no le aporta nada.
+        excludeRoles: ['FIRMANTE'],
       },
       {
         href: '/contratos',
@@ -116,7 +121,8 @@ export function AppSidebar({
   const pathname = usePathname();
 
   const canSee = (item: NavItem) =>
-    item.requires.length === 0 || item.requires.some((p) => privileges.includes(p));
+    !item.excludeRoles?.includes(role) &&
+    (item.requires.length === 0 || item.requires.some((p) => privileges.includes(p)));
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 

@@ -16,13 +16,20 @@ import {
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { clearSession } from '../api/session';
-import { type Privilege, ROLES } from '../auth/roles';
+import { type Privilege, type Role, ROLES } from '../auth/roles';
 import { useRole } from '../auth/useRole';
 import { cn } from '../utils/cn';
 import { Logo } from './logo';
 
 /* ─── Nav data (espejo de AppSidebar del web-shell) ─────────────────── */
-type NavItem = { href: string; label: string; icon: ReactNode; requires: Privilege[] };
+type NavItem = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  requires: Privilege[];
+  /** Roles que igual tienen el privilegio pero para quienes esta sección no aporta nada. */
+  excludeRoles?: Role[];
+};
 const ICON = 'h-[18px] w-[18px]';
 
 const SECTIONS: { group: string; items: NavItem[] }[] = [
@@ -40,6 +47,9 @@ const SECTIONS: { group: string; items: NavItem[] }[] = [
           'CONTRACT_CANCEL',
           'CONTRACT_RECOVER',
         ],
+        // Firmante ya tiene su cola completa (lista + detalle) en /firmas; ver
+        // el listado genérico de solicitudes no le aporta nada.
+        excludeRoles: ['FIRMANTE'],
       },
       {
         href: '/contratos',
@@ -111,7 +121,8 @@ export function MfSidebar({ children }: { children: ReactNode }) {
   const initial = (roleName || '?').charAt(0).toUpperCase();
 
   const canSee = (item: NavItem) =>
-    item.requires.length === 0 || item.requires.some((p) => privileges.includes(p));
+    !(role && item.excludeRoles?.includes(role)) &&
+    (item.requires.length === 0 || item.requires.some((p) => privileges.includes(p)));
 
   const isActive = (href: string) => pathname.startsWith(href);
 
