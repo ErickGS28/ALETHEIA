@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button } from '@aletheia/frontend-commons';
+import { Badge, Button, useRole } from '@aletheia/frontend-commons';
 import { FileText, FolderOpen } from 'lucide-react';
 import { useListDocumentsQuery, useRequiredDocsQuery } from '../api/contracts-api';
 import { toBackendProviderType } from '../api/types';
@@ -19,6 +19,7 @@ export function RequiredDocsStatus({
   contractId: number;
   providerType: ProviderType;
 }) {
+  const { can } = useRole();
   const { data: required, isLoading: reqLoading } = useRequiredDocsQuery(
     toBackendProviderType(providerType),
   );
@@ -66,12 +67,14 @@ export function RequiredDocsStatus({
         </ul>
       )}
 
-      <Button asChild variant="neutral" size="sm">
-        <a href={`/documentos?contractId=${contractId}`}>
-          <FolderOpen className="h-4 w-4" />
-          Ir a documentos
-        </a>
-      </Button>
+      {can('DOCUMENT_UPLOAD') && (
+        <Button asChild variant="neutral" size="sm">
+          <a href={`/documentos?contractId=${contractId}`}>
+            <FolderOpen className="h-4 w-4" />
+            Ir a documentos
+          </a>
+        </Button>
+      )}
     </div>
   );
 }
