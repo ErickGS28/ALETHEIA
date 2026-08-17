@@ -287,6 +287,8 @@
 }
 .animate-credits {
   animation: creditsFade 9s ease-in-out infinite;
+}
+
 /* ─── Success checkmark (confirmaciones tipo "listo") ───────────────── */
 @keyframes circleDraw {
   from {
