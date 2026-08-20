@@ -17,8 +17,9 @@ const MANUAL_PATH = path.join(
   '..',
   '..',
   '..',
-  'DocumentacionParaElEquipo',
-  'ManualDeRolesYFlujoQA.md',
+  'docs',
+  '04-product',
+  'manual-roles-y-flujo-qa.md',
 );
 
 async function loadManual() {
@@ -38,7 +39,7 @@ export default async function ManualPage() {
     return (
       <main className={styles.error}>
         No se pudo cargar el manual — verifica que{' '}
-        <code>DocumentacionParaElEquipo/ManualDeRolesYFlujoQA.md</code> existe.
+        <code>docs/04-product/manual-roles-y-flujo-qa.md</code> existe.
       </main>
     );
   }
@@ -58,7 +59,7 @@ export default async function ManualPage() {
           ))}
         </nav>
       </aside>
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: contenido generado desde DocumentacionParaElEquipo/ManualDeRolesYFlujoQA.md, versionado en el repo y editado solo por el equipo — no es input de usuario, mismo nivel de confianza que el JSX de /como-funciona. */}
+      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: contenido generado desde docs/04-product/manual-roles-y-flujo-qa.md, versionado en el repo y editado solo por el equipo — no es input de usuario, mismo nivel de confianza que el JSX de /como-funciona. */}
       <main className={styles.main} dangerouslySetInnerHTML={{ __html: manual.html }} />
     </div>
   );

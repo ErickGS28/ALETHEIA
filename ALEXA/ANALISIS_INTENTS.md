@@ -1,6 +1,11 @@
 # ALETHEIA CLM — Análisis de Intents para la Alexa Skill
 
-Este documento confirma la lectura de `ALETHEIA-CLM-Skill.pdf` y `Copia de Actividad1Integradora (1).pdf`, y deja explícitas las decisiones de diseño tomadas para poder implementar la skill contra el backend **real** (que ya diverge en varios puntos de `DocumentacionParaElEquipo/PropuestaBD.md`). Revisar antes de que se generen `.js`/`.json` y los cambios de backend.
+Este documento confirma la lectura de la definición original de la skill (ver
+[`DEFINICION_SKILL.md`](./DEFINICION_SKILL.md), convertida desde los PDF académicos originales), y
+deja explícitas las decisiones de diseño tomadas para poder implementar la skill contra el backend
+**real** (que ya diverge en varios puntos del schema descrito en
+[`docs/01-architecture/base-datos.md`](../docs/01-architecture/base-datos.md)). Revisar antes de
+que se generen `.js`/`.json` y los cambios de backend.
 
 ---
 

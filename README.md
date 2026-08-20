@@ -64,14 +64,29 @@ pnpm dev:core       # gateway + auth/contracts/workflow + web-shell + solicitude
 
 ## Documentación
 
+**Para entender el proyecto** (léelos en este orden, sin necesidad de tocar código):
+
 | Doc | Contenido |
 |---|---|
-| [`docs/01-architecture/implementacion.md`](docs/01-architecture/implementacion.md) | Arquitectura, ADRs, roles/privilegios, patrones, SOLID |
+| [`docs/00-overview/vision-general.md`](docs/00-overview/vision-general.md) | Empieza aquí — qué es el proyecto, la idea central, y mapa del resto de la documentación |
+| [`docs/04-product/roles.md`](docs/04-product/roles.md) | Qué hace cada rol, en lenguaje de negocio, con la matriz de privilegios |
+| [`docs/04-product/flujo-y-estados.md`](docs/04-product/flujo-y-estados.md) | El ciclo de vida del contrato: los 7 estados, quién dispara cada transición, caminos alternativos |
+| [`docs/01-architecture/arquitectura-explicada.md`](docs/01-architecture/arquitectura-explicada.md) | Por qué la arquitectura es así, en lenguaje llano, con el recorrido de una petición real |
+
+**Referencia técnica:**
+
+| Doc | Contenido |
+|---|---|
+| [`docs/01-architecture/implementacion.md`](docs/01-architecture/implementacion.md) | Arquitectura, roles/privilegios, patrones de diseño, SOLID, endpoints |
 | [`docs/01-architecture/flujo-desarrollo.md`](docs/01-architecture/flujo-desarrollo.md) | Orden de construcción por fases (microservicios → MFs) |
 | [`docs/01-architecture/base-datos.md`](docs/01-architecture/base-datos.md) | Schema-per-service, entidades y relaciones |
-| [`docs/01-architecture/decisions/`](docs/01-architecture/decisions/) | ADRs como archivos individuales |
+| [`docs/01-architecture/decisions/`](docs/01-architecture/decisions/) | ADRs — decisiones de arquitectura, una por archivo |
 | [`docs/03-runbooks/ejecutar-proyecto.md`](docs/03-runbooks/ejecutar-proyecto.md) | Cómo levantar el proyecto |
 | [`docs/00-overview/consideraciones-generales.md`](docs/00-overview/consideraciones-generales.md) | Alcance y mejoras opcionales |
+| [`docs/04-product/historias-de-usuario.md`](docs/04-product/historias-de-usuario.md) | Historias de usuario por rol |
+| [`docs/04-product/roles-y-cobertura.md`](docs/04-product/roles-y-cobertura.md) | Qué historia de usuario cubre cada pantalla, con estado real en código |
+| [`docs/04-product/manual-roles-y-flujo-qa.md`](docs/04-product/manual-roles-y-flujo-qa.md) | Guía de prueba manual por rol, paso a paso, y recorrido de punta a punta del flujo de contratos (también disponible en `/manual` con el sistema corriendo) |
+| [`ALEXA/README.md`](ALEXA/README.md) | Integración adicional: Alexa Skill de reportes ejecutivos por voz |
 
 ---
 

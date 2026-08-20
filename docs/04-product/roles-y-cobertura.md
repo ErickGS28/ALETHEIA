@@ -2,7 +2,7 @@
 
 > **Qué es este documento.** Explica, rol por rol, **qué debería hacer** cada actor del Gestor de Contratos (CLM) y **qué parte de ese comportamiento está realmente programada** hoy en el sistema. Es el cruce entre el diseño (Historias de Usuario + [`implementacion.md`](../01-architecture/implementacion.md)) y el código real auditado en `apps/backend` y `apps/frontend`.
 >
-> **Fecha de auditoría:** 2026-06-04 · **Rama:** `main` · **Método:** lectura directa del código fuente (services, gateway, microfrontends), no solo de la documentación.
+> **Fecha de auditoría:** 2026-07-30 · **Rama:** `main` · **Método:** lectura directa del código fuente (services, gateway, microfrontends), no solo de la documentación.
 
 ---
 

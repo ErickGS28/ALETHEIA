@@ -46,6 +46,8 @@ URLs una vez arriba:
 
 Los puertos 4001–4007 son los microfrontends individuales — no se visitan directo, el shell los sirve por debajo de rutas como `/solicitudes` o `/flujo`.
 
+**Nota (2026-08-08):** el detalle general del contrato (`/solicitudes/[id]`) ahora también muestra el documento formal elaborado por el Abogado — antes solo mostraba datos básicos (folio, sociedad, proveedor, fechas). Ver §3 y §5. Este cambio vive en la rama `feature/contract-detail-document-preview` (worktree `.worktrees/contract-detail-document-preview`), todavía no fusionada a `main` — pendiente de probar en vivo.
+
 ## 1. El recorrido de un contrato
 
 Siete estados, cinco relevos. Cada flecha es un cambio de estado real en el backend (máquina de estados en `workflow-service`); el rol es quien puede dispararlo.
@@ -80,7 +82,7 @@ Todos con contraseña `password123`. El login también trae un botón de acceso 
 
 Origina el contrato: arma la solicitud, adjunta documentación de soporte y decide cuándo está listo para entrar a revisión. Único que puede cancelar o recuperar su propia solicitud.
 
-**Pantallas:** `/solicitudes` (lista y detalle) · `/solicitudes/crear` (alta y edición, solo en DRAFT) · `/documentos` (carga de soporte)
+**Pantallas:** `/solicitudes` (lista y detalle — el detalle ahora incluye el documento formal, si ya se elaboró) · `/solicitudes/crear` (alta y edición, solo en DRAFT) · `/documentos` (carga de soporte)
 
 **Pasos para probar:**
 1. Inicia sesión como Solicitante y entra a **Solicitudes**.
@@ -90,6 +92,7 @@ Origina el contrato: arma la solicitud, adjunta documentación de soporte y deci
 5. Da clic en **Enviar a revisión** — pasa a **SUBMITTED** y desaparece de tu bandeja de edición.
 6. En otro contrato activo, prueba **Cancelar** con motivo obligatorio → **CANCELLED**.
 7. Desde ese contrato, prueba **Recuperar** → vuelve a **DRAFT**, editable de nuevo.
+8. **Nuevo:** abre el detalle de un contrato que ya tiene documento elaborado (pasó por el paso 2 de Abogado, §5) — debe aparecer una card **"Documento del contrato"** entre "Datos generales" y "Documentos requeridos", con el contenido real (no solo un indicador). En un contrato que todavía no llegó a `ADMIN_REVIEW`, esa misma card debe mostrar en su lugar el aviso "El Abogado aún no elabora el documento formal". Verifica esto explícitamente — es el cambio más reciente del flujo, antes esta pantalla solo mostraba datos básicos.
 
 **No debería poder:** aprobar/rechazar/regresar un contrato en revisión · firmar un contrato ajeno · entrar a `/admin` ni a configuración de etapas.
 
@@ -119,7 +122,7 @@ Primer filtro después de que una solicitud se envía. Configura el sistema (usu
 
 ## 5. Abogado
 
-Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el documento formal del contrato a partir de una de ellas — es el contenido que Aprobador y Firmante van a ver después, no un ejercicio aparte.
+Hace la revisión legal de fondo. Redacta y mantiene plantillas, y elabora el documento formal del contrato a partir de una de ellas — es el contenido que Aprobador, Firmante, y ahora cualquier rol desde el detalle general del contrato van a ver después, no un ejercicio aparte.
 
 > **Aquí se conecta plantilla ↔ contrato:** el Abogado, y solo el Abogado, elige una plantilla y la convierte en el documento formal de *este* contrato específico — ocurre durante `ADMIN_REVIEW`, en **Contratos → Elaborar documento** (paso 2 abajo). Ese documento resultante (no la plantilla en abstracto) es lo que después ven Aprobador, Firmante y el detalle general del contrato. Ninguna otra pantalla ni rol hace esta conexión.
 
@@ -192,6 +195,8 @@ La forma más rápida de validar que el flujo entero funciona: seguir un solo co
 
 **Variantes para no probar solo el camino feliz:** repite el recorrido rechazando en cada etapa (regresa a DRAFT desde Administrador/Abogado, rechazo definitivo desde Aprobador), y prueba cancelar + recuperar desde el Solicitante en cualquier punto antes de SIGNING. Para llegar hasta Firmante mientras el paso 5 sigue sin dueño, avanza ese contrato a `SIGNING` manualmente (API o BD directa) — no es parte del recorrido real todavía.
 
+**Nuevo — verificación cruzada:** en cualquier punto después del paso 3 (una vez que Abogado guardó el documento), entra a `/solicitudes/<id>` con cualquier rol y confirma que la card "Documento del contrato" ya muestra el contenido real; antes del paso 3, esa misma card debe mostrar el aviso de "aún no elaborado" en su lugar.
+
 ## 9. Cobertura conocida (antes de reportar un bug)
 
 Estos huecos ya están identificados en el código — repórtalos si quieres, pero no como hallazgo nuevo. Todo lo que **no** esté en esta lista sí es candidato a bug real.
@@ -216,6 +221,7 @@ Estos huecos ya están identificados en el código — repórtalos si quieres, p
 - `docs/04-product/historias-de-usuario.md`
 - `docs/04-product/roles-y-cobertura.md`
 - `docs/03-runbooks/ejecutar-proyecto.md`
-- `docs/plans/2026-07-30-conectar-plantillas-contratos-design.md` y `docs/superpowers/plans/2026-07-30-conectar-plantillas-contratos.md` — diseño y plan de la conexión plantillas↔flujo, con el detalle de qué cambió y por qué.
+- `docs/plans/2026-07-30-conectar-plantillas-contratos-design.md` — diseño de la conexión plantillas↔flujo, con el detalle de qué cambió y por qué.
+- `docs/plans/2026-08-07-contract-detail-document-preview-design.md` — diseño de la card de documento en el detalle general del contrato (rama `feature/contract-detail-document-preview`, pendiente de mergear).
 
 También existe una versión visual navegable de este mismo manual, publicada como página pública del proyecto en `localhost:4000/manual` (código en `apps/frontend/web-shell/src/app/manual/`) — lee este mismo archivo en vivo, así que nunca queda desactualizada ni depende de que alguien recuerde dónde vive. No es la fuente de verdad: **este archivo es la fuente de verdad**, porque vive versionado en el repo.

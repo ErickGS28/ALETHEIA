@@ -84,17 +84,15 @@ ALETHEIA/                              # raíz git = raíz monorepo
 ├─ .husky/ (pre-commit, commit-msg)   # junto a .git → husky encuentra el repo
 │
 ├─ docs/
-│   ├─ 00-overview/    (consideraciones-generales, vision, glossary, principles)
+│   ├─ 00-overview/    (consideraciones-generales)
 │   ├─ 01-architecture/
-│   │   ├─ c4/         (context, container, component, deployment)
 │   │   ├─ decisions/  (ADR-0001 … ADR-0008)
-│   │   ├─ standards/  (api-guidelines, security-baseline, branching)
-│   │   ├─ implementacion.md · flujo-desarrollo.md · base-datos.md
-│   ├─ 02-api/         (openapi/, postman/)
+│   │   └─ implementacion.md · flujo-desarrollo.md · base-datos.md
 │   ├─ 03-runbooks/    (ejecutar-proyecto.md)
-│   ├─ 04-product/     (historias-de-usuario)
-│   ├─ changelog/
-│   └─ superpowers/specs/
+│   ├─ 04-product/     (historias-de-usuario, roles-y-cobertura)
+│   ├─ plans/          (diseño por feature)
+│   ├─ recursos/       (logo, favicon, tipografías)
+│   └─ internal/       (plans/, specs/ — notas de diseño internas del equipo)
 │
 ├─ infra/docker/compose/
 │   └─ docker-compose.dev.yml         # postgres + redis
@@ -487,14 +485,26 @@ Los contratos en estado `SIGNED` solo son visibles para usuarios cuyo `areaId` c
 
 ## 12. Patrones de Diseño
 
-| Categoría | Patrón | Dónde | Por qué |
+Los patrones se aplican donde resuelven un problema concreto de acoplamiento o variabilidad —no se
+buscó completar una lista— y aparecen tanto en el backend como en el frontend.
+
+### Backend
+
+| Categoría | Patrón | Dónde | Problema que resuelve |
 |---|---|---|---|
 | **Creacional** | **Factory** | `documents-service`: `documents/factories/document-requirement.factory.ts` | Retorna los documentos requeridos según Persona Física o Moral sin condicionales dispersos. |
 | **Estructural** | **Repository** | `*.repository.ts` en cada servicio (p.ej. `contracts-service`) | Abstrae Prisma. El service no conoce el ORM directamente. |
 | **Estructural** | **Decorator** | `gateway`: `@RequirePrivilege()`, `@CurrentUser()` | Verificación de privilegios declarativa en el gateway, sin contaminar la lógica de negocio. |
 | **Comportamiento** | **State Machine** | `workflow-service` (`workflow/state-machine/`) | Estados y transiciones controladas. Elimina estados inválidos. |
 | **Comportamiento** | **Strategy** | `documents-service` (`signatures/strategies/`) | `CanvasSignature` / `ElectronicSignature` intercambiables sin cambiar el servicio. |
+| **Comportamiento** | **Strategy** | `gateway`: `documents/storage/` (`StorageService`, `DiskStorageService`, `R2StorageService`) | Disco local (desarrollo) y Cloudflare R2 (producción) implementan la misma interfaz `StorageService`; un factory provider en `storage.module.ts` elige la implementación según las variables de entorno disponibles, sin que el resto del código sepa cuál está activa. |
 | **Comportamiento** | **Observer** | `workflow-service`: `WorkflowService` emite evento → `NotificationsService` lo consume | Cambio de estado dispara notificación. Desacopla lógica de negocio y notificaciones. |
+
+### Frontend
+
+| Categoría | Patrón | Dónde | Problema que resuelve |
+|---|---|---|---|
+| **Estructural** | **Adapter** | `documentos-mf/src/lib/adapter.ts`, `flujo-mf/src/features/_shared/adapters.ts`, `solicitudes-mf/src/features/_shared/api/adapters.ts` | Convierte los payloads que expone el gateway (`Api*`) a las formas que ya esperan los componentes de UI de cada microfrontend, evitando que un cambio de forma en la API obligue a tocar cada componente que consume esos datos. |
 
 ---
 

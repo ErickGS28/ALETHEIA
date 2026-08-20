@@ -3,7 +3,7 @@
 Registro de decisiones de arquitectura de ALETHEIA (CLM). Cada ADR documenta una decisión,
 su contexto y sus consecuencias. Estos archivos son el desglose individual de los ADRs
 resumidos en [`../implementacion.md`](../implementacion.md) §18; la fuente base es la spec
-[`2026-06-01-arquitectura-microservicios-microfrontends-design.md`](../../superpowers/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md).
+[`2026-06-01-arquitectura-microservicios-microfrontends-design.md`](../../internal/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md).
 
 | ADR | Título | Estado |
 |---|---|---|

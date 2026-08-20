@@ -1,6 +1,8 @@
 # ALETHEIA CLM — Alexa Skill
 
-Ver `ANALISIS_INTENTS.md` para el detalle de intents, slots y contratos de datos con el backend.
+Ver [`DEFINICION_SKILL.md`](./DEFINICION_SKILL.md) para la definición original de la skill
+(entrega académica) y [`ANALISIS_INTENTS.md`](./ANALISIS_INTENTS.md) para el detalle técnico
+vigente de intents, slots y contratos de datos con el backend real.
 
 > **Modo demo (sin backend):** si el Lambda no tiene `CLM_API_BASE_URL` configurada (o tiene `CLM_USE_MOCK=true`), la skill responde datos de demostración desde `lambda/mockData.js` — no necesita backend ni variables de entorno. Ver `GUIA_DEMO.md` para el paso a paso de probarla en la consola de Alexa como skill Alexa-hosted.
 

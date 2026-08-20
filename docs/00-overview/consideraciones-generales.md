@@ -2,7 +2,7 @@
 
 Notas de alcance y mejoras opcionales del proyecto ALETHEIA (CLM).
 La arquitectura aprobada está en [`docs/01-architecture/implementacion.md`](../01-architecture/implementacion.md)
-y la spec base en [`docs/superpowers/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md`](../superpowers/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md).
+y la spec base en [`docs/internal/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md`](../internal/specs/2026-06-01-arquitectura-microservicios-microfrontends-design.md).
 
 ## Pitch para el final
 
