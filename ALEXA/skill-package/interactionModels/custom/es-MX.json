@@ -7,8 +7,15 @@
         { "name": "AMAZON.StopIntent", "samples": [] },
         { "name": "AMAZON.FallbackIntent", "samples": [] },
         {
-          "name": "HelpIntent",
-          "samples": ["ayuda", "qué puedo decir", "opciones"]
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "ayuda",
+            "qué puedo decir",
+            "opciones",
+            "no entiendo",
+            "cómo funciona esto",
+            "qué puedo preguntar"
+          ]
         },
         {
           "name": "ValidarClaveIntent",
@@ -27,20 +34,65 @@
           "name": "ResumenEjecutivoIntent",
           "samples": [
             "dame mi resumen del día",
-            "reporte ejecutivo de contratos",
             "cómo vamos con los contratos",
-            "dame el resumen ejecutivo",
-            "cuál es mi resumen del día"
+            "qué tal vamos",
+            "cómo va todo",
+            "resumen",
+            "mi resumen",
+            "pendientes",
+            "dame un resumen",
+            "resumen de hoy",
+            "cómo está todo",
+            "a ver cómo vamos",
+            "qué onda con los contratos",
+            "dime cómo va todo",
+            "échame un resumen",
+            "cómo va el día",
+            "cuál es mi resumen del día",
+            "quiero ver cómo vamos",
+            "cuál es el estado de los contratos",
+            "cómo pintan los contratos",
+            "qué hay de nuevo",
+            "ponme al tanto",
+            "actualízame",
+            "dame el update del día",
+            "cómo amanecieron los contratos",
+            "qué tenemos hoy",
+            "cuéntame cómo vamos",
+            "quiero un resumen rápido"
           ]
         },
         {
           "name": "AlertaCuelloDeBotellaIntent",
           "samples": [
             "dónde están atorados los contratos",
-            "qué etapa tiene más contratos pendientes",
+            "dónde hay cuellos de botella",
+            "atorados",
+            "alertas",
+            "qué está atorado",
+            "hay retrasos",
+            "algo atorado",
+            "demoras",
+            "dime las alertas",
+            "dónde nos estamos atorando",
+            "qué se está atorando",
+            "hay algo trabado",
+            "en dónde vamos lento",
+            "por qué se están tardando tanto",
+            "dónde está el cuello de botella",
+            "qué contratos se están atorando",
+            "dime dónde vamos mal",
             "reporte de cuellos de botella",
-            "dime los cuellos de botella",
-            "dónde hay cuellos de botella"
+            "retrasados",
+            "atrasados",
+            "contratos atrasados",
+            "qué se está tardando",
+            "hay algo pendiente desde hace rato",
+            "qué lleva mucho tiempo esperando",
+            "dónde nos estamos quedando",
+            "qué está trabado",
+            "hay cuellos de botella",
+            "algo se está tardando de más"
           ]
         },
         {
@@ -54,11 +106,28 @@
           ],
           "samples": [
             "qué contratos vencen {rangoFecha}",
-            "dime qué acuerdos expiran {rangoFecha}",
-            "contratos a punto de caducar",
+            "qué se me vence {rangoFecha}",
             "contratos por vencer {rangoFecha}",
             "qué contratos vencen en {rangoFecha}",
-            "acuerdos que expiran {rangoFecha}"
+            "qué está por caducar",
+            "cuáles contratos ya casi vencen",
+            "vencimientos",
+            "qué se vence",
+            "vencen pronto",
+            "por vencer",
+            "contratos que vencen",
+            "cuáles vencen",
+            "qué está a punto de vencer",
+            "contratos a punto de caducar",
+            "dime qué se vence pronto",
+            "acuerdos que expiran {rangoFecha}",
+            "expiraciones",
+            "qué contratos expiran {rangoFecha}",
+            "qué se me acaba",
+            "cuáles ya casi caducan",
+            "qué contratos se acaban",
+            "fechas límite",
+            "cuáles tienen fecha límite pronto"
           ]
         },
         {
@@ -82,10 +151,27 @@
           "samples": [
             "cuántos contratos fueron {estadoContrato} {rangoFecha}",
             "dime los contratos {estadoContrato} {rangoFecha}",
-            "resumen de contratos {estadoContrato} {rangoFecha}",
-            "contratos {estadoContrato} {rangoFecha}",
             "cuántos contratos {estadoContrato} hay {rangoFecha}",
-            "dame los contratos {estadoContrato} de {rangoFecha}"
+            "contratos {estadoContrato} {rangoFecha}",
+            "dame los contratos {estadoContrato} de {rangoFecha}",
+            "contratos",
+            "dime los contratos",
+            "cuántos contratos hay",
+            "quiero ver los contratos",
+            "revisa los contratos",
+            "cuántos llevamos {estadoContrato}",
+            "quiero saber cuántos contratos {estadoContrato} hay",
+            "dame un dato de los contratos",
+            "necesito información de contratos",
+            "cuántos tenemos {estadoContrato}",
+            "dime cuántos contratos {estadoContrato} llevamos {rangoFecha}",
+            "quiero las cifras de contratos",
+            "dame los números de contratos",
+            "cuántos van {estadoContrato}",
+            "quiero saber cuántos hay {estadoContrato}",
+            "cómo van los contratos {estadoContrato}",
+            "dame el conteo de contratos {estadoContrato}",
+            "cuántos contratos van {estadoContrato} en {rangoFecha}"
           ]
         }
       ],
@@ -95,56 +181,116 @@
           "values": [
             {
               "id": "DRAFT",
-              "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] }
+              "name": {
+                "value": "borrador",
+                "synonyms": [
+                  "borradores",
+                  "en borrador",
+                  "en edición",
+                  "sin enviar",
+                  "todavía en borrador"
+                ]
+              }
             },
             {
               "id": "SUBMITTED",
-              "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] }
+              "name": {
+                "value": "enviado",
+                "synonyms": [
+                  "enviados",
+                  "enviada",
+                  "enviadas",
+                  "recién enviado",
+                  "ya se mandó",
+                  "los que ya se enviaron"
+                ]
+              }
             },
             {
               "id": "ADMIN_REVIEW",
               "name": {
                 "value": "en revisión del administrador",
-                "synonyms": ["revisión administrativa", "revisión de administrador"]
+                "synonyms": [
+                  "revisión administrativa",
+                  "revisión de administrador",
+                  "con el administrador",
+                  "en manos del administrador"
+                ]
               }
             },
             {
               "id": "LAWYER_REVIEW",
               "name": {
                 "value": "en revisión del abogado",
-                "synonyms": ["revisión legal", "revisión de abogado"]
+                "synonyms": [
+                  "revisión legal",
+                  "revisión de abogado",
+                  "con el abogado",
+                  "en legal",
+                  "en el área legal"
+                ]
               }
             },
             {
               "id": "APPROVAL_PENDING",
               "name": {
                 "value": "pendiente de aprobación",
-                "synonyms": ["pendientes de aprobación", "por aprobar"]
+                "synonyms": [
+                  "pendientes de aprobación",
+                  "por aprobar",
+                  "esperando aprobación",
+                  "los que faltan aprobar"
+                ]
               }
             },
             {
               "id": "SIGNING",
               "name": {
                 "value": "en firma",
-                "synonyms": ["por firmar", "en proceso de firma", "aprobado", "aprobados"]
+                "synonyms": [
+                  "por firmar",
+                  "en proceso de firma",
+                  "aprobado",
+                  "aprobados",
+                  "ya casi firmado",
+                  "esperando firma",
+                  "los que faltan firmar"
+                ]
               }
             },
             {
               "id": "SIGNED",
-              "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] }
+              "name": {
+                "value": "firmado",
+                "synonyms": ["firmados", "firmada", "firmadas", "ya firmados", "listos", "cerrados"]
+              }
             },
             {
               "id": "REJECTED",
               "name": {
                 "value": "rechazado",
-                "synonyms": ["rechazados", "rechazada", "rechazadas"]
+                "synonyms": [
+                  "rechazados",
+                  "rechazada",
+                  "rechazadas",
+                  "los que rechazaron",
+                  "no aprobados",
+                  "denegados"
+                ]
               }
             },
             {
               "id": "CANCELLED",
               "name": {
                 "value": "cancelado",
-                "synonyms": ["cancelados", "cancelada", "canceladas"]
+                "synonyms": [
+                  "cancelados",
+                  "cancelada",
+                  "canceladas",
+                  "los que se cancelaron",
+                  "dados de baja",
+                  "anulados"
+                ]
               }
             }
           ]

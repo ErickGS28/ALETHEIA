@@ -13,6 +13,25 @@ const MESES = [
   'diciembre',
 ];
 
+const MONTHS_EN = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
+function isEnglish(locale) {
+  return typeof locale === 'string' && locale.indexOf('en') === 0;
+}
+
 function pad(n) {
   return String(n).padStart(2, '0');
 }
@@ -56,6 +75,8 @@ function normalizeAmbiguousYear(year, monthIndex, now = new Date()) {
 /**
  * Convierte el valor resuelto de un slot AMAZON.DATE a un rango { isoStart, isoEnd }.
  * Soporta: día (YYYY-MM-DD), semana ISO (YYYY-Wnn), mes (YYYY-MM) y año (YYYY).
+ * Es independiente del locale — el AMAZON.DATE que llega ya viene en formato ISO
+ * sin importar en qué idioma habló el usuario.
  */
 function resolveDateRange(amazonDateValue) {
   if (!amazonDateValue) return null;
@@ -92,22 +113,37 @@ function resolveDateRange(amazonDateValue) {
   return null;
 }
 
-function describeAmazonDate(amazonDateValue) {
+// `locale` decide el idioma de la frase hablada (no afecta el cálculo de fechas,
+// que siempre trabaja en ISO). Por defecto español, para no romper llamadas viejas.
+function describeAmazonDate(amazonDateValue, locale) {
+  const en = isEnglish(locale);
+
   const weekMatch = /^(\d{4})-W(\d{2})$/.exec(amazonDateValue);
-  if (weekMatch) return `la semana ${weekMatch[2]} de ${weekMatch[1]}`;
+  if (weekMatch) {
+    return en
+      ? `week ${weekMatch[2]} of ${weekMatch[1]}`
+      : `la semana ${weekMatch[2]} de ${weekMatch[1]}`;
+  }
 
   const monthMatch = /^(\d{4})-(\d{2})$/.exec(amazonDateValue);
   if (monthMatch) {
     const monthIndex = Number(monthMatch[2]) - 1;
     const year = normalizeAmbiguousYear(Number(monthMatch[1]), monthIndex);
-    return `${MESES[monthIndex]} de ${year}`;
+    return en ? `${MONTHS_EN[monthIndex]} ${year}` : `${MESES[monthIndex]} de ${year}`;
   }
 
   const dayMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(amazonDateValue);
-  if (dayMatch) return `el ${dayMatch[3]} de ${MESES[Number(dayMatch[2]) - 1]} de ${dayMatch[1]}`;
+  if (dayMatch) {
+    const monthIndex = Number(dayMatch[2]) - 1;
+    return en
+      ? `${MONTHS_EN[monthIndex]} ${Number(dayMatch[3])}, ${dayMatch[1]}`
+      : `el ${dayMatch[3]} de ${MESES[monthIndex]} de ${dayMatch[1]}`;
+  }
 
   const yearMatch = /^(\d{4})$/.exec(amazonDateValue);
-  if (yearMatch) return `el año ${amazonDateValue}`;
+  if (yearMatch) {
+    return en ? `the year ${amazonDateValue}` : `el año ${amazonDateValue}`;
+  }
 
   return amazonDateValue;
 }

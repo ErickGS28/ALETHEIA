@@ -69,12 +69,13 @@ function getExpiringContracts(isoStart, isoEnd) {
   const end = Date.parse(`${isoEnd}T00:00:00Z`);
   const span = Math.max(end - start, 0);
 
-  const contratos = DEMO_CONTRACTS.map((contract, index) => ({
-    ...contract,
-    expiresAt: toISODateOnly(
-      new Date(start + Math.round((span * (index + 1)) / (DEMO_CONTRACTS.length + 1))),
-    ),
-  }));
+  const contratos = DEMO_CONTRACTS.map((contract, index) =>
+    Object.assign({}, contract, {
+      expiresAt: toISODateOnly(
+        new Date(start + Math.round((span * (index + 1)) / (DEMO_CONTRACTS.length + 1))),
+      ),
+    }),
+  );
 
   const { id, title, vendorName, expiresAt } = contratos[0];
 
