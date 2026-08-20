@@ -16,6 +16,8 @@ import { AuthController } from './auth.controller';
           options: {
             host: config.get<string>('REDIS_HOST', 'localhost'),
             port: Number(config.get<string>('REDIS_PORT', '6379')),
+            password: config.get<string>('REDIS_PASSWORD') || undefined,
+            db: Number(config.get<string>('REDIS_DB', '0')),
           },
         }),
       },
