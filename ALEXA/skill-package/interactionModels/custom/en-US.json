@@ -1,0 +1,362 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "aletheia clm",
+      "intents": [
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": [
+            "help",
+            "what can I say",
+            "options",
+            "I don't understand",
+            "how does this work",
+            "what can I ask"
+          ]
+        },
+        {
+          "name": "ValidarClaveIntent",
+          "samples": [
+            "sesame",
+            "open sesame",
+            "the password is sesame",
+            "my password is sesame",
+            "the passphrase is sesame",
+            "password sesame",
+            "it's sesame"
+          ]
+        },
+        {
+          "name": "ResumenEjecutivoIntent",
+          "samples": [
+            "give me my daily summary",
+            "how are we doing with contracts",
+            "how's it going",
+            "how's everything going",
+            "summary",
+            "my summary",
+            "pending",
+            "give me a summary",
+            "today's summary",
+            "how is everything",
+            "let's see how we're doing",
+            "what's up with the contracts",
+            "tell me how it's going",
+            "give me a quick update",
+            "how's the day going",
+            "what's my summary for today",
+            "I want to see how we're doing",
+            "what's the status of the contracts",
+            "how are things looking",
+            "what's new",
+            "keep me posted",
+            "give me an update",
+            "give me today's update",
+            "how did things look this morning",
+            "what do we have today",
+            "tell me how we're doing",
+            "give me a quick summary"
+          ]
+        },
+        {
+          "name": "AlertaCuelloDeBotellaIntent",
+          "samples": [
+            "where are contracts stuck",
+            "where are the bottlenecks",
+            "stuck",
+            "alerts",
+            "what's stuck",
+            "are there any delays",
+            "something's stuck",
+            "delays",
+            "tell me the alerts",
+            "where are we getting stuck",
+            "what's getting stuck",
+            "is anything stuck",
+            "where are we falling behind",
+            "why is this taking so long",
+            "where's the bottleneck",
+            "which contracts are stuck",
+            "tell me where we're behind",
+            "bottleneck report",
+            "delayed",
+            "behind schedule",
+            "contracts behind schedule",
+            "what's taking so long",
+            "is anything overdue",
+            "what's been waiting a long time",
+            "where are we falling behind on",
+            "what's jammed up",
+            "are there bottlenecks",
+            "something's taking too long"
+          ]
+        },
+        {
+          "name": "ConsultarContratosPorExpirarIntent",
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "samples": ["{rangoFecha}", "in {rangoFecha}", "for {rangoFecha}"]
+            }
+          ],
+          "samples": [
+            "what contracts expire {rangoFecha}",
+            "what's expiring on me {rangoFecha}",
+            "contracts about to expire {rangoFecha}",
+            "what contracts expire in {rangoFecha}",
+            "what's about to expire",
+            "which contracts are about to expire",
+            "expirations",
+            "what's expiring",
+            "expiring soon",
+            "about to expire",
+            "contracts that expire",
+            "which ones expire",
+            "what's about to run out",
+            "contracts about to run out",
+            "tell me what's expiring soon",
+            "agreements expiring {rangoFecha}",
+            "expiration dates",
+            "what's due to expire {rangoFecha}",
+            "what's running out on me",
+            "which ones are about to expire",
+            "what contracts are running out",
+            "deadline dates",
+            "which ones have a deadline coming up"
+          ]
+        },
+        {
+          "name": "ConsultarMetricasPorFechaIntent",
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "samples": ["{rangoFecha}", "in {rangoFecha}", "for {rangoFecha}"]
+            },
+            {
+              "name": "estadoContrato",
+              "type": "EstadoContratoType",
+              "samples": [
+                "{estadoContrato}",
+                "the {estadoContrato} status",
+                "{estadoContrato} contracts"
+              ]
+            }
+          ],
+          "samples": [
+            "how many contracts were {estadoContrato} {rangoFecha}",
+            "tell me the {estadoContrato} contracts {rangoFecha}",
+            "how many {estadoContrato} contracts are there {rangoFecha}",
+            "{estadoContrato} contracts {rangoFecha}",
+            "give me the {estadoContrato} contracts from {rangoFecha}",
+            "contracts",
+            "tell me the contracts",
+            "how many contracts are there",
+            "I want to see the contracts",
+            "check the contracts",
+            "how many do we have {estadoContrato}",
+            "I want to know how many {estadoContrato} contracts there are",
+            "give me a number on the contracts",
+            "I need some contract info",
+            "how many are {estadoContrato}",
+            "tell me how many {estadoContrato} contracts we have {rangoFecha}",
+            "give me the contract numbers",
+            "what are the contract figures",
+            "how many are {estadoContrato} so far",
+            "I want to know how many are {estadoContrato}",
+            "how are the {estadoContrato} contracts doing",
+            "give me the count of {estadoContrato} contracts",
+            "how many contracts are {estadoContrato} in {rangoFecha}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "name": "EstadoContratoType",
+          "values": [
+            {
+              "id": "DRAFT",
+              "name": {
+                "value": "draft",
+                "synonyms": [
+                  "drafts",
+                  "in draft",
+                  "in progress",
+                  "not submitted yet",
+                  "still a draft"
+                ]
+              }
+            },
+            {
+              "id": "SUBMITTED",
+              "name": {
+                "value": "submitted",
+                "synonyms": [
+                  "submitted ones",
+                  "just submitted",
+                  "already sent",
+                  "the ones already sent"
+                ]
+              }
+            },
+            {
+              "id": "ADMIN_REVIEW",
+              "name": {
+                "value": "admin review",
+                "synonyms": [
+                  "administrative review",
+                  "administrator review",
+                  "with the admin",
+                  "in the admin's hands"
+                ]
+              }
+            },
+            {
+              "id": "LAWYER_REVIEW",
+              "name": {
+                "value": "lawyer review",
+                "synonyms": [
+                  "legal review",
+                  "attorney review",
+                  "with the lawyer",
+                  "in legal",
+                  "with legal"
+                ]
+              }
+            },
+            {
+              "id": "APPROVAL_PENDING",
+              "name": {
+                "value": "pending approval",
+                "synonyms": [
+                  "awaiting approval",
+                  "to be approved",
+                  "waiting for approval",
+                  "the ones still needing approval"
+                ]
+              }
+            },
+            {
+              "id": "SIGNING",
+              "name": {
+                "value": "signing",
+                "synonyms": [
+                  "to be signed",
+                  "in signing process",
+                  "approved",
+                  "almost signed",
+                  "waiting to be signed",
+                  "the ones still needing a signature"
+                ]
+              }
+            },
+            {
+              "id": "SIGNED",
+              "name": {
+                "value": "signed",
+                "synonyms": ["signed ones", "already signed", "done", "closed"]
+              }
+            },
+            {
+              "id": "REJECTED",
+              "name": {
+                "value": "rejected",
+                "synonyms": [
+                  "rejected ones",
+                  "the ones that got rejected",
+                  "not approved",
+                  "denied"
+                ]
+              }
+            },
+            {
+              "id": "CANCELLED",
+              "name": {
+                "value": "cancelled",
+                "synonyms": [
+                  "canceled",
+                  "cancelled ones",
+                  "the ones that got cancelled",
+                  "voided",
+                  "annulled"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "ConsultarContratosPorExpirarIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha"
+              }
+            }
+          ]
+        },
+        {
+          "name": "ConsultarMetricasPorFechaIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "rangoFecha",
+              "type": "AMAZON.DATE",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha"
+              }
+            },
+            {
+              "name": "estadoContrato",
+              "type": "EstadoContratoType",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
+        "variations": [
+          { "type": "PlainText", "value": "What time period would you like to check?" }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha",
+        "variations": [
+          { "type": "PlainText", "value": "What time period would you like to check?" }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What status would you like to check? For example: signed, rejected, or in review."
+          }
+        ]
+      }
+    ]
+  }
+}
