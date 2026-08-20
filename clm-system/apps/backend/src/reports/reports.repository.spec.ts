@@ -36,7 +36,11 @@ describe('ReportsRepository', () => {
     ]);
     const repo = new ReportsRepository(prisma as any);
 
-    const result = await repo.findActiveWorkflowsWithStage(['SIGNED', 'REJECTED', 'CANCELLED'] as any);
+    const result = await repo.findActiveWorkflowsWithStage([
+      'SIGNED',
+      'REJECTED',
+      'CANCELLED',
+    ] as any);
 
     expect(result).toEqual([{ stageId: 2, stageName: 'Revisión Legal', slaHours: 24, enteredAt }]);
     expect(prisma.contractWorkflow.findMany).toHaveBeenCalledWith({

@@ -3,9 +3,9 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RequirePrivilege } from '../auth/decorators/require-privilege.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrivilegeGuard } from '../auth/guards/privilege.guard';
+import { ContractsService } from './contracts.service';
 import { ContractsMetricsQueryDto } from './dto/contracts-metrics-query.dto';
 import { DateRangeQueryDto } from './dto/date-range-query.dto';
-import { ContractsService } from './contracts.service';
 
 // IMPORTANTE: las rutas estáticas (expiring, metrics) deben declararse antes de
 // cualquier futura ruta dinámica GET /contracts/:id — si :id se agrega antes,

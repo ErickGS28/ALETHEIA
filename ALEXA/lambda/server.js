@@ -1,5 +1,3 @@
-'use strict';
-
 const express = require('express');
 const { ExpressAdapter } = require('ask-sdk-express-adapter');
 const { skillInstance } = require('./index');
@@ -15,7 +13,7 @@ app.post('/', adapter.getRequestHandlers());
 app.get('/health', (req, res) => res.status(200).json({ ok: true }));
 
 // Íconos de la skill requeridos por Amazon para publicar/beta test.
-app.use('/public', express.static(require('path').join(__dirname, 'public')));
+app.use('/public', express.static(require('node:path').join(__dirname, 'public')));
 
 const port = process.env.PORT ?? 4021;
 app.listen(port, () => {

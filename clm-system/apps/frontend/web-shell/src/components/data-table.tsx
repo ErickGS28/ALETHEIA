@@ -1,19 +1,5 @@
 'use client';
 
-import {
-  type ColumnDef,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
-import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -34,6 +20,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
+  type VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from '@tanstack/react-table';
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from 'lucide-react';
+import * as React from 'react';
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 
@@ -59,26 +59,75 @@ type Contract = {
 /* ─── Data ───────────────────────────────────────────────────────────── */
 
 const contracts: Contract[] = [
-  { id: 'CLM-2025-0042', proveedor: 'TechCorp México S.A.', area: 'Compras', status: 'ADMIN_REVIEW', tipo: 'Persona Moral', monto: 150000 },
-  { id: 'CLM-2025-0041', proveedor: 'Distribuidora Norte', area: 'Logística', status: 'SIGNED', tipo: 'Persona Moral', monto: 85000 },
-  { id: 'CLM-2025-0040', proveedor: 'Ana García López', area: 'RRHH', status: 'DRAFT', tipo: 'Persona Física', monto: 12000 },
-  { id: 'CLM-2025-0039', proveedor: 'Constructora Oeste', area: 'Infraestructura', status: 'LAWYER_REVIEW', tipo: 'Persona Moral', monto: 320000 },
-  { id: 'CLM-2025-0038', proveedor: 'Carlos Mendoza Ruiz', area: 'IT', status: 'REJECTED', tipo: 'Persona Física', monto: 45000 },
-  { id: 'CLM-2025-0037', proveedor: 'Servicios Globales SA', area: 'Finanzas', status: 'SIGNING', tipo: 'Persona Moral', monto: 220000 },
-  { id: 'CLM-2025-0036', proveedor: 'María Torres Hdez.', area: 'Legal', status: 'APPROVAL_PENDING', tipo: 'Persona Física', monto: 28000 },
+  {
+    id: 'CLM-2025-0042',
+    proveedor: 'TechCorp México S.A.',
+    area: 'Compras',
+    status: 'ADMIN_REVIEW',
+    tipo: 'Persona Moral',
+    monto: 150000,
+  },
+  {
+    id: 'CLM-2025-0041',
+    proveedor: 'Distribuidora Norte',
+    area: 'Logística',
+    status: 'SIGNED',
+    tipo: 'Persona Moral',
+    monto: 85000,
+  },
+  {
+    id: 'CLM-2025-0040',
+    proveedor: 'Ana García López',
+    area: 'RRHH',
+    status: 'DRAFT',
+    tipo: 'Persona Física',
+    monto: 12000,
+  },
+  {
+    id: 'CLM-2025-0039',
+    proveedor: 'Constructora Oeste',
+    area: 'Infraestructura',
+    status: 'LAWYER_REVIEW',
+    tipo: 'Persona Moral',
+    monto: 320000,
+  },
+  {
+    id: 'CLM-2025-0038',
+    proveedor: 'Carlos Mendoza Ruiz',
+    area: 'IT',
+    status: 'REJECTED',
+    tipo: 'Persona Física',
+    monto: 45000,
+  },
+  {
+    id: 'CLM-2025-0037',
+    proveedor: 'Servicios Globales SA',
+    area: 'Finanzas',
+    status: 'SIGNING',
+    tipo: 'Persona Moral',
+    monto: 220000,
+  },
+  {
+    id: 'CLM-2025-0036',
+    proveedor: 'María Torres Hdez.',
+    area: 'Legal',
+    status: 'APPROVAL_PENDING',
+    tipo: 'Persona Física',
+    monto: 28000,
+  },
 ];
 
 /* ─── Status badge ───────────────────────────────────────────────────── */
 
 const statusColor: Record<ContractStatus, string> = {
-  DRAFT:            'bg-secondary-background text-foreground',
-  SUBMITTED:        'bg-main text-main-foreground',
-  ADMIN_REVIEW:     'bg-yellow-400 text-black',
-  LAWYER_REVIEW:    'bg-orange-400 text-black',
+  DRAFT: 'bg-secondary-background text-foreground',
+  SUBMITTED: 'bg-main text-main-foreground',
+  ADMIN_REVIEW: 'bg-yellow-400 text-black',
+  LAWYER_REVIEW: 'bg-orange-400 text-black',
   APPROVAL_PENDING: 'bg-blue-400 text-black',
-  SIGNING:          'bg-purple-400 text-black',
-  SIGNED:           'bg-green-500 text-white',
-  REJECTED:         'bg-red-500 text-white',
+  SIGNING: 'bg-purple-400 text-black',
+  SIGNED: 'bg-green-500 text-white',
+  REJECTED: 'bg-red-500 text-white',
 };
 
 function StatusBadge({ status }: { status: ContractStatus }) {
@@ -98,7 +147,9 @@ const columns: ColumnDef<Contract>[] = [
     id: 'select',
     header: ({ table }) => (
       <Checkbox
-        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+        checked={
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
         onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
         aria-label="Seleccionar todo"
       />
@@ -153,11 +204,14 @@ const columns: ColumnDef<Contract>[] = [
   },
   {
     accessorKey: 'monto',
-    header: () => <div className="text-right font-heading text-xs tracking-widest uppercase">Monto</div>,
+    header: () => (
+      <div className="text-right font-heading text-xs tracking-widest uppercase">Monto</div>
+    ),
     cell: ({ row }) => {
-      const formatted = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(
-        row.getValue('monto'),
-      );
+      const formatted = new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+      }).format(row.getValue('monto'));
       return <div className="text-right font-mono text-sm">{formatted}</div>;
     },
   },
@@ -276,7 +330,10 @@ export default function ContractDataTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center font-mono text-foreground/40">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center font-mono text-foreground/40"
+                >
                   Sin resultados.
                 </TableCell>
               </TableRow>

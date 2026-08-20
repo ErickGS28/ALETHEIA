@@ -54,8 +54,8 @@ describe('apiClient en modo mock', () => {
 
   beforeEach(() => {
     process.env = { ...OLD_ENV };
-    delete process.env.CLM_API_BASE_URL;
-    delete process.env.CLM_USE_MOCK;
+    process.env.CLM_API_BASE_URL = undefined;
+    process.env.CLM_USE_MOCK = undefined;
     global.fetch = jest.fn();
   });
 

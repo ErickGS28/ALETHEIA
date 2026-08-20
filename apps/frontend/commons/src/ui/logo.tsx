@@ -23,7 +23,6 @@ export function Logo({
 }: LogoProps) {
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)} {...props}>
-      {/* biome-ignore lint/a11y/useAltText: alt provisto explícitamente */}
       <img
         src="/logo.png"
         alt="ALETHEIA"

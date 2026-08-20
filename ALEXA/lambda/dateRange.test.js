@@ -3,7 +3,10 @@ const { resolveDateRange, describeAmazonDate, normalizeAmbiguousYear } = require
 
 describe('resolveDateRange', () => {
   it('returns the same day for a plain date', () => {
-    expect(resolveDateRange('2026-07-14')).toEqual({ isoStart: '2026-07-14', isoEnd: '2026-07-14' });
+    expect(resolveDateRange('2026-07-14')).toEqual({
+      isoStart: '2026-07-14',
+      isoEnd: '2026-07-14',
+    });
   });
 
   it('returns the full month range for a YYYY-MM value', () => {

@@ -16,7 +16,10 @@ interface CancelContractModalProps {
 export function CancelContractModal({ contract, onClose, onConfirm }: CancelContractModalProps) {
   const [reason, setReason] = React.useState('');
 
-  // Reset the textarea whenever the targeted contract changes.
+  // Reset the textarea only when the targeted contract actually changes (by id) — depending on
+  // the whole `contract` object would also reset it on every re-render that gives a new object
+  // reference for the same contract, wiping out what the user is typing.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional narrower dependency, see above
   React.useEffect(() => {
     setReason('');
   }, [contract?.id]);

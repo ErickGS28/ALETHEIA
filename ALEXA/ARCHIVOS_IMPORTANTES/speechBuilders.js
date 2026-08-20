@@ -1,5 +1,3 @@
-'use strict';
-
 const ESTADO_HABLADO = {
   DRAFT: 'borrador',
   SUBMITTED: 'enviado',

@@ -11,12 +11,7 @@
             "Alexa, pregunta a aletheia clm mi resumen del día",
             "Alexa, pregunta a aletheia clm qué contratos vencen este mes"
           ],
-          "keywords": [
-            "contratos",
-            "clm",
-            "aletheia",
-            "reportes"
-          ],
+          "keywords": ["contratos", "clm", "aletheia", "reportes"],
           "smallIconUri": "https://alexa-clm.levsek.com.mx/public/icon-108.png",
           "largeIconUri": "https://alexa-clm.levsek.com.mx/public/icon-512.png"
         }
@@ -24,9 +19,7 @@
       "isAvailableWorldwide": false,
       "testingInstructions": "Usar la cuenta de sistema sembrada en prisma/seed.ts contra el backend desplegado.",
       "category": "BUSINESS_AND_FINANCE",
-      "distributionCountries": [
-        "MX"
-      ]
+      "distributionCountries": ["MX"]
     },
     "privacyAndCompliance": {
       "allowsPurchases": false,

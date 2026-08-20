@@ -72,7 +72,11 @@
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
-              "samples": ["{estadoContrato}", "el estado {estadoContrato}", "contratos {estadoContrato}"]
+              "samples": [
+                "{estadoContrato}",
+                "el estado {estadoContrato}",
+                "contratos {estadoContrato}"
+              ]
             }
           ],
           "samples": [
@@ -89,8 +93,14 @@
         {
           "name": "EstadoContratoType",
           "values": [
-            { "id": "DRAFT", "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] } },
-            { "id": "SUBMITTED", "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] } },
+            {
+              "id": "DRAFT",
+              "name": { "value": "borrador", "synonyms": ["borradores", "en borrador"] }
+            },
+            {
+              "id": "SUBMITTED",
+              "name": { "value": "enviado", "synonyms": ["enviados", "enviada", "enviadas"] }
+            },
             {
               "id": "ADMIN_REVIEW",
               "name": {
@@ -119,14 +129,23 @@
                 "synonyms": ["por firmar", "en proceso de firma", "aprobado", "aprobados"]
               }
             },
-            { "id": "SIGNED", "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] } },
+            {
+              "id": "SIGNED",
+              "name": { "value": "firmado", "synonyms": ["firmados", "firmada", "firmadas"] }
+            },
             {
               "id": "REJECTED",
-              "name": { "value": "rechazado", "synonyms": ["rechazados", "rechazada", "rechazadas"] }
+              "name": {
+                "value": "rechazado",
+                "synonyms": ["rechazados", "rechazada", "rechazadas"]
+              }
             },
             {
               "id": "CANCELLED",
-              "name": { "value": "cancelado", "synonyms": ["cancelados", "cancelada", "canceladas"] }
+              "name": {
+                "value": "cancelado",
+                "synonyms": ["cancelados", "cancelada", "canceladas"]
+              }
             }
           ]
         }

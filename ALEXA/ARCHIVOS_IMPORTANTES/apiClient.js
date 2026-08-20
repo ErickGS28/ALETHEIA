@@ -1,5 +1,3 @@
-'use strict';
-
 const mockData = require('./mockData');
 
 // Modo demo: sin CLM_API_BASE_URL configurada (o con CLM_USE_MOCK=true) se responden

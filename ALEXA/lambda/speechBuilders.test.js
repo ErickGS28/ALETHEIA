@@ -9,7 +9,9 @@ const {
 describe('speechBuilders', () => {
   it('builds the resumen ejecutivo speech with plural contratos', () => {
     const speech = buildResumenEjecutivoSpeech({ pendientes: 6, firmados: 1, rechazados: 1 });
-    expect(speech).toBe('Hoy tienes 6 contratos por revisar, se han firmado 1 y 1 fueron rechazados.');
+    expect(speech).toBe(
+      'Hoy tienes 6 contratos por revisar, se han firmado 1 y 1 fueron rechazados.',
+    );
   });
 
   it('uses singular contrato when pendientes es 1', () => {
@@ -43,7 +45,9 @@ describe('speechBuilders', () => {
   });
 
   it('builds the bottlenecks speech with the worst stage', () => {
-    const speech = buildBottlenecksSpeech({ peor: { stageName: 'Revisión Legal', cantidadVencidos: 2 } });
+    const speech = buildBottlenecksSpeech({
+      peor: { stageName: 'Revisión Legal', cantidadVencidos: 2 },
+    });
     expect(speech).toBe(
       'Actualmente, la etapa de Revisión Legal concentra 2 contratos que han superado su tiempo límite de revisión.',
     );

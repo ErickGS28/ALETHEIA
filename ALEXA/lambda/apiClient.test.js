@@ -1,9 +1,5 @@
 // ALEXA/lambda/apiClient.test.js
-const {
-  getDailySummary,
-  getExpiringContracts,
-  resetSessionForTests,
-} = require('./apiClient');
+const { getDailySummary, getExpiringContracts, resetSessionForTests } = require('./apiClient');
 
 describe('apiClient', () => {
   const OLD_ENV = process.env;

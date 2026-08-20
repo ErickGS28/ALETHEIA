@@ -25,7 +25,9 @@ export class ReportsRepository {
     });
   }
 
-  async findActiveWorkflowsWithStage(excludedStatuses: ContractStatus[]): Promise<StageWorkflowRow[]> {
+  async findActiveWorkflowsWithStage(
+    excludedStatuses: ContractStatus[],
+  ): Promise<StageWorkflowRow[]> {
     const rows = await this.prisma.contractWorkflow.findMany({
       where: { contract: { status: { notIn: excludedStatuses } } },
       include: { stage: true },

@@ -1,5 +1,3 @@
-'use strict';
-
 const Alexa = require('ask-sdk-core');
 const apiClient = require('./apiClient');
 const { resolveDateRange, describeAmazonDate } = require('./dateRange');
@@ -75,9 +73,9 @@ const ConsultarMetricasPorFechaIntentHandler = {
     }
 
     const estadoSlot = currentIntent.slots.estadoContrato;
-    const resolutions = estadoSlot.resolutions && estadoSlot.resolutions.resolutionsPerAuthority;
+    const resolutions = estadoSlot.resolutions?.resolutionsPerAuthority;
     const resolvedStatus =
-      resolutions && resolutions[0] && resolutions[0].status.code === 'ER_SUCCESS_MATCH'
+      resolutions?.[0] && resolutions[0].status.code === 'ER_SUCCESS_MATCH'
         ? resolutions[0].values[0].value.id
         : null;
 
@@ -101,7 +99,11 @@ const ConsultarMetricasPorFechaIntentHandler = {
     }
 
     try {
-      const data = await apiClient.getContractsMetrics(resolvedStatus, range.isoStart, range.isoEnd);
+      const data = await apiClient.getContractsMetrics(
+        resolvedStatus,
+        range.isoStart,
+        range.isoEnd,
+      );
       const speech = buildMetricasPorFechaSpeech(data, describeAmazonDate(rawDate));
       return handlerInput.responseBuilder
         .speak(speech)
@@ -228,7 +230,10 @@ const CancelAndStopIntentHandler = {
     );
   },
   handle(handlerInput) {
-    return handlerInput.responseBuilder.speak('Hasta luego.').withShouldEndSession(true).getResponse();
+    return handlerInput.responseBuilder
+      .speak('Hasta luego.')
+      .withShouldEndSession(true)
+      .getResponse();
   },
 };
 

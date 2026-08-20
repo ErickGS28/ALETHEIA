@@ -49,9 +49,9 @@
   --font-weight-heading: 800;
 
   /* ─── Font Families ─────────────────────────────────── */
-  --font-sans: var(--font-dm-sans, "DM Sans", ui-sans-serif, sans-serif);
-  --font-heading: var(--font-koulen, "Anton", ui-sans-serif, sans-serif);
-  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --font-sans: var(--font-dm-sans, 'DM Sans', ui-sans-serif, sans-serif);
+  --font-heading: var(--font-koulen, 'Anton', ui-sans-serif, sans-serif);
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
 @layer base {
@@ -71,7 +71,7 @@
     color: var(--color-foreground);
     font-size: 1rem; /* 16px — texto base cómodo y legible */
     line-height: 1.6;
-    font-variation-settings: "opsz" 14;
+    font-variation-settings: 'opsz' 14;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -483,7 +483,7 @@
   position: relative;
 }
 .clm-page-break::after {
-  content: "Salto de página";
+  content: 'Salto de página';
   position: absolute;
   top: -0.6rem;
   left: 50%;

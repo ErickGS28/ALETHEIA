@@ -1,5 +1,3 @@
-'use strict';
-
 // Datos de demostración para correr la skill SIN backend real.
 // Se activan cuando el Lambda no tiene configurada CLM_API_BASE_URL (ver apiClient.js),
 // que es el caso de una skill Alexa-hosted recién creada.
@@ -45,9 +43,24 @@ function getContractsMetrics(status, isoStart, isoEnd) {
 }
 
 const DEMO_CONTRACTS = [
-  { id: 101, title: 'Renovación de licencias de software', vendorName: 'Acme Soluciones', status: 'SIGNED' },
-  { id: 102, title: 'Mantenimiento de servidores', vendorName: 'TecnoRed del Bajío', status: 'SIGNED' },
-  { id: 103, title: 'Arrendamiento de oficinas', vendorName: 'Inmobiliaria Cumbres', status: 'SIGNING' },
+  {
+    id: 101,
+    title: 'Renovación de licencias de software',
+    vendorName: 'Acme Soluciones',
+    status: 'SIGNED',
+  },
+  {
+    id: 102,
+    title: 'Mantenimiento de servidores',
+    vendorName: 'TecnoRed del Bajío',
+    status: 'SIGNED',
+  },
+  {
+    id: 103,
+    title: 'Arrendamiento de oficinas',
+    vendorName: 'Inmobiliaria Cumbres',
+    status: 'SIGNING',
+  },
 ];
 
 // Reparte los contratos de demo dentro del rango pedido, ordenados del más urgente al menos.

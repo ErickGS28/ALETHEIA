@@ -128,11 +128,18 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
       rangoFecha: { name: 'rangoFecha', value: '2026-06' },
     };
-    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots), AUTHENTICATED);
+    const event = buildEnvelope(
+      buildIntentRequest('ConsultarMetricasPorFechaIntent', slots),
+      AUTHENTICATED,
+    );
 
     const result = await handler(event, {});
 
-    expect(apiClient.getContractsMetrics).toHaveBeenCalledWith('REJECTED', '2026-06-01', '2026-06-30');
+    expect(apiClient.getContractsMetrics).toHaveBeenCalledWith(
+      'REJECTED',
+      '2026-06-01',
+      '2026-06-30',
+    );
     expect(result.response.outputSpeech.ssml).toContain('4 contratos en estado rechazado');
   });
 
@@ -147,7 +154,10 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
       rangoFecha: { name: 'rangoFecha', value: '2026-06' },
     };
-    const event = buildEnvelope(buildIntentRequest('ConsultarMetricasPorFechaIntent', slots), AUTHENTICATED);
+    const event = buildEnvelope(
+      buildIntentRequest('ConsultarMetricasPorFechaIntent', slots),
+      AUTHENTICATED,
+    );
 
     const result = await handler(event, {});
 
@@ -159,7 +169,13 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
     apiClient.getExpiringContracts.mockResolvedValue({
       count: 1,
       contratos: [
-        { id: 1, title: 'Renovación licencias', vendorName: 'Acme S.A.', status: 'SIGNED', expiresAt: '2026-07-20' },
+        {
+          id: 1,
+          title: 'Renovación licencias',
+          vendorName: 'Acme S.A.',
+          status: 'SIGNED',
+          expiresAt: '2026-07-20',
+        },
       ],
       masUrgente: {
         id: 1,
@@ -170,18 +186,26 @@ describe('ALETHEIA CLM Alexa skill handler', () => {
       },
     });
     const slots = { rangoFecha: { name: 'rangoFecha', value: '2026-07' } };
-    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots), AUTHENTICATED);
+    const event = buildEnvelope(
+      buildIntentRequest('ConsultarContratosPorExpirarIntent', slots),
+      AUTHENTICATED,
+    );
 
     const result = await handler(event, {});
 
     expect(apiClient.getExpiringContracts).toHaveBeenCalledWith('2026-07-01', '2026-07-31');
-    expect(result.response.outputSpeech.ssml).toContain('El más urgente es con el cliente Acme S.A.');
+    expect(result.response.outputSpeech.ssml).toContain(
+      'El más urgente es con el cliente Acme S.A.',
+    );
   });
 
   it('responds gracefully when there are no contratos por expirar', async () => {
     apiClient.getExpiringContracts.mockResolvedValue({ count: 0, contratos: [], masUrgente: null });
     const slots = { rangoFecha: { name: 'rangoFecha', value: '2026-07' } };
-    const event = buildEnvelope(buildIntentRequest('ConsultarContratosPorExpirarIntent', slots), AUTHENTICATED);
+    const event = buildEnvelope(
+      buildIntentRequest('ConsultarContratosPorExpirarIntent', slots),
+      AUTHENTICATED,
+    );
 
     const result = await handler(event, {});
 
