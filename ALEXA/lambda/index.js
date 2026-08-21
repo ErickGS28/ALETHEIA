@@ -127,6 +127,16 @@ const LoggingResponseInterceptor = {
       console.error(
         '[RESPONSE] Se generó una respuesta sin outputSpeech — el usuario se queda sin voz.',
       );
+      return;
+    }
+
+    // Se guarda lo último que dijo Alexa para poder repetirlo. Las cifras
+    // habladas se van en cuanto suenan; sin esto, "repite" no tiene de dónde.
+    const ssml = response.outputSpeech.ssml;
+    if (ssml) {
+      const attrs = handlerInput.attributesManager.getSessionAttributes();
+      attrs.lastSpeech = ssml.replace(/<\/?speak>/g, '').trim();
+      handlerInput.attributesManager.setSessionAttributes(attrs);
     }
   },
 };
@@ -477,6 +487,26 @@ const FallbackIntentHandler = {
   },
 };
 
+// AMAZON.RepeatIntent: repite la última respuesta tal cual. Si todavía no hay
+// nada que repetir (primer turno), ofrece el menú en vez de quedarse mudo.
+const RepeatIntentHandler = {
+  canHandle(handlerInput) {
+    return (
+      Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest' &&
+      Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.RepeatIntent'
+    );
+  },
+  handle(handlerInput) {
+    const { lastSpeech } = handlerInput.attributesManager.getSessionAttributes();
+    const speech = lastSpeech || handlerInput.t('MENU_OPTIONS');
+    return handlerInput.responseBuilder
+      .speak(speech)
+      .reprompt(handlerInput.t('MENU_OPTIONS'))
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
 const CancelAndStopIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -554,6 +584,7 @@ const skill = Alexa.SkillBuilders.custom()
     ConsultarContratosPorExpirarIntentHandler,
     AlertaCuelloDeBotellaIntentHandler,
     HelpIntentHandler,
+    RepeatIntentHandler,
     FallbackIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,

@@ -6,7 +6,7 @@ const DEFAULT_LOCALE = 'es-MX';
 const strings = {
   'es-MX': {
     AUTH_PROMPT: 'Antes de continuar, dime la palabra clave.',
-    WELCOME: 'Bienvenido a ALETHEIA CLM. Antes de continuar, dime la palabra clave.',
+    WELCOME: 'Bienvenido a ALETHEIA CLM. Antes de continuar, dime la palabra clave. Si no la recuerdas, di ayuda.',
     AUTHENTICATED_WELCOME:
       'Clave correcta. Puedo darte tu resumen del día, alertas de cuellos de botella, o consultarte contratos ' +
       'por estado y fecha. ¿Cuál quieres?',
@@ -68,7 +68,7 @@ const strings = {
   },
   'en-US': {
     AUTH_PROMPT: 'Before we continue, tell me the passphrase.',
-    WELCOME: 'Welcome to ALETHEIA CLM. Before we continue, tell me the passphrase.',
+    WELCOME: 'Welcome to ALETHEIA CLM. Before we continue, tell me the passphrase. If you don\'t remember it, say help.',
     AUTHENTICATED_WELCOME:
       'Correct. I can give you your daily summary, bottleneck alerts, or contracts by status and date. ' +
       'Which one would you like?',

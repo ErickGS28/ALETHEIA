@@ -1,21 +1,64 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "aletheia clm",
+      "invocationName": "clm",
       "intents": [
-        { "name": "AMAZON.CancelIntent", "samples": [] },
-        { "name": "AMAZON.StopIntent", "samples": [] },
-        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "thanks stop",
+            "thank you stop",
+            "i m done",
+            "that s all",
+            "that is all",
+            "i m finished",
+            "all good thanks",
+            "nothing else",
+            "that s it",
+            "no more"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
             "help",
-            "what can I say",
+            "i need help",
+            "give me help",
+            "help me",
+            "what can i say",
+            "what can i ask",
+            "what can i ask you",
+            "what can you do",
+            "what do you do",
+            "what are you for",
             "options",
-            "I don't understand",
+            "give me options",
+            "what are my options",
+            "what options do i have",
+            "menu",
+            "give me the menu",
+            "i don t know what to say",
+            "i don t understand",
+            "i m lost",
             "how does this work",
-            "what can I ask"
+            "how do i use you",
+            "instructions",
+            "guide me",
+            "explain",
+            "explain this to me"
           ]
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
         },
         {
           "name": "ValidarClaveIntent",
@@ -25,152 +68,298 @@
             "the password is sesame",
             "my password is sesame",
             "the passphrase is sesame",
+            "my passphrase is sesame",
             "password sesame",
-            "it's sesame"
+            "passphrase sesame",
+            "the passphrase sesame",
+            "the password sesame",
+            "it s sesame",
+            "it is sesame",
+            "i say sesame",
+            "sesame please",
+            "the word is sesame",
+            "the keyword is sesame",
+            "keyword sesame",
+            "access sesame",
+            "code sesame",
+            "say sesame"
           ]
         },
         {
           "name": "ResumenEjecutivoIntent",
           "samples": [
             "give me my daily summary",
-            "how are we doing with contracts",
-            "how's it going",
-            "how's everything going",
-            "summary",
+            "daily summary",
             "my summary",
-            "pending",
+            "give me the summary",
+            "give me my summary",
+            "executive summary",
+            "give me the executive summary",
+            "i want the executive summary",
+            "executive report",
+            "executive contract report",
+            "give me the executive report",
+            "contract summary",
+            "summary of contracts",
+            "give me the contract summary",
+            "general summary",
+            "give me a general summary",
             "give me a summary",
-            "today's summary",
-            "how is everything",
-            "let's see how we're doing",
-            "what's up with the contracts",
-            "tell me how it's going",
-            "give me a quick update",
-            "how's the day going",
-            "what's my summary for today",
-            "I want to see how we're doing",
-            "what's the status of the contracts",
-            "how are things looking",
-            "what's new",
-            "keep me posted",
-            "give me an update",
-            "give me today's update",
-            "how did things look this morning",
-            "what do we have today",
-            "tell me how we're doing",
-            "give me a quick summary"
+            "i want my summary",
+            "i need the summary",
+            "show me the summary",
+            "tell me the summary",
+            "how are we doing",
+            "how are we doing with the contracts",
+            "how are the contracts going",
+            "how are the contracts doing",
+            "tell me how we are doing",
+            "what s the status",
+            "what is our status",
+            "status report",
+            "give me a status report",
+            "where do we stand",
+            "tell me where we stand",
+            "catch me up",
+            "bring me up to speed",
+            "update me",
+            "give me the overview",
+            "overview",
+            "general overview",
+            "what do i have today",
+            "what s on my plate",
+            "what s pending",
+            "what is pending today",
+            "today s numbers",
+            "give me today s numbers",
+            "the numbers for today",
+            "how many contracts do i have",
+            "brief me",
+            "give me a briefing",
+            "give me the highlights",
+            "give me a rundown",
+            "daily rundown"
           ]
         },
         {
           "name": "AlertaCuelloDeBotellaIntent",
           "samples": [
-            "where are contracts stuck",
+            "bottlenecks",
+            "show me the bottlenecks",
+            "tell me the bottlenecks",
+            "give me the bottlenecks",
             "where are the bottlenecks",
-            "stuck",
-            "alerts",
-            "what's stuck",
-            "are there any delays",
-            "something's stuck",
-            "delays",
-            "tell me the alerts",
-            "where are we getting stuck",
-            "what's getting stuck",
-            "is anything stuck",
-            "where are we falling behind",
-            "why is this taking so long",
-            "where's the bottleneck",
-            "which contracts are stuck",
-            "tell me where we're behind",
             "bottleneck report",
-            "delayed",
-            "behind schedule",
-            "contracts behind schedule",
-            "what's taking so long",
-            "is anything overdue",
-            "what's been waiting a long time",
-            "where are we falling behind on",
-            "what's jammed up",
-            "are there bottlenecks",
-            "something's taking too long"
+            "bottleneck alerts",
+            "what is the bottleneck",
+            "are there any bottlenecks",
+            "i want to see the bottlenecks",
+            "alerts",
+            "give me the alerts",
+            "show me alerts",
+            "what alerts are there",
+            "i need the alerts",
+            "where are contracts stuck",
+            "what contracts are stuck",
+            "what is stuck",
+            "what got stuck",
+            "where is the holdup",
+            "what is the holdup",
+            "where is the problem",
+            "what are the problems",
+            "which stage has the most pending contracts",
+            "which stage is backed up",
+            "which stage is the slowest",
+            "where are we slow",
+            "what is taking the longest",
+            "what is delayed",
+            "what contracts are delayed",
+            "delays",
+            "show me the delays",
+            "are there delays",
+            "what is running late",
+            "what is overdue",
+            "what contracts are overdue",
+            "contracts past due",
+            "past due contracts",
+            "where is the backlog",
+            "show me the backlog",
+            "what is blocking the flow",
+            "what is blocking the process",
+            "where does the process stall",
+            "which stage stalls",
+            "what needs attention",
+            "what requires attention",
+            "tell me what needs attention",
+            "is anything urgent",
+            "what is urgent",
+            "where should i focus"
           ]
         },
         {
           "name": "ConsultarContratosPorExpirarIntent",
+          "samples": [
+            "what contracts expire {rangoFecha}",
+            "which contracts expire {rangoFecha}",
+            "what contracts expire in {rangoFecha}",
+            "what agreements expire {rangoFecha}",
+            "tell me what contracts expire {rangoFecha}",
+            "tell me which agreements expire {rangoFecha}",
+            "contracts expiring {rangoFecha}",
+            "contracts that expire {rangoFecha}",
+            "contracts up for renewal {rangoFecha}",
+            "contracts about to expire",
+            "what is about to expire",
+            "what contracts are about to expire",
+            "contracts close to expiring",
+            "contracts close to expiring {rangoFecha}",
+            "upcoming expirations",
+            "give me the upcoming expirations",
+            "expirations {rangoFecha}",
+            "give me the expirations {rangoFecha}",
+            "tell me the expirations {rangoFecha}",
+            "list the expirations {rangoFecha}",
+            "what are the expirations {rangoFecha}",
+            "i need the expirations {rangoFecha}",
+            "what expires {rangoFecha}",
+            "what is expiring {rangoFecha}",
+            "show me the contracts expiring {rangoFecha}",
+            "i want to see the contracts expiring {rangoFecha}",
+            "give me contracts about to expire",
+            "contracts with expiration {rangoFecha}",
+            "give me the contracts with expiration {rangoFecha}",
+            "contract expiration dates",
+            "expiration review",
+            "expiration alerts",
+            "give me expiration alerts",
+            "what contracts end {rangoFecha}",
+            "which contracts end {rangoFecha}",
+            "contracts ending {rangoFecha}",
+            "what contracts terminate {rangoFecha}",
+            "contracts terminating {rangoFecha}",
+            "what contracts need renewal",
+            "contracts to renew",
+            "what do i need to renew {rangoFecha}",
+            "what do i have to renew",
+            "which ones do i renew {rangoFecha}",
+            "what needs renewing {rangoFecha}",
+            "renewals {rangoFecha}",
+            "give me the renewals {rangoFecha}",
+            "what lapses {rangoFecha}",
+            "contracts lapsing {rangoFecha}",
+            "which agreements are due {rangoFecha}",
+            "agreements due {rangoFecha}"
+          ],
           "slots": [
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "samples": ["{rangoFecha}", "in {rangoFecha}", "for {rangoFecha}"]
+              "samples": [
+                "{rangoFecha}",
+                "for {rangoFecha}",
+                "in {rangoFecha}",
+                "on {rangoFecha}",
+                "during {rangoFecha}",
+                "make it {rangoFecha}",
+                "i want {rangoFecha}",
+                "give me {rangoFecha}",
+                "let s say {rangoFecha}",
+                "the {rangoFecha} one",
+                "{rangoFecha} please",
+                "just {rangoFecha}"
+              ]
             }
-          ],
-          "samples": [
-            "what contracts expire {rangoFecha}",
-            "what's expiring on me {rangoFecha}",
-            "contracts about to expire {rangoFecha}",
-            "what contracts expire in {rangoFecha}",
-            "what's about to expire",
-            "which contracts are about to expire",
-            "expirations",
-            "what's expiring",
-            "expiring soon",
-            "about to expire",
-            "contracts that expire",
-            "which ones expire",
-            "what's about to run out",
-            "contracts about to run out",
-            "tell me what's expiring soon",
-            "agreements expiring {rangoFecha}",
-            "expiration dates",
-            "what's due to expire {rangoFecha}",
-            "what's running out on me",
-            "which ones are about to expire",
-            "what contracts are running out",
-            "deadline dates",
-            "which ones have a deadline coming up"
           ]
         },
         {
           "name": "ConsultarMetricasPorFechaIntent",
+          "samples": [
+            "how many contracts were {estadoContrato} {rangoFecha}",
+            "how many contracts are {estadoContrato} {rangoFecha}",
+            "how many contracts got {estadoContrato} {rangoFecha}",
+            "how many {estadoContrato} are there {rangoFecha}",
+            "how many {estadoContrato} were there {rangoFecha}",
+            "how many were {estadoContrato} {rangoFecha}",
+            "tell me how many contracts were {estadoContrato} {rangoFecha}",
+            "tell me how many {estadoContrato} {rangoFecha}",
+            "tell me the {estadoContrato} contracts {rangoFecha}",
+            "give me the {estadoContrato} contracts {rangoFecha}",
+            "give me the contracts {estadoContrato} in {rangoFecha}",
+            "{estadoContrato} contracts {rangoFecha}",
+            "contracts {estadoContrato} {rangoFecha}",
+            "the {estadoContrato} contracts {rangoFecha}",
+            "which contracts are {estadoContrato} {rangoFecha}",
+            "which contracts were {estadoContrato} {rangoFecha}",
+            "what contracts are {estadoContrato} {rangoFecha}",
+            "show me the {estadoContrato} contracts {rangoFecha}",
+            "i want the {estadoContrato} contracts {rangoFecha}",
+            "i want to see the {estadoContrato} contracts {rangoFecha}",
+            "i need the {estadoContrato} contracts {rangoFecha}",
+            "find the {estadoContrato} contracts {rangoFecha}",
+            "look up the {estadoContrato} contracts {rangoFecha}",
+            "report of {estadoContrato} contracts {rangoFecha}",
+            "metrics for {estadoContrato} contracts {rangoFecha}",
+            "metrics for {estadoContrato} {rangoFecha}",
+            "statistics for {estadoContrato} contracts {rangoFecha}",
+            "figures for {estadoContrato} contracts {rangoFecha}",
+            "numbers for {estadoContrato} contracts {rangoFecha}",
+            "total {estadoContrato} contracts {rangoFecha}",
+            "the total of {estadoContrato} contracts {rangoFecha}",
+            "give me the total of {estadoContrato} contracts {rangoFecha}",
+            "contracts in {estadoContrato} status {rangoFecha}",
+            "contracts with status {estadoContrato} {rangoFecha}",
+            "give me contracts in {estadoContrato} status {rangoFecha}",
+            "list of {estadoContrato} contracts {rangoFecha}",
+            "give me the list of {estadoContrato} contracts {rangoFecha}",
+            "filter contracts {estadoContrato} {rangoFecha}",
+            "how many contracts are {estadoContrato}",
+            "how many {estadoContrato}",
+            "{estadoContrato} contracts",
+            "the {estadoContrato} contracts",
+            "tell me the {estadoContrato} contracts",
+            "give me the {estadoContrato} contracts",
+            "which contracts are {estadoContrato}",
+            "show me the {estadoContrato} contracts",
+            "i want to see the {estadoContrato} ones",
+            "total {estadoContrato} contracts",
+            "list of {estadoContrato} contracts",
+            "give me the metrics for {estadoContrato}"
+          ],
           "slots": [
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "samples": ["{rangoFecha}", "in {rangoFecha}", "for {rangoFecha}"]
+              "samples": [
+                "{rangoFecha}",
+                "for {rangoFecha}",
+                "in {rangoFecha}",
+                "on {rangoFecha}",
+                "during {rangoFecha}",
+                "make it {rangoFecha}",
+                "i want {rangoFecha}",
+                "give me {rangoFecha}",
+                "let s say {rangoFecha}",
+                "the {rangoFecha} one",
+                "{rangoFecha} please",
+                "just {rangoFecha}"
+              ]
             },
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
               "samples": [
                 "{estadoContrato}",
+                "the {estadoContrato} ones",
+                "{estadoContrato} contracts",
                 "the {estadoContrato} status",
-                "{estadoContrato} contracts"
+                "status {estadoContrato}",
+                "in {estadoContrato} status",
+                "i want {estadoContrato}",
+                "give me {estadoContrato}",
+                "show me {estadoContrato}",
+                "the ones that are {estadoContrato}"
               ]
             }
-          ],
-          "samples": [
-            "how many contracts were {estadoContrato} {rangoFecha}",
-            "tell me the {estadoContrato} contracts {rangoFecha}",
-            "how many {estadoContrato} contracts are there {rangoFecha}",
-            "{estadoContrato} contracts {rangoFecha}",
-            "give me the {estadoContrato} contracts from {rangoFecha}",
-            "contracts",
-            "tell me the contracts",
-            "how many contracts are there",
-            "I want to see the contracts",
-            "check the contracts",
-            "how many do we have {estadoContrato}",
-            "I want to know how many {estadoContrato} contracts there are",
-            "give me a number on the contracts",
-            "I need some contract info",
-            "how many are {estadoContrato}",
-            "tell me how many {estadoContrato} contracts we have {rangoFecha}",
-            "give me the contract numbers",
-            "what are the contract figures",
-            "how many are {estadoContrato} so far",
-            "I want to know how many are {estadoContrato}",
-            "how are the {estadoContrato} contracts doing",
-            "give me the count of {estadoContrato} contracts",
-            "how many contracts are {estadoContrato} in {rangoFecha}"
           ]
         }
       ],
@@ -211,7 +400,8 @@
                   "administrative review",
                   "administrator review",
                   "with the admin",
-                  "in the admin's hands"
+                  "in the admins hands",
+                  "under admin review"
                 ]
               }
             },
@@ -224,7 +414,8 @@
                   "attorney review",
                   "with the lawyer",
                   "in legal",
-                  "with legal"
+                  "with legal",
+                  "under legal review"
                 ]
               }
             },
@@ -236,7 +427,8 @@
                   "awaiting approval",
                   "to be approved",
                   "waiting for approval",
-                  "the ones still needing approval"
+                  "the ones still needing approval",
+                  "up for approval"
                 ]
               }
             },
@@ -258,7 +450,13 @@
               "id": "SIGNED",
               "name": {
                 "value": "signed",
-                "synonyms": ["signed ones", "already signed", "done", "closed"]
+                "synonyms": [
+                  "signed ones",
+                  "already signed",
+                  "done",
+                  "closed",
+                  "fully executed"
+                ]
               }
             },
             {
@@ -269,7 +467,8 @@
                   "rejected ones",
                   "the ones that got rejected",
                   "not approved",
-                  "denied"
+                  "denied",
+                  "turned down"
                 ]
               }
             },
@@ -300,8 +499,8 @@
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha"
               }
@@ -316,8 +515,8 @@
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha"
               }
@@ -325,8 +524,8 @@
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato"
               }
@@ -337,15 +536,20 @@
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
-        "variations": [
-          { "type": "PlainText", "value": "What time period would you like to check?" }
-        ]
-      },
-      {
         "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha",
         "variations": [
-          { "type": "PlainText", "value": "What time period would you like to check?" }
+          {
+            "type": "PlainText",
+            "value": "Which period? For example, today, this week, or this month."
+          },
+          {
+            "type": "PlainText",
+            "value": "Tell me the period. It can be today, yesterday, this week, this month, or a month like August."
+          },
+          {
+            "type": "PlainText",
+            "value": "I need a date to search. Try today, this week, or this month."
+          }
         ]
       },
       {
@@ -353,7 +557,32 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "What status would you like to check? For example: signed, rejected, or in review."
+            "value": "Which status? For example, signed, rejected, or signing."
+          },
+          {
+            "type": "PlainText",
+            "value": "Tell me the status: draft, submitted, admin review, lawyer review, pending approval, signing, signed, rejected, or cancelled."
+          },
+          {
+            "type": "PlainText",
+            "value": "You can pick signed, rejected, signing, pending approval, or cancelled. Which one?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "For which period? For example, this month, this week, or the next thirty days."
+          },
+          {
+            "type": "PlainText",
+            "value": "Tell me how far ahead to look. It can be this week, this month, or August."
+          },
+          {
+            "type": "PlainText",
+            "value": "I need a period. Try this month or this week."
           }
         ]
       }

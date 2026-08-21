@@ -1,21 +1,63 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "aletheia clm",
+      "invocationName": "clm",
       "intents": [
-        { "name": "AMAZON.CancelIntent", "samples": [] },
-        { "name": "AMAZON.StopIntent", "samples": [] },
-        { "name": "AMAZON.FallbackIntent", "samples": [] },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "gracias detener",
+            "ya terminé",
+            "eso es todo",
+            "es todo",
+            "ya acabé",
+            "listo gracias",
+            "nada más",
+            "así está bien",
+            "ya no"
+          ]
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
             "ayuda",
+            "necesito ayuda",
+            "dame ayuda",
+            "ayúdame",
+            "auxilio",
             "qué puedo decir",
+            "qué puedo preguntar",
+            "qué te puedo preguntar",
+            "qué puedes hacer",
+            "qué sabes hacer",
+            "para qué sirves",
             "opciones",
+            "dame opciones",
+            "cuáles son mis opciones",
+            "qué opciones tengo",
+            "menú",
+            "dame el menú",
+            "no sé qué decir",
             "no entiendo",
-            "cómo funciona esto",
-            "qué puedo preguntar"
+            "estoy perdido",
+            "cómo funciona",
+            "cómo te uso",
+            "instrucciones",
+            "guíame",
+            "explícame"
           ]
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
         },
         {
           "name": "ValidarClaveIntent",
@@ -23,155 +65,300 @@
             "sésamo",
             "ábrete sésamo",
             "abrete sésamo",
+            "abre sésamo",
+            "ábrete sesamo",
             "la clave es sésamo",
             "mi clave es sésamo",
-            "la contraseña es sésamo",
+            "la clave sésamo",
             "clave sésamo",
-            "es sésamo"
+            "la contraseña es sésamo",
+            "mi contraseña es sésamo",
+            "contraseña sésamo",
+            "la palabra clave es sésamo",
+            "palabra clave sésamo",
+            "la palabra es sésamo",
+            "es sésamo",
+            "digo sésamo",
+            "sésamo por favor",
+            "acceso sésamo",
+            "código sésamo"
           ]
         },
         {
           "name": "ResumenEjecutivoIntent",
           "samples": [
             "dame mi resumen del día",
-            "cómo vamos con los contratos",
-            "qué tal vamos",
-            "cómo va todo",
-            "resumen",
-            "mi resumen",
-            "pendientes",
-            "dame un resumen",
-            "resumen de hoy",
-            "cómo está todo",
-            "a ver cómo vamos",
-            "qué onda con los contratos",
-            "dime cómo va todo",
-            "échame un resumen",
-            "cómo va el día",
+            "dame el resumen del día",
             "cuál es mi resumen del día",
-            "quiero ver cómo vamos",
-            "cuál es el estado de los contratos",
-            "cómo pintan los contratos",
+            "resumen del día",
+            "resumen diario",
+            "mi resumen",
+            "dame mi resumen",
+            "resumen ejecutivo",
+            "dame el resumen ejecutivo",
+            "quiero el resumen ejecutivo",
+            "reporte ejecutivo",
+            "reporte ejecutivo de contratos",
+            "dame el reporte ejecutivo",
+            "resumen de contratos",
+            "dame el resumen de contratos",
+            "resumen general",
+            "dame un resumen general",
+            "hazme un resumen",
+            "quiero mi resumen",
+            "quiero el resumen del día",
+            "necesito el resumen",
+            "muéstrame el resumen",
+            "dime el resumen",
+            "dame el resumen",
+            "cómo vamos",
+            "cómo vamos con los contratos",
+            "cómo van los contratos",
+            "qué tal van los contratos",
+            "dime cómo vamos",
+            "cómo está todo",
+            "cómo está el día",
+            "cómo está la operación",
             "qué hay de nuevo",
-            "ponme al tanto",
+            "ponme al día",
+            "ponme al corriente",
             "actualízame",
-            "dame el update del día",
-            "cómo amanecieron los contratos",
-            "qué tenemos hoy",
-            "cuéntame cómo vamos",
-            "quiero un resumen rápido"
+            "dame un panorama",
+            "dame el panorama general",
+            "panorama general",
+            "estado general",
+            "dame el estado general",
+            "qué tengo pendiente",
+            "qué tengo hoy",
+            "qué hay para hoy",
+            "qué me toca hoy",
+            "dame los números del día",
+            "dame las cifras del día",
+            "números de hoy",
+            "dame el corte del día",
+            "corte del día",
+            "balance del día"
           ]
         },
         {
           "name": "AlertaCuelloDeBotellaIntent",
           "samples": [
-            "dónde están atorados los contratos",
+            "dime los cuellos de botella",
+            "cuellos de botella",
+            "dame los cuellos de botella",
             "dónde hay cuellos de botella",
-            "atorados",
-            "alertas",
-            "qué está atorado",
-            "hay retrasos",
-            "algo atorado",
-            "demoras",
-            "dime las alertas",
-            "dónde nos estamos atorando",
-            "qué se está atorando",
-            "hay algo trabado",
-            "en dónde vamos lento",
-            "por qué se están tardando tanto",
-            "dónde está el cuello de botella",
-            "qué contratos se están atorando",
-            "dime dónde vamos mal",
             "reporte de cuellos de botella",
-            "retrasados",
-            "atrasados",
-            "contratos atrasados",
-            "qué se está tardando",
-            "hay algo pendiente desde hace rato",
-            "qué lleva mucho tiempo esperando",
-            "dónde nos estamos quedando",
-            "qué está trabado",
+            "alertas de cuellos de botella",
+            "cuál es el cuello de botella",
             "hay cuellos de botella",
-            "algo se está tardando de más"
+            "muéstrame los cuellos de botella",
+            "quiero ver los cuellos de botella",
+            "dame las alertas",
+            "alertas",
+            "qué alertas hay",
+            "necesito las alertas",
+            "dame alertas",
+            "dónde están atorados los contratos",
+            "dónde se atoran los contratos",
+            "qué contratos están atorados",
+            "qué está atorado",
+            "qué se atoró",
+            "dame el reporte de atorones",
+            "dónde está el problema",
+            "dónde están los problemas",
+            "qué etapa tiene más contratos pendientes",
+            "qué etapa está saturada",
+            "cuál etapa está más lenta",
+            "qué etapa se traba",
+            "dónde se traba el proceso",
+            "qué frena el proceso",
+            "qué está frenando el flujo",
+            "dónde está el embudo",
+            "dime dónde está el embudo",
+            "dónde se están tardando",
+            "dónde nos estamos tardando",
+            "qué está tardando más",
+            "qué está retrasado",
+            "qué contratos están retrasados",
+            "retrasos",
+            "dime los retrasos",
+            "hay retrasos",
+            "qué va tarde",
+            "qué se pasó del tiempo",
+            "qué contratos se pasaron del plazo",
+            "contratos fuera de plazo",
+            "dime qué está mal",
+            "hay algo urgente",
+            "qué es urgente",
+            "qué requiere atención",
+            "dime qué requiere atención",
+            "dónde debo poner atención"
           ]
         },
         {
           "name": "ConsultarContratosPorExpirarIntent",
+          "samples": [
+            "qué contratos vencen {rangoFecha}",
+            "qué contratos vencen en {rangoFecha}",
+            "cuáles contratos vencen {rangoFecha}",
+            "qué contratos expiran {rangoFecha}",
+            "qué acuerdos expiran {rangoFecha}",
+            "dime qué acuerdos expiran {rangoFecha}",
+            "dime qué contratos vencen {rangoFecha}",
+            "contratos por vencer {rangoFecha}",
+            "contratos que vencen {rangoFecha}",
+            "contratos que expiran {rangoFecha}",
+            "contratos por expirar {rangoFecha}",
+            "contratos por caducar {rangoFecha}",
+            "qué contratos caducan {rangoFecha}",
+            "cuáles caducan {rangoFecha}",
+            "contratos a punto de caducar",
+            "qué está por vencer",
+            "qué está por vencerse",
+            "contratos próximos a vencer",
+            "contratos próximos a vencer {rangoFecha}",
+            "próximos vencimientos",
+            "dame los próximos vencimientos",
+            "cuáles están por expirar",
+            "cuáles están por expirar {rangoFecha}",
+            "vencimientos {rangoFecha}",
+            "dame los vencimientos {rangoFecha}",
+            "dime los vencimientos {rangoFecha}",
+            "cuáles son los vencimientos {rangoFecha}",
+            "lista de vencimientos {rangoFecha}",
+            "necesito los vencimientos {rangoFecha}",
+            "qué se vence {rangoFecha}",
+            "qué vence {rangoFecha}",
+            "qué se me vence {rangoFecha}",
+            "muéstrame los contratos que vencen {rangoFecha}",
+            "quiero ver los contratos que vencen {rangoFecha}",
+            "dame contratos por vencer",
+            "contratos con vencimiento {rangoFecha}",
+            "dame los contratos con vencimiento {rangoFecha}",
+            "fecha de vencimiento de contratos",
+            "revisión de vencimientos",
+            "alerta de vencimientos",
+            "dame alertas de vencimiento",
+            "qué contratos terminan {rangoFecha}",
+            "qué contratos se acaban {rangoFecha}",
+            "cuáles contratos terminan {rangoFecha}",
+            "contratos que terminan {rangoFecha}",
+            "qué contratos necesitan renovación",
+            "contratos por renovar",
+            "qué hay que renovar {rangoFecha}",
+            "qué tengo que renovar",
+            "cuáles renuevo {rangoFecha}"
+          ],
           "slots": [
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "samples": ["{rangoFecha}", "en {rangoFecha}", "para {rangoFecha}"]
+              "samples": [
+                "{rangoFecha}",
+                "de {rangoFecha}",
+                "del {rangoFecha}",
+                "en {rangoFecha}",
+                "para {rangoFecha}",
+                "el {rangoFecha}",
+                "la {rangoFecha}",
+                "de la {rangoFecha}",
+                "quiero {rangoFecha}",
+                "dame {rangoFecha}",
+                "que sea {rangoFecha}",
+                "{rangoFecha} por favor"
+              ]
             }
-          ],
-          "samples": [
-            "qué contratos vencen {rangoFecha}",
-            "qué se me vence {rangoFecha}",
-            "contratos por vencer {rangoFecha}",
-            "qué contratos vencen en {rangoFecha}",
-            "qué está por caducar",
-            "cuáles contratos ya casi vencen",
-            "vencimientos",
-            "qué se vence",
-            "vencen pronto",
-            "por vencer",
-            "contratos que vencen",
-            "cuáles vencen",
-            "qué está a punto de vencer",
-            "contratos a punto de caducar",
-            "dime qué se vence pronto",
-            "acuerdos que expiran {rangoFecha}",
-            "expiraciones",
-            "qué contratos expiran {rangoFecha}",
-            "qué se me acaba",
-            "cuáles ya casi caducan",
-            "qué contratos se acaban",
-            "fechas límite",
-            "cuáles tienen fecha límite pronto"
           ]
         },
         {
           "name": "ConsultarMetricasPorFechaIntent",
+          "samples": [
+            "cuántos contratos fueron {estadoContrato} {rangoFecha}",
+            "cuántos contratos {estadoContrato} hay {rangoFecha}",
+            "cuántos contratos {estadoContrato} hubo {rangoFecha}",
+            "cuántos {estadoContrato} hay {rangoFecha}",
+            "cuántos {estadoContrato} hubo {rangoFecha}",
+            "cuántos fueron {estadoContrato} {rangoFecha}",
+            "dime cuántos contratos {estadoContrato} {rangoFecha}",
+            "dime cuántos {estadoContrato} {rangoFecha}",
+            "dime los contratos {estadoContrato} {rangoFecha}",
+            "dame los contratos {estadoContrato} {rangoFecha}",
+            "dame los contratos {estadoContrato} de {rangoFecha}",
+            "contratos {estadoContrato} {rangoFecha}",
+            "contratos {estadoContrato} de {rangoFecha}",
+            "los contratos {estadoContrato} {rangoFecha}",
+            "qué contratos están {estadoContrato} {rangoFecha}",
+            "qué contratos fueron {estadoContrato} {rangoFecha}",
+            "cuáles contratos están {estadoContrato} {rangoFecha}",
+            "muéstrame los contratos {estadoContrato} {rangoFecha}",
+            "quiero los contratos {estadoContrato} {rangoFecha}",
+            "quiero ver los contratos {estadoContrato} {rangoFecha}",
+            "necesito los contratos {estadoContrato} {rangoFecha}",
+            "busca los contratos {estadoContrato} {rangoFecha}",
+            "consulta los contratos {estadoContrato} {rangoFecha}",
+            "reporte de contratos {estadoContrato} {rangoFecha}",
+            "métricas de contratos {estadoContrato} {rangoFecha}",
+            "métricas de {estadoContrato} {rangoFecha}",
+            "estadísticas de contratos {estadoContrato} {rangoFecha}",
+            "cifras de contratos {estadoContrato} {rangoFecha}",
+            "números de contratos {estadoContrato} {rangoFecha}",
+            "total de contratos {estadoContrato} {rangoFecha}",
+            "el total de contratos {estadoContrato} {rangoFecha}",
+            "dame el total de contratos {estadoContrato} {rangoFecha}",
+            "contratos en estado {estadoContrato} {rangoFecha}",
+            "contratos con estado {estadoContrato} {rangoFecha}",
+            "dame contratos en estado {estadoContrato} {rangoFecha}",
+            "lista de contratos {estadoContrato} {rangoFecha}",
+            "dame la lista de contratos {estadoContrato} {rangoFecha}",
+            "filtra contratos {estadoContrato} {rangoFecha}",
+            "cuántos contratos {estadoContrato}",
+            "cuántos {estadoContrato}",
+            "contratos {estadoContrato}",
+            "los contratos {estadoContrato}",
+            "dime los contratos {estadoContrato}",
+            "dame los contratos {estadoContrato}",
+            "qué contratos están {estadoContrato}",
+            "muéstrame los contratos {estadoContrato}",
+            "quiero ver los {estadoContrato}",
+            "total de contratos {estadoContrato}",
+            "lista de contratos {estadoContrato}",
+            "dame las métricas de {estadoContrato}"
+          ],
           "slots": [
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "samples": ["{rangoFecha}", "en {rangoFecha}", "para {rangoFecha}"]
+              "samples": [
+                "{rangoFecha}",
+                "de {rangoFecha}",
+                "del {rangoFecha}",
+                "en {rangoFecha}",
+                "para {rangoFecha}",
+                "el {rangoFecha}",
+                "la {rangoFecha}",
+                "de la {rangoFecha}",
+                "quiero {rangoFecha}",
+                "dame {rangoFecha}",
+                "que sea {rangoFecha}",
+                "{rangoFecha} por favor"
+              ]
             },
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
               "samples": [
                 "{estadoContrato}",
+                "los {estadoContrato}",
+                "las {estadoContrato}",
+                "estado {estadoContrato}",
                 "el estado {estadoContrato}",
-                "contratos {estadoContrato}"
+                "en estado {estadoContrato}",
+                "quiero los {estadoContrato}",
+                "dame los {estadoContrato}",
+                "que estén {estadoContrato}",
+                "los que están {estadoContrato}"
               ]
             }
-          ],
-          "samples": [
-            "cuántos contratos fueron {estadoContrato} {rangoFecha}",
-            "dime los contratos {estadoContrato} {rangoFecha}",
-            "cuántos contratos {estadoContrato} hay {rangoFecha}",
-            "contratos {estadoContrato} {rangoFecha}",
-            "dame los contratos {estadoContrato} de {rangoFecha}",
-            "contratos",
-            "dime los contratos",
-            "cuántos contratos hay",
-            "quiero ver los contratos",
-            "revisa los contratos",
-            "cuántos llevamos {estadoContrato}",
-            "quiero saber cuántos contratos {estadoContrato} hay",
-            "dame un dato de los contratos",
-            "necesito información de contratos",
-            "cuántos tenemos {estadoContrato}",
-            "dime cuántos contratos {estadoContrato} llevamos {rangoFecha}",
-            "quiero las cifras de contratos",
-            "dame los números de contratos",
-            "cuántos van {estadoContrato}",
-            "quiero saber cuántos hay {estadoContrato}",
-            "cómo van los contratos {estadoContrato}",
-            "dame el conteo de contratos {estadoContrato}",
-            "cuántos contratos van {estadoContrato} en {rangoFecha}"
           ]
         }
       ],
@@ -186,9 +373,8 @@
                 "synonyms": [
                   "borradores",
                   "en borrador",
-                  "en edición",
                   "sin enviar",
-                  "todavía en borrador"
+                  "no enviados"
                 ]
               }
             },
@@ -200,9 +386,8 @@
                   "enviados",
                   "enviada",
                   "enviadas",
-                  "recién enviado",
-                  "ya se mandó",
-                  "los que ya se enviaron"
+                  "ya enviados",
+                  "mandados"
                 ]
               }
             },
@@ -214,7 +399,8 @@
                   "revisión administrativa",
                   "revisión de administrador",
                   "con el administrador",
-                  "en manos del administrador"
+                  "en revisión administrativa",
+                  "revisados por administración"
                 ]
               }
             },
@@ -227,7 +413,8 @@
                   "revisión de abogado",
                   "con el abogado",
                   "en legal",
-                  "en el área legal"
+                  "en revisión legal",
+                  "revisados por legal"
                 ]
               }
             },
@@ -239,7 +426,8 @@
                   "pendientes de aprobación",
                   "por aprobar",
                   "esperando aprobación",
-                  "los que faltan aprobar"
+                  "en aprobación",
+                  "pendiente de aprobar"
                 ]
               }
             },
@@ -250,11 +438,10 @@
                 "synonyms": [
                   "por firmar",
                   "en proceso de firma",
-                  "aprobado",
-                  "aprobados",
-                  "ya casi firmado",
                   "esperando firma",
-                  "los que faltan firmar"
+                  "para firma",
+                  "aprobado",
+                  "aprobados"
                 ]
               }
             },
@@ -262,7 +449,14 @@
               "id": "SIGNED",
               "name": {
                 "value": "firmado",
-                "synonyms": ["firmados", "firmada", "firmadas", "ya firmados", "listos", "cerrados"]
+                "synonyms": [
+                  "firmados",
+                  "firmada",
+                  "firmadas",
+                  "ya firmados",
+                  "completados",
+                  "cerrados"
+                ]
               }
             },
             {
@@ -273,9 +467,8 @@
                   "rechazados",
                   "rechazada",
                   "rechazadas",
-                  "los que rechazaron",
                   "no aprobados",
-                  "denegados"
+                  "declinados"
                 ]
               }
             },
@@ -287,9 +480,8 @@
                   "cancelados",
                   "cancelada",
                   "canceladas",
-                  "los que se cancelaron",
-                  "dados de baja",
-                  "anulados"
+                  "anulados",
+                  "dados de baja"
                 ]
               }
             }
@@ -298,6 +490,7 @@
       ]
     },
     "dialog": {
+      "delegationStrategy": "SKILL_RESPONSE",
       "intents": [
         {
           "name": "ConsultarContratosPorExpirarIntent",
@@ -307,8 +500,8 @@
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha"
               }
@@ -323,8 +516,8 @@
             {
               "name": "rangoFecha",
               "type": "AMAZON.DATE",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha"
               }
@@ -332,8 +525,8 @@
             {
               "name": "estadoContrato",
               "type": "EstadoContratoType",
-              "confirmationRequired": false,
               "elicitationRequired": true,
+              "confirmationRequired": false,
               "prompts": {
                 "elicitation": "Elicit.Slot.ConsultarMetricasPorFechaIntent.estadoContrato"
               }
@@ -344,15 +537,20 @@
     },
     "prompts": [
       {
-        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
-        "variations": [
-          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
-        ]
-      },
-      {
         "id": "Elicit.Slot.ConsultarMetricasPorFechaIntent.rangoFecha",
         "variations": [
-          { "type": "PlainText", "value": "¿Para qué periodo deseas consultar esta información?" }
+          {
+            "type": "PlainText",
+            "value": "¿De qué periodo? Por ejemplo, hoy, esta semana o este mes."
+          },
+          {
+            "type": "PlainText",
+            "value": "Dime el periodo. Puede ser hoy, ayer, esta semana, este mes, o un mes como agosto."
+          },
+          {
+            "type": "PlainText",
+            "value": "Necesito una fecha para buscar. Prueba con hoy, esta semana o este mes."
+          }
         ]
       },
       {
@@ -360,7 +558,32 @@
         "variations": [
           {
             "type": "PlainText",
-            "value": "¿Qué estado deseas consultar? Por ejemplo: firmados, rechazados o en revisión."
+            "value": "¿Qué estado? Por ejemplo, firmados, rechazados o en firma."
+          },
+          {
+            "type": "PlainText",
+            "value": "Dime el estado: borrador, enviados, revisión administrativa, revisión legal, por aprobar, en firma, firmados, rechazados o cancelados."
+          },
+          {
+            "type": "PlainText",
+            "value": "Puedes elegir entre firmados, rechazados, en firma, por aprobar o cancelados. ¿Cuál?"
+          }
+        ]
+      },
+      {
+        "id": "Elicit.Slot.ConsultarContratosPorExpirarIntent.rangoFecha",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "¿Para qué periodo? Por ejemplo, este mes, esta semana o los próximos treinta días."
+          },
+          {
+            "type": "PlainText",
+            "value": "Dime hasta cuándo quieres revisar. Puede ser esta semana, este mes o agosto."
+          },
+          {
+            "type": "PlainText",
+            "value": "Necesito un periodo. Prueba con este mes o esta semana."
           }
         ]
       }

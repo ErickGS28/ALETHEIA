@@ -7,11 +7,34 @@
           "summary": "Dashboard auditivo para gestión de contratos ALETHEIA CLM",
           "description": "Consulta métricas ejecutivas de tu sistema CLM por voz: resumen del día, contratos por vencer, cuellos de botella en el flujo de revisión y métricas por estado y fecha.",
           "examplePhrases": [
-            "Alexa, abre aletheia clm",
-            "Alexa, pregunta a aletheia clm mi resumen del día",
-            "Alexa, pregunta a aletheia clm qué contratos vencen este mes"
+            "Alexa, abre CLM",
+            "Alexa, pregunta a CLM mi resumen del día",
+            "Alexa, pregunta a CLM dónde están atorados los contratos"
           ],
-          "keywords": ["contratos", "clm", "aletheia", "reportes"],
+          "keywords": [
+            "contratos",
+            "clm",
+            "aletheia",
+            "reportes"
+          ],
+          "smallIconUri": "https://alexa-clm.levsek.com.mx/public/icon-108.png",
+          "largeIconUri": "https://alexa-clm.levsek.com.mx/public/icon-512.png"
+        },
+        "en-US": {
+          "name": "ALETHEIA CLM",
+          "summary": "Voice dashboard for ALETHEIA CLM contract management",
+          "description": "Check your CLM metrics by voice: daily summary, contracts about to expire, bottlenecks in the review flow, and metrics by status and date.",
+          "examplePhrases": [
+            "Alexa, open CLM",
+            "Alexa, ask CLM for my daily summary",
+            "Alexa, ask CLM where contracts are stuck"
+          ],
+          "keywords": [
+            "contracts",
+            "clm",
+            "aletheia",
+            "reports"
+          ],
           "smallIconUri": "https://alexa-clm.levsek.com.mx/public/icon-108.png",
           "largeIconUri": "https://alexa-clm.levsek.com.mx/public/icon-512.png"
         }
@@ -19,7 +42,9 @@
       "isAvailableWorldwide": false,
       "testingInstructions": "Usar la cuenta de sistema sembrada en prisma/seed.ts contra el backend desplegado.",
       "category": "BUSINESS_AND_FINANCE",
-      "distributionCountries": ["MX"]
+      "distributionCountries": [
+        "MX"
+      ]
     },
     "privacyAndCompliance": {
       "allowsPurchases": false,

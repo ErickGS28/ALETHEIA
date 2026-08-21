@@ -47,14 +47,35 @@ npm install
 npm test
 ```
 
-## Despliegue con ASK CLI
+## Despliegue
 
 ```bash
-cd ALEXA
-ask deploy
+./deploy-skill.sh
 ```
 
-Crea la skill en la consola de desarrollador de Alexa y despliega el Lambda usando `lambda` como `sourceDir` (requiere `ask configure` ya configurado con credenciales de AWS/Amazon).
+Sube `skill-package/interactionModels/custom/{es-MX,en-US}.json` a la skill y espera
+a que compilen los modelos.
+
+**No uses `ask deploy` desde un clon limpio.** El ASK CLI guarda el id de la skill en
+`.ask/ask-states.json`, que está en `.gitignore`; sin ese archivo `ask deploy` no sabe a
+qué skill apuntar y **crea una nueva** en vez de actualizar la de siempre. `deploy-skill.sh`
+lleva el id fijo, así que funciona desde cualquier clon.
+
+El id vive en el script (`SKILL_ID`) y se puede sobreescribir por entorno:
+
+```bash
+SKILL_ID=amzn1.ask.skill.otra STAGE=live ./deploy-skill.sh
+```
+
+### El modelo de interacción es la fuente de verdad
+
+Los archivos de `skill-package/` son lo que se despliega. Si editas el modelo desde la
+consola de Alexa, ese cambio **no** está en el repo y el siguiente despliegue lo revierte:
+descarga primero con `ask smapi get-interaction-model` y guárdalo aquí.
+
+> Los `id` de `EstadoContratoType` (`DRAFT`, `REJECTED`, `LAWYER_REVIEW`…) no son
+> etiquetas: la skill los manda tal cual al backend como `?status=`. Si se pierden al
+> editar, Alexa autogenera un hash y el gateway responde `400`.
 
 ## Notas de diseño
 
