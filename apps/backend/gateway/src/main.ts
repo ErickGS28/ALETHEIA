@@ -11,17 +11,26 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Los orígenes permitidos vienen del entorno: cada despliegue (VPS, AWS, local)
+  // sirve la app desde un dominio distinto. Sin esto el navegador rechaza el login
+  // en cualquier sitio que no sea localhost.
+  const corsOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
+    : [
+        'http://localhost:4000',
+        'http://localhost:4001',
+        'http://localhost:4002',
+        'http://localhost:4003',
+        'http://localhost:4004',
+        'http://localhost:4005',
+        'http://localhost:4006',
+        'http://localhost:4007',
+      ];
+
   app.enableCors({
-    origin: [
-      'http://localhost:4000',
-      'http://localhost:4001',
-      'http://localhost:4002',
-      'http://localhost:4003',
-      'http://localhost:4004',
-      'http://localhost:4005',
-      'http://localhost:4006',
-      'http://localhost:4007',
-    ],
+    origin: corsOrigins,
     credentials: true,
   });
 

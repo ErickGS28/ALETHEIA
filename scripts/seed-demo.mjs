@@ -77,6 +77,20 @@ async function login() {
 }
 
 /** Crea un contrato DRAFT. Devuelve el objeto del contrato o null si falló. */
+// Las vigencias se reparten entre hoy y ~6 meses adelante para que las alertas de
+// vencimiento siempre tengan algo que reportar, sin fechas fijas que queden en el
+// pasado al cabo de unas semanas.
+let contratosCreados = 0;
+
+function vigenciaDemo() {
+  contratosCreados += 1;
+  const dias = 8 + ((contratosCreados * 17) % 172);
+  const fin = new Date();
+  fin.setUTCDate(fin.getUTCDate() + dias);
+  fin.setUTCHours(0, 0, 0, 0);
+  return fin.toISOString();
+}
+
 async function createContract(spec) {
   const res = await api('POST', '/contracts', {
     title: spec.title,
@@ -85,6 +99,7 @@ async function createContract(spec) {
     providerType: spec.providerType,
     areaId: spec.areaId,
     societyId: spec.societyId,
+    expiresAt: spec.expiresAt ?? vigenciaDemo(),
   });
   if (!res.ok || !res.data?.id) {
     console.error(`   ↳ no se pudo crear "${spec.title}"`);

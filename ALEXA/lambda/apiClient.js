@@ -221,14 +221,42 @@ async function getBottlenecks() {
   return { etapas, peor: etapas[0] || null };
 }
 
-function getExpiringContracts(isoStart, isoEnd) {
-  if (isMockMode()) return Promise.resolve(mockData.getExpiringContracts(isoStart, isoEnd));
-  // El backend actual no guarda fecha de vencimiento por contrato (ni en Contract ni en
-  // ContractWorkflow) — no hay de dónde sacar este dato todavía. Se marca explícito en
-  // vez de inventar un número, para que index.js responda "no disponible" y no un error genérico.
-  return Promise.reject(
-    new Error('NOT_SUPPORTED: el backend no registra fecha de vencimiento por contrato'),
+async function getExpiringContracts(isoStart, isoEnd) {
+  if (isMockMode()) return mockData.getExpiringContracts(isoStart, isoEnd);
+
+  // Contract.expiresAt es opcional: un contrato sin vigencia registrada
+  // simplemente no vence, y se queda fuera del reporte.
+  const contratos = assertContractsArray(
+    await getWithAuth('/reports/contracts'),
+    'getExpiringContracts',
   );
+
+  const start = Date.parse(`${isoStart}T00:00:00Z`);
+  const end = Date.parse(`${isoEnd}T23:59:59Z`);
+
+  const enRango = contratos
+    .filter((c) => {
+      if (!c.expiresAt) return false;
+      const vence = Date.parse(c.expiresAt);
+      return Number.isFinite(vence) && vence >= start && vence <= end;
+    })
+    // El más próximo primero: es el que se anuncia como "el más urgente".
+    .sort((a, b) => Date.parse(a.expiresAt) - Date.parse(b.expiresAt));
+
+  const primero = enRango[0];
+
+  return {
+    count: enRango.length,
+    contratos: enRango,
+    masUrgente: primero
+      ? {
+          id: primero.id,
+          title: primero.title,
+          vendorName: primero.vendorName,
+          expiresAt: primero.expiresAt,
+        }
+      : null,
+  };
 }
 
 async function getContractsMetrics(status, isoStart, isoEnd) {

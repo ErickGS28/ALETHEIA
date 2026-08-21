@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateContractDto {
   @ApiProperty({ example: 'Contrato de suministro' })
@@ -33,4 +41,9 @@ export class CreateContractDto {
   @IsOptional()
   @IsInt()
   templateId?: number;
+
+  @ApiPropertyOptional({ example: '2026-12-31T00:00:00.000Z', description: 'Fin de vigencia' })
+  @IsOptional()
+  @IsDateString()
+  expiresAt?: string;
 }

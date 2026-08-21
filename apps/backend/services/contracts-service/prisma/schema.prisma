@@ -93,6 +93,7 @@ model Contract {
   templateId   Int?
   createdById  Int // referencia lógica a auth.User (sin FK cross-schema)
   submittedAt  DateTime?
+  expiresAt    DateTime? // vigencia del contrato; alimenta las alertas de vencimiento
   cancelReason String?
   cancelledAt  DateTime?
   createdAt    DateTime       @default(now())

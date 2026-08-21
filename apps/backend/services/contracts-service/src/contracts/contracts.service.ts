@@ -35,6 +35,7 @@ export class ContractsService {
       vendorName: dto.vendorName,
       vendorEmail: dto.vendorEmail ?? null,
       providerType: dto.providerType,
+      expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
       createdById,
       area: { connect: { id: dto.areaId } },
       society: { connect: { id: dto.societyId } },

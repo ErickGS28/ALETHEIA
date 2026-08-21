@@ -12,4 +12,6 @@ export class CreateContractDto {
   areaId!: number;
   societyId!: number;
   templateId?: number;
+  /** Fin de vigencia en ISO-8601. Opcional: no todo contrato tiene vencimiento. */
+  expiresAt?: string;
 }
