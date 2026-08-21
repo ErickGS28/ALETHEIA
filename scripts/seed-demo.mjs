@@ -82,9 +82,14 @@ async function login() {
 // pasado al cabo de unas semanas.
 let contratosCreados = 0;
 
+// Escalonado a proposito hacia el corto plazo: la consulta natural es "que vence
+// este mes", asi que varios contratos tienen que caer dentro de los proximos dias
+// o la alerta responde cero y parece rota.
+const DIAS_DE_VIGENCIA = [3, 6, 9, 13, 18, 24, 31, 40, 52, 66, 82, 100, 121, 145, 172];
+
 function vigenciaDemo() {
+  const dias = DIAS_DE_VIGENCIA[contratosCreados % DIAS_DE_VIGENCIA.length];
   contratosCreados += 1;
-  const dias = 8 + ((contratosCreados * 17) % 172);
   const fin = new Date();
   fin.setUTCDate(fin.getUTCDate() + dias);
   fin.setUTCHours(0, 0, 0, 0);
