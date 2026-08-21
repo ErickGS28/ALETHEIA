@@ -18,7 +18,16 @@
             "listo gracias",
             "nada más",
             "así está bien",
-            "ya no"
+            "ya no",
+            "ya bye",
+            "bye",
+            "ya me voy",
+            "chao",
+            "adiós",
+            "hasta luego",
+            "ya estuvo",
+            "sale",
+            "córtale"
           ]
         },
         {
@@ -57,7 +66,20 @@
         },
         {
           "name": "AMAZON.RepeatIntent",
-          "samples": []
+          "samples": [
+            "otra vez",
+            "repite",
+            "repítelo",
+            "repite eso",
+            "repite por favor",
+            "qué dijiste",
+            "no te escuché",
+            "no te entendí",
+            "dilo otra vez",
+            "vuelve a decirlo",
+            "cómo",
+            "mande"
+          ]
         },
         {
           "name": "ValidarClaveIntent",

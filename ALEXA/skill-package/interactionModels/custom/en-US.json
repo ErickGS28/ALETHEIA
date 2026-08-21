@@ -19,7 +19,13 @@
             "all good thanks",
             "nothing else",
             "that s it",
-            "no more"
+            "no more",
+            "im out",
+            "bye",
+            "later",
+            "see ya",
+            "im done here",
+            "thats enough"
           ]
         },
         {
@@ -58,7 +64,16 @@
         },
         {
           "name": "AMAZON.RepeatIntent",
-          "samples": []
+          "samples": [
+            "say that again",
+            "repeat",
+            "repeat that",
+            "one more time",
+            "what did you say",
+            "i didnt hear you",
+            "come again",
+            "say it again"
+          ]
         },
         {
           "name": "ValidarClaveIntent",

@@ -28,6 +28,11 @@ for LOCALE in es-MX en-US; do
     --interaction-model "file:$MODELO" > /dev/null
 done
 
+# El manifiesto declara en que locales e idiomas existe la skill. Sin esto, el
+# modelo en-US se publica pero la skill no aparece en ingles para nadie.
+echo ">> subiendo el manifiesto"
+ask smapi update-skill-manifest   -s "$SKILL_ID" -g "$STAGE"   --manifest "file:skill-package/skill.json" > /dev/null
+
 echo ">> esperando a que compilen los modelos"
 for _ in $(seq 1 30); do
   ESTADOS=$(ask smapi get-skill-status -s "$SKILL_ID" --resource interactionModel 2>/dev/null |
@@ -42,5 +47,11 @@ for _ in $(seq 1 30); do
     *) break ;;
   esac
 done
+
+# Actualizar el manifiesto deshabilita la skill para pruebas: el simulador
+# empieza a responder "did not resolve to any intent" en TODAS las frases,
+# incluida la de invocacion. Se vuelve a habilitar aqui.
+echo ">> rehabilitando para pruebas"
+ask smapi set-skill-enablement -s "$SKILL_ID" -g "$STAGE" > /dev/null
 
 echo ">> listo. Probar con:  ask dialog -s $SKILL_ID -l es-MX -g $STAGE"
